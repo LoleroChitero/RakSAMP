@@ -186,6 +186,8 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 				{
 					if(!iNotificationDisplayedBeforeSpawn)
 					{
+						sampRequestClass(settings.iClassID);
+						
 						Log("Please write !spawn into the console when you're ready to spawn.");
 
 						iNotificationDisplayedBeforeSpawn = 1;
