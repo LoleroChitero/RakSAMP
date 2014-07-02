@@ -247,7 +247,7 @@ int RunCommand(char *szCMD, int iFromAutorun)
 		return 1;
 	}
 
-	if(!strncmp(szCMD, "spawn", 4) || !strncmp(szCMD, "SPAWN", 4))
+	if(!strncmp(szCMD, "spawn", 5) || !strncmp(szCMD, "SPAWN", 5))
 	{
 		sampRequestClass(settings.iClassID);
 		sampSpawn();
