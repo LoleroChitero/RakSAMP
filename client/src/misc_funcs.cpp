@@ -115,6 +115,8 @@ void sampSpawn()
 #endif
 	RakNet::BitStream bsSendSpawn;
 	pRakClient->RPC(&RPC_Spawn, &bsSendSpawn, HIGH_PRIORITY, RELIABLE, 0, FALSE, UNASSIGNED_NETWORK_ID, NULL);
+	
+	Log("You have been spawned!");
 }
 
 DWORD spamTimeDisconnect = GetTickCount();
