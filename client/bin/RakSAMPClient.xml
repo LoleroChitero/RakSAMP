@@ -8,10 +8,10 @@ Avalable runmodes:
 	5 = Follows a player with a vehicle
 -->
 
-<RakSAMPClient console="0" runmode="1" autorun="0" find="1" select_classid="0"
+<RakSAMPClient console="0" runmode="3" autorun="0" find="1" select_classid="0" manual_spawn="1"
 			   print_timestamps="0" chatcolor_rgb="0 0 130" clientmsg_rgb="0 130 0"
 			   followplayer="P3ti" followplayerwithvehicleid="295" followXOffset="3.0" followYOffset="0.0" followZOffset="0.0"
-			   imitatechat="">
+			   imitatechat="" updatestats="1" minfps="20" maxfps="90">
 
 	<!-- The first one is the one it will connect to -->
 	<server nickname="root" password="">127.0.0.1:7777</server>
@@ -31,12 +31,12 @@ Avalable runmodes:
 		!imitate: change imitate name.
 		!vlist: shows list of vehicles.
 		!vdeath: send vehicle death notification.
-		!selveh: selects vehicle for playback.
+		!spawn: spawns fake player.
 		!menusel: selects an item from the GTA menu.
 	-->
 
 	<!-- These get called when we successfully connected to a server. -->
-	<autorun>!selveh 4</autorun>
+	<!-- <autorun>!selveh 4</autorun> -->
 	
 	<!-- Finds text from the chatbox and says something. -->
 	<!-- <find text="PM from" say="" bk_color="255 255 255" text_color="255 0 0" /> -->
