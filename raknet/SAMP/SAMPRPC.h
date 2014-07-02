@@ -124,7 +124,6 @@ extern int RPC_ScrSetPlayerVelocity;
 extern int RPC_ScrSetVehicleVelocity;
 extern int RPC_ScrToggleWidescreen;
 extern int RPC_ScrSetVehicleTireStatus;
-extern int RPC_ScrSetPlayerDrunkVisuals;
-extern int RPC_ScrSetPlayerDrunkHandling;
+extern int RPC_ScrSetPlayerDrunkLevel;
 extern int RPC_ScrDialogBox;
 extern int RPC_PlayerUpdate;
