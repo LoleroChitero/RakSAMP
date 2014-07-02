@@ -15,6 +15,7 @@
 HWND hwnd, texthwnd, loghwnd, inputhwnd;
 HINSTANCE g_hInst;
 HFONT g_hfText;
+HFONT g_hfInfo;
 
 // Prototypes
 LRESULT CALLBACK MainWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
@@ -35,11 +36,11 @@ LRESULT CALLBACK MainWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 			CenterWindow(hWnd, NULL);
 
 			// Create the info text at the the top.
-			hWndChild = CreateWindowEx(0, WC_STATIC, TEXT("RakSAMP " RAKSAMP_VERSION),
+			hWndChild = CreateWindowEx(0, WC_STATIC, TEXT("RakSAMP " RAKSAMP_VERSION "\n" "Authors: " AUTHOR),
 				SS_LEFT | WS_CHILD | WS_VISIBLE,
 				0, 0, 0, 0, hWnd, (HMENU)(IDC_LBLINFO), g_hInst, NULL);
 			if(!hWndChild) return -1;
-			SendMessage(hWndChild, WM_SETFONT, (WPARAM)g_hfText, FALSE);
+			SendMessage(hWndChild, WM_SETFONT, (WPARAM)g_hfInfo, FALSE);
 			texthwnd = hWndChild;
 
 			// Create the custom/owner drawn listbox
@@ -217,7 +218,7 @@ LRESULT CALLBACK MainWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 
 				// Move/Size the listbox
 				hDWP = DeferWindowPos(hDWP, GetDlgItem(hWnd, IDC_LSTCUSTOM), NULL,
-					10, rcText.bottom + 20, rc.right - 20, rc.bottom - rcText.bottom - 75,
+					10, rcText.bottom + 10, rc.right - 20, rc.bottom - rcText.bottom - 75,
 					SWP_NOZORDER | SWP_NOREDRAW);
 
 				// Move/Size the input box
@@ -388,9 +389,15 @@ DWORD WINAPI windowThread(PVOID)
 	// Create a font we can later use on our controls. We use MulDiv and GetDeviceCaps to convert
 	// our point size to match the users DPI setting.
 	hdcScreen = GetDC(HWND_DESKTOP);
+
 	g_hfText = CreateFont(-MulDiv(11, GetDeviceCaps(hdcScreen, LOGPIXELSY), 72), // 11pt
 		0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE, ANSI_CHARSET, OUT_TT_PRECIS,
 		CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, FF_DONTCARE, TEXT("Tahoma"));
+
+	g_hfInfo = CreateFont(-MulDiv(11, GetDeviceCaps(hdcScreen, LOGPIXELSY), 85),
+		0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE, ANSI_CHARSET, OUT_TT_PRECIS,
+		CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, FF_DONTCARE, TEXT("Arial"));
+
 	ReleaseDC(HWND_DESKTOP, hdcScreen);
 
 	// Create an instance of the Main Window.
@@ -415,6 +422,7 @@ DWORD WINAPI windowThread(PVOID)
 
 	// Free up our resources and return.
 	DeleteObject(g_hfText);
+	DeleteObject(g_hfInfo);
 	ExitProcess(0);
 
 	return 0;
