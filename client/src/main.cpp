@@ -138,7 +138,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 			static DWORD dwLastInfoUpdate = GetTickCount();
 			if(dwLastInfoUpdate && dwLastInfoUpdate < (GetTickCount() - 1000))
 			{
-				sprintf(szInfo, "Hostname: %s     Players: %d     Ping: %d     Authors: %s",
+				sprintf(szInfo, "Hostname: %s     Players: %d     Ping: %d\nAuthors: %s",
 					g_szHostName, getPlayerCount(), playerInfo[g_myPlayerID].dwPing,AUTHOR);
 				SetWindowText(texthwnd, szInfo);
 			}
