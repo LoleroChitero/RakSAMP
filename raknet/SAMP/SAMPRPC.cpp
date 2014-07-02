@@ -130,6 +130,5 @@ int RPC_ScrSetPlayerVelocity = 90;
 int RPC_ScrSetVehicleVelocity = 91;
 int RPC_ScrToggleWidescreen = 255;
 int RPC_ScrSetVehicleTireStatus = 255;
-int RPC_ScrSetPlayerDrunkVisuals = 255;
-int RPC_ScrSetPlayerDrunkHandling = 255;
+int RPC_ScrSetPlayerDrunkLevel = 35;
 int RPC_ScrDialogBox = 61;
