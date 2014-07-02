@@ -444,6 +444,8 @@ void resetPools(int iRestart, DWORD dwTimeReconnect)
 		iAreWeConnected = 0;
 		iConnectionRequested = 0;
 		iSpawned = 0;
+		iMoney = 0;
+		iDrunkLevel = 0;
 
 		Sleep(dwTimeReconnect);
 	}
