@@ -251,6 +251,7 @@ int RunCommand(char *szCMD, int iFromAutorun)
 	{
 		sampRequestClass(settings.iClassID);
 		sampSpawn();
+		iSpawned = 1;
 		return 1;
 	}
 
