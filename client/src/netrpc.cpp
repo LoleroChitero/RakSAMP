@@ -12,6 +12,8 @@ BYTE m_bLagCompensation;
 PLAYERID imitateID = -1;
 bool iGettingNewName=false;
 
+int iMoney, iDrunkLevel;
+
 struct stGTAMenu GTAMenu;
 
 struct stSAMPDialog sampDialog;
@@ -777,37 +779,68 @@ void ScrPlayAudioStream(RPCParameters *rpcParams)
 }
 #endif
 
+void ScrSetDrunkLevel(RPCParameters *rpcParams)
+{
+	PCHAR Data = reinterpret_cast<PCHAR>(rpcParams->input);
+	int iBitLength = rpcParams->numberOfBitsOfData;
+
+	RakNet::BitStream bsData((unsigned char *)Data,(iBitLength/8)+1,false);
+
+	bsData.Read(iDrunkLevel);
+}
+
+void ScrHaveSomeMoney(RPCParameters *rpcParams)
+{
+	PCHAR Data = reinterpret_cast<PCHAR>(rpcParams->input);
+	int iBitLength = rpcParams->numberOfBitsOfData;
+
+	RakNet::BitStream bsData((unsigned char *)Data,(iBitLength/8)+1,false);
+
+	int iGivenMoney;
+	bsData.Read(iGivenMoney);
+
+	iMoney += iGivenMoney;
+}
+
+void ScrResetMoney(RPCParameters *rpcParams)
+{
+	iMoney = 0;
+}
+
 void RegisterRPCs(RakClientInterface *pRakClient)
 {
-	// Core RPCs
-	pRakClient->RegisterAsRemoteProcedureCall(&RPC_ServerJoin, ServerJoin);
-	pRakClient->RegisterAsRemoteProcedureCall(&RPC_ServerQuit, ServerQuit);
-	pRakClient->RegisterAsRemoteProcedureCall(&RPC_InitGame, InitGame);
-	pRakClient->RegisterAsRemoteProcedureCall(&RPC_WorldPlayerAdd, WorldPlayerAdd);
-	pRakClient->RegisterAsRemoteProcedureCall(&RPC_WorldPlayerDeath, WorldPlayerDeath);
-	pRakClient->RegisterAsRemoteProcedureCall(&RPC_WorldPlayerRemove, WorldPlayerRemove);
-	pRakClient->RegisterAsRemoteProcedureCall(&RPC_WorldVehicleAdd, WorldVehicleAdd);
-	pRakClient->RegisterAsRemoteProcedureCall(&RPC_WorldVehicleRemove, WorldVehicleRemove);
-	pRakClient->RegisterAsRemoteProcedureCall(&RPC_ConnectionRejected, ConnectionRejected);
-	pRakClient->RegisterAsRemoteProcedureCall(&RPC_ClientMessage, ClientMessage);
-	pRakClient->RegisterAsRemoteProcedureCall(&RPC_Chat, Chat);
-	pRakClient->RegisterAsRemoteProcedureCall(&RPC_UpdateScoresPingsIPs, UpdateScoresPingsIPs);
-
 	if (pRakClient == ::pRakClient)
 	{
+		// Core RPCs
+		pRakClient->RegisterAsRemoteProcedureCall(&RPC_ServerJoin, ServerJoin);
+		pRakClient->RegisterAsRemoteProcedureCall(&RPC_ServerQuit, ServerQuit);
+		pRakClient->RegisterAsRemoteProcedureCall(&RPC_InitGame, InitGame);
+		pRakClient->RegisterAsRemoteProcedureCall(&RPC_WorldPlayerAdd, WorldPlayerAdd);
+		pRakClient->RegisterAsRemoteProcedureCall(&RPC_WorldPlayerDeath, WorldPlayerDeath);
+		pRakClient->RegisterAsRemoteProcedureCall(&RPC_WorldPlayerRemove, WorldPlayerRemove);
+		pRakClient->RegisterAsRemoteProcedureCall(&RPC_WorldVehicleAdd, WorldVehicleAdd);
+		pRakClient->RegisterAsRemoteProcedureCall(&RPC_WorldVehicleRemove, WorldVehicleRemove);
+		pRakClient->RegisterAsRemoteProcedureCall(&RPC_ConnectionRejected, ConnectionRejected);
+		pRakClient->RegisterAsRemoteProcedureCall(&RPC_ClientMessage, ClientMessage);
+		pRakClient->RegisterAsRemoteProcedureCall(&RPC_Chat, Chat);
+		pRakClient->RegisterAsRemoteProcedureCall(&RPC_UpdateScoresPingsIPs, UpdateScoresPingsIPs);
+
 		// Scripting RPCs
 		pRakClient->RegisterAsRemoteProcedureCall(&RPC_ScrInitMenu, ScrInitMenu);
 		pRakClient->RegisterAsRemoteProcedureCall(&RPC_ScrDialogBox, ScrDialogBox);
 		pRakClient->RegisterAsRemoteProcedureCall(&RPC_ScrDisplayGameText, ScrGameText);
 		pRakClient->RegisterAsRemoteProcedureCall(&RPC_PlayAudioStream, ScrPlayAudioStream);
+		pRakClient->RegisterAsRemoteProcedureCall(&RPC_ScrSetPlayerDrunkLevel, ScrSetDrunkLevel);
+		pRakClient->RegisterAsRemoteProcedureCall(&RPC_ScrHaveSomeMoney, ScrHaveSomeMoney);
+		pRakClient->RegisterAsRemoteProcedureCall(&RPC_ScrResetMoney, ScrResetMoney);
 	}
 }
 
 void UnRegisterRPCs(RakClientInterface * pRakClient)
 {
-	// Core RPCs
 	if (pRakClient == ::pRakClient)
 	{
+		// Core RPCs
 		pRakClient->UnregisterAsRemoteProcedureCall(&RPC_ServerJoin);
 		pRakClient->UnregisterAsRemoteProcedureCall(&RPC_ServerQuit);
 		pRakClient->UnregisterAsRemoteProcedureCall(&RPC_InitGame);
@@ -819,15 +852,15 @@ void UnRegisterRPCs(RakClientInterface * pRakClient)
 		pRakClient->UnregisterAsRemoteProcedureCall(&RPC_ConnectionRejected);
 		pRakClient->UnregisterAsRemoteProcedureCall(&RPC_ClientMessage);
 		pRakClient->UnregisterAsRemoteProcedureCall(&RPC_Chat);
-	}
-	pRakClient->UnregisterAsRemoteProcedureCall(&RPC_UpdateScoresPingsIPs);
+		pRakClient->UnregisterAsRemoteProcedureCall(&RPC_UpdateScoresPingsIPs);
 
-	if (pRakClient == ::pRakClient)
-	{
 		// Scripting RPCs
 		pRakClient->UnregisterAsRemoteProcedureCall(&RPC_ScrInitMenu);
 		pRakClient->UnregisterAsRemoteProcedureCall(&RPC_ScrDialogBox);
 		pRakClient->UnregisterAsRemoteProcedureCall(&RPC_ScrDisplayGameText);
 		pRakClient->UnregisterAsRemoteProcedureCall(&RPC_PlayAudioStream);
+		pRakClient->UnregisterAsRemoteProcedureCall(&RPC_ScrSetPlayerDrunkLevel);
+		pRakClient->UnregisterAsRemoteProcedureCall(&RPC_ScrHaveSomeMoney);
+		pRakClient->UnregisterAsRemoteProcedureCall(&RPC_ScrResetMoney);
 	}
 }
