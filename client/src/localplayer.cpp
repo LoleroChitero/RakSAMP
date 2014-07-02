@@ -238,7 +238,18 @@ void SendSpectatorData(SPECTATOR_SYNC_DATA *pSpecData)
 
 	bsSpecSync.Write((BYTE)ID_SPECTATOR_SYNC);
 	bsSpecSync.Write((PCHAR)pSpecData, sizeof(SPECTATOR_SYNC_DATA));
+	
 	pRakClient->Send(&bsSpecSync,HIGH_PRIORITY,UNRELIABLE_SEQUENCED,0);
+}
+
+void SendBulletData(BULLET_SYNC_DATA *pBulletData)
+{
+	RakNet::BitStream bsBulletSync;
+
+	bsBulletSync.Write((BYTE)ID_SPECTATOR_SYNC);
+	bsBulletSync.Write((PCHAR)pBulletData, sizeof(BULLET_SYNC_DATA));
+
+	pRakClient->Send(&bsBulletSync,HIGH_PRIORITY,UNRELIABLE_SEQUENCED,0);
 }
 
 
