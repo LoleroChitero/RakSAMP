@@ -36,7 +36,7 @@ LRESULT CALLBACK MainWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 			CenterWindow(hWnd, NULL);
 
 			// Create the info text at the the top.
-			hWndChild = CreateWindowEx(0, WC_STATIC, TEXT("RakSAMP " RAKSAMP_VERSION "\n" "Authors: " AUTHOR),
+			hWndChild = CreateWindowEx(0, WC_STATIC, TEXT("RakSAMP " RAKSAMP_VERSION),
 				SS_LEFT | WS_CHILD | WS_VISIBLE,
 				0, 0, 0, 0, hWnd, (HMENU)(IDC_LBLINFO), g_hInst, NULL);
 			if(!hWndChild) return -1;
