@@ -34,8 +34,20 @@ int LoadSettings()
 		// get selected class id
 		rakSAMPElement->QueryIntAttribute("select_classid", (int *)&settings.iClassID);
 
+		// get manual spawn
+		rakSAMPElement->QueryIntAttribute("manual_spawn", (int *)&settings.iManualSpawn);
+
 		// get print_timestamps
 		rakSAMPElement->QueryIntAttribute("print_timestamps", (int *)&settings.iPrintTimestamps);
+
+		// get fps simulation
+		rakSAMPElement->QueryIntAttribute("updatestats", (int *)&settings.iUpdateStats);
+
+		// get min simulated fps
+		rakSAMPElement->QueryIntAttribute("minfps", (int *)&settings.iMinFPS);
+
+		// get max simulated fps
+		rakSAMPElement->QueryIntAttribute("maxfps", (int *)&settings.iMaxFPS);
 
 		// get chat color
 		rakSAMPElement->QueryColorAttribute("chatcolor_rgb",
