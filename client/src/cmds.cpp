@@ -194,20 +194,6 @@ int RunCommand(char *szCMD, int iFromAutorun)
 		return 1;
 	}
 
-	// VEHICLE PLAYING COMMANDS
-	// SELECT VEHICLE ID TO PLAY THE ROUTE OR DRIVING MODE VEHICLE
-	if(!strncmp(szCMD, "selveh", 6) || !strncmp(szCMD, "SELVEH", 6))
-	{
-		int iSelectedVeh = atoi(&szCMD[7]);
-
-		if(settings.runMode == RUNMODE_FOLLOWPLAYERSVEHICLE)
-			settings.iFollowingWithVehicleID = (VEHICLEID)iSelectedVeh;
-
-		Log("[SELVEH] Changed to vehicle ID to %d.", iSelectedVeh);
-
-		return 1;
-	}
-
 	// SELECT AN ITEM FROM THE GTA MENU
 	if(!strncmp(szCMD, "menusel", 7) || !strncmp(szCMD, "MENUSEL", 7))
 	{
@@ -258,6 +244,13 @@ int RunCommand(char *szCMD, int iFromAutorun)
 			Log("Started spamming...");
 			settings.ispam = true;
 		}
+		return 1;
+	}
+
+	if(!strncmp(szCMD, "spawn", 4) || !strncmp(szCMD, "SPAWN", 4))
+	{
+		sampRequestClass(settings.iClassID);
+		sampSpawn();
 		return 1;
 	}
 
