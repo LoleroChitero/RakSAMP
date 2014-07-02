@@ -5,7 +5,9 @@
 #include "main.h"
 
 int iNetModeNormalOnfootSendRate, iNetModeNormalIncarSendRate, iNetModeFiringSendRate, iNetModeSendMultiplier;
+
 char g_szHostName[256];
+BYTE m_bLagCompensation;
 
 PLAYERID imitateID = -1;
 bool iGettingNewName=false;
@@ -117,6 +119,13 @@ void InitGame(RPCParameters *rpcParams)
 	bsInitGame.Read(iNetModeNormalIncarSendRate);
 	bsInitGame.Read(iNetModeFiringSendRate);
 	bsInitGame.Read(iNetModeSendMultiplier);
+
+	bsInitGame.Read(m_bLagCompensation);
+
+	BYTE unk;
+	bsInitGame.Read(unk);
+	bsInitGame.Read(unk);
+	bsInitGame.Read(unk);
 
 	BYTE byteStrLen;
 	bsInitGame.Read(byteStrLen);
