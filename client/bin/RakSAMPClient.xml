@@ -8,7 +8,7 @@ Avalable runmodes:
 	5 = Follows a player with a vehicle
 -->
 
-<RakSAMPClient console="0" runmode="3" autorun="0" find="1" select_classid="0" manual_spawn="1"
+<RakSAMPClient console="0" runmode="3" autorun="0" find="1" select_classid="0" manual_spawn="0"
 			   print_timestamps="0" chatcolor_rgb="0 0 130" clientmsg_rgb="0 130 0"
 			   followplayer="P3ti" followplayerwithvehicleid="295" followXOffset="3.0" followYOffset="0.0" followZOffset="0.0"
 			   imitatechat="" updatestats="1" minfps="20" maxfps="90">
