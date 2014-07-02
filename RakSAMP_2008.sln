@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual C++ Express 2008
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RakSAMPClient", "client\src\RakSAMPClient_2008.vcproj", "{450EB8E3-A369-464E-9718-030CD34A2C26}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RakSAMPServer", "server\src\RakSAMPServer_2008.vcproj", "{78A1D796-CEB3-4BDD-8C67-F1522AA2D490}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{450EB8E3-A369-464E-9718-030CD34A2C26}.Debug|Win32.ActiveCfg = Release|Win32
+		{450EB8E3-A369-464E-9718-030CD34A2C26}.Debug|Win32.Build.0 = Release|Win32
+		{450EB8E3-A369-464E-9718-030CD34A2C26}.Release|Win32.ActiveCfg = Release|Win32
+		{450EB8E3-A369-464E-9718-030CD34A2C26}.Release|Win32.Build.0 = Release|Win32
+		{78A1D796-CEB3-4BDD-8C67-F1522AA2D490}.Debug|Win32.ActiveCfg = Release|Win32
+		{78A1D796-CEB3-4BDD-8C67-F1522AA2D490}.Debug|Win32.Build.0 = Release|Win32
+		{78A1D796-CEB3-4BDD-8C67-F1522AA2D490}.Release|Win32.ActiveCfg = Release|Win32
+		{78A1D796-CEB3-4BDD-8C67-F1522AA2D490}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

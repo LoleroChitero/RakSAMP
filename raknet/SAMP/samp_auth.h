@@ -1,0 +1,1 @@
+extern char AuthKeyTable[1279][2][128];

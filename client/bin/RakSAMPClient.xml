@@ -1,0 +1,44 @@
+<!--
+Avalable runmodes:
+	0 = RCON mode,
+	1 = Bare mode (doesn't spawn),
+	2 = Still mode (stays still at spawn position),
+	3 = Normal mode (stays still at a position),
+	4 = Follows a player,
+	5 = Follows a player with a vehicle
+-->
+
+<RakSAMPClient console="0" runmode="1" autorun="0" find="1" select_classid="0"
+			   print_timestamps="0" chatcolor_rgb="0 0 130" clientmsg_rgb="0 130 0"
+			   followplayer="P3ti" followplayerwithvehicleid="295" followXOffset="3.0" followYOffset="0.0" followZOffset="0.0"
+			   imitatechat="">
+
+	<!-- The first one is the one it will connect to -->
+	<server nickname="root" password="">127.0.0.1:7777</server>
+
+
+	<!-- If in normal mode, stay still at... -->
+	<normal_pos position="325.35 2512.09 16.56" rotation="0.0" />
+
+	<!--
+	Available commands:
+		!exit or !quit: exits client.
+		!reconnect: reconnects the server.
+		!reload: reloads settings.
+		!stats: shows raknet statistics.
+		!players: shows list of players.
+		!goto: go to players position.
+		!imitate: change imitate name.
+		!vlist: shows list of vehicles.
+		!vdeath: send vehicle death notification.
+		!selveh: selects vehicle for playback.
+		!menusel: selects an item from the GTA menu.
+	-->
+
+	<!-- These get called when we successfully connected to a server. -->
+	<autorun>!selveh 4</autorun>
+	
+	<!-- Finds text from the chatbox and says something. -->
+	<!-- <find text="PM from" say="" bk_color="255 255 255" text_color="255 0 0" /> -->
+
+</RakSAMPClient>
