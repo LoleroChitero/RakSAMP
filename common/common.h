@@ -8,7 +8,7 @@
 
 #include "SAMP_VER.h"
 
-#define RAKSAMP_VERSION "v0.8-0.3z"
+#define RAKSAMP_VERSION "v0.8.1-0.3z"
 #define NETCODE_OPENCONNLULZ 6969
 #define NETGAME_VERSION 4047
 
