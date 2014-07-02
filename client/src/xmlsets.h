@@ -45,7 +45,12 @@ struct stSettings
 	int iAutorun;
 	int iFind;
 	int iClassID;
+	int iManualSpawn;
 	int iPrintTimestamps;
+	
+	int iUpdateStats;
+	int iMinFPS;
+	int iMaxFPS;
 
 	bool fakeKill;
 	bool lag;
