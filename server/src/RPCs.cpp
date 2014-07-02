@@ -33,6 +33,12 @@ void InitGameForPlayer(PLAYERID playerID)
 	bsInitGame.Write((int)40); // iNetModeFiringSendRate
 	bsInitGame.Write((int)10); // iNetModeSendMultiplier
 
+	bsInitGame.Write((int)0); // m_bLagCompensation
+	
+	bsInitGame.Write((int)0); // unknown
+	bsInitGame.Write((int)0); // unknown
+	bsInitGame.Write((int)0); // unknown
+
 	BYTE bServerNameLen = (BYTE)strlen(serverName);
 	bsInitGame.Write(bServerNameLen);
 	bsInitGame.Write(serverName, bServerNameLen);
