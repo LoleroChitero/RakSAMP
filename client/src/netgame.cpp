@@ -7,7 +7,9 @@
 DWORD dwTimeReconnect = 10000;
 
 int iPassengerNotificationSent = 0, iDriverNotificationSent = 0;
+
 extern int iFollowingPassenger, iFollowingDriver;
+extern int iDrunkLevel, iMoney;
 
 void Packet_AUTH_KEY(Packet *p, RakClientInterface *pRakClient)
 {
