@@ -6,7 +6,8 @@
 
 RakClientInterface *pRakClient = NULL;
 int iAreWeConnected = 0, iConnectionRequested = 0, iSpawned = 0, iGameInited = 0;
-int iReconnectTime = 2 * 1000;
+int iReconnectTime = 2 * 1000, iNotificationDisplayedBeforeSpawn = 0;
+
 PLAYERID g_myPlayerID;
 char g_szNickName[32];
 
@@ -20,6 +21,8 @@ DWORD dwAutoRunTick = GetTickCount();
 int dd = 0;
 
 SAMP * pSamp = NULL;
+
+extern int iMoney, iDrunkLevel;
 
 int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd)
 {
@@ -96,6 +99,12 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	}
 
 	char szInfo[400];
+	
+	int iLastMoney = iMoney;
+	int iLastDrunkLevel = iDrunkLevel;
+
+	int iLastStatsUpdate = GetTickCount();
+	
 	while(1)
 	{
 		UpdateNetwork(pRakClient);
@@ -138,9 +147,34 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 			static DWORD dwLastInfoUpdate = GetTickCount();
 			if(dwLastInfoUpdate && dwLastInfoUpdate < (GetTickCount() - 1000))
 			{
-				sprintf(szInfo, "Hostname: %s     Players: %d     Ping: %d\nAuthors: %s",
+				sprintf(szInfo, "Hostname: %s     Players: %d     Ping: %d     Authors: %s",
 					g_szHostName, getPlayerCount(), playerInfo[g_myPlayerID].dwPing,AUTHOR);
 				SetWindowText(texthwnd, szInfo);
+			}
+
+			if (settings.iUpdateStats)
+			{
+				if((GetTickCount() - iLastStatsUpdate >= 1000) || iMoney != iLastMoney || iDrunkLevel != iLastDrunkLevel)
+				{
+					RakNet::BitStream bsSend;
+
+					bsSend.Write((BYTE)ID_STATS_UPDATE);
+
+					iDrunkLevel -= (rand() % settings.iMaxFPS + settings.iMinFPS);
+
+					if(iDrunkLevel < 0)
+						iDrunkLevel = 0;
+
+					bsSend.Write(iMoney);
+					bsSend.Write(iDrunkLevel);
+
+					pRakClient->Send(&bsSend, HIGH_PRIORITY, RELIABLE, 0);
+
+					iLastMoney = iMoney;
+					iLastDrunkLevel = iDrunkLevel;
+
+					iLastStatsUpdate = GetTickCount();
+				}
 			}
 
 			if(settings.runMode == RUNMODE_BARE)
@@ -148,16 +182,29 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 
 			if(!iSpawned)
 			{
-				sampRequestClass(settings.iClassID);
-				sampSpawn();
+				if(settings.iManualSpawn != 0)
+				{
+					if(!iNotificationDisplayedBeforeSpawn)
+					{
+						Log("Please write !spawn into the console when you're ready to spawn.");
 
-				iSpawned = 1;
+						iNotificationDisplayedBeforeSpawn = 1;
+					}
+				}
+				else
+				{
+					sampRequestClass(settings.iClassID);
+					sampSpawn();
+
+					iSpawned = 1;
+					iNotificationDisplayedBeforeSpawn = 1;
+				}
 			}
 			else
 			{
 				if(settings.runMode == RUNMODE_STILL)
 				{
-					//Nothing left to do :-)
+					// Nothing left to do. :-)
 				}
 
 				if(settings.runMode == RUNMODE_NORMAL)
@@ -165,13 +212,6 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 					if(normalMode_goto == (PLAYERID)-1)
 						onFootUpdateAtNormalPos();
 				}
-
-				// Have to teleport to play_pos so that we can get vehicles streamed in.
-				/*if(settings.runMode == RUNMODE_PLAYROUTES)
-				{
-					if(rec_state == RECORDING_OFF)
-						onFootUpdateAtNormalPos();
-				}*/
 
 				// Run autorun commands
 				if(settings.iAutorun)
@@ -190,10 +230,6 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 						}
 					}
 				}
-
-				// Play routes handler
-				/*if(settings.runMode == RUNMODE_PLAYROUTES)
-					vehicle_playback_handler();*/
 
 				// Following player mode.
 				if(settings.runMode == RUNMODE_FOLLOWPLAYER)
