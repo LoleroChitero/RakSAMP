@@ -807,6 +807,34 @@ void ScrResetMoney(RPCParameters *rpcParams)
 	iMoney = 0;
 }
 
+void ScrSetPlayerPos(RPCParameters *rpcParams)
+{
+	PCHAR Data = reinterpret_cast<PCHAR>(rpcParams->input);
+	int iBitLength = rpcParams->numberOfBitsOfData;
+
+	RakNet::BitStream bsData((unsigned char *)Data,(iBitLength/8)+1,false);
+
+	bsData.Read(settings.fNormalModePos[0]);
+	bsData.Read(settings.fNormalModePos[1]);
+	bsData.Read(settings.fNormalModePos[2]);
+}
+
+void ScrSetSpawnInfo(RPCParameters *rpcParams)
+{
+	PCHAR Data = reinterpret_cast<PCHAR>(rpcParams->input);
+	int iBitLength = rpcParams->numberOfBitsOfData;
+
+	RakNet::BitStream bsData((unsigned char *)Data,(iBitLength/8)+1,false);
+
+	PLAYER_SPAWN_INFO SpawnInfo;
+
+	bsData.Read((PCHAR)&SpawnInfo, sizeof(PLAYER_SPAWN_INFO));
+
+	settings.fNormalModePos[0] = SpawnInfo.vecPos[0];
+	settings.fNormalModePos[1] = SpawnInfo.vecPos[1];
+	settings.fNormalModePos[2] = SpawnInfo.vecPos[2];
+}
+
 void RegisterRPCs(RakClientInterface *pRakClient)
 {
 	if (pRakClient == ::pRakClient)
@@ -833,6 +861,8 @@ void RegisterRPCs(RakClientInterface *pRakClient)
 		pRakClient->RegisterAsRemoteProcedureCall(&RPC_ScrSetPlayerDrunkLevel, ScrSetDrunkLevel);
 		pRakClient->RegisterAsRemoteProcedureCall(&RPC_ScrHaveSomeMoney, ScrHaveSomeMoney);
 		pRakClient->RegisterAsRemoteProcedureCall(&RPC_ScrResetMoney, ScrResetMoney);
+		pRakClient->RegisterAsRemoteProcedureCall(&RPC_ScrSetPlayerPos, ScrSetPlayerPos);
+		pRakClient->RegisterAsRemoteProcedureCall(&RPC_ScrSetSpawnInfo, ScrSetSpawnInfo);
 	}
 }
 
@@ -862,5 +892,7 @@ void UnRegisterRPCs(RakClientInterface * pRakClient)
 		pRakClient->UnregisterAsRemoteProcedureCall(&RPC_ScrSetPlayerDrunkLevel);
 		pRakClient->UnregisterAsRemoteProcedureCall(&RPC_ScrHaveSomeMoney);
 		pRakClient->UnregisterAsRemoteProcedureCall(&RPC_ScrResetMoney);
+		pRakClient->UnregisterAsRemoteProcedureCall(&RPC_ScrSetPlayerPos);
+		pRakClient->UnregisterAsRemoteProcedureCall(&RPC_ScrSetSpawnInfo);
 	}
 }
