@@ -178,17 +178,6 @@ void RPC_ClientJoins(RPCParameters *rpcParams)
 	SpawnAllVehiclesForPlayer(playerID);
 }
 
-#pragma pack(1)
-typedef struct _PLAYER_SPAWN_INFO
-{
-	BYTE byteTeam;
-	int iSkin;
-	BYTE byteUnknown; // TODO dis wat be
-	float vecPos[3];
-	float fRotation;
-	int iSpawnWeapons[3];
-	int iSpawnWeaponsAmmo[3];
-} PLAYER_SPAWN_INFO;
 void RPC_ClientRequestsClass(RPCParameters *rpcParams)
 {
 	PCHAR Data = reinterpret_cast<PCHAR>(rpcParams->input);
@@ -203,7 +192,6 @@ void RPC_ClientRequestsClass(RPCParameters *rpcParams)
 	memset(&psInfo, 0, sizeof(psInfo));
 	psInfo.byteTeam = 0xFF;
 	psInfo.iSkin = 33;
-	psInfo.byteUnknown = 0;
 	psInfo.vecPos[0] = 389.8672f;
 	psInfo.vecPos[1] = 2543.0046f;
 	psInfo.vecPos[2] = 16.5391f;
