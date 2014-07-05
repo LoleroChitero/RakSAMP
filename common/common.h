@@ -8,11 +8,11 @@
 
 #include "SAMP_VER.h"
 
-#define RAKSAMP_VERSION "v0.8.1-0.3z"
+#define RAKSAMP_VERSION "v0.8.2-0.3z"
 #define NETCODE_OPENCONNLULZ 6969
 #define NETGAME_VERSION 4047
 
-#define AUTHOR "jlfm, bartekdvd, P3ti, balika011"
+#define AUTHOR "jlfm, bartekdvd, P3ti"
 
 #define REJECT_REASON_BAD_VERSION	1
 #define REJECT_REASON_BAD_NICKNAME	2
@@ -168,6 +168,17 @@ typedef struct _BULLET_SYNC_DATA {
 	float fHitTarget[3];
 	float fCenterOfHit[3];
 } BULLET_SYNC_DATA;
+
+#pragma pack(1)
+typedef struct _PLAYER_SPAWN_INFO
+{
+	BYTE byteTeam;
+	int iSkin;
+	float vecPos[3];
+	float fRotation;
+	int iSpawnWeapons[3];
+	int iSpawnWeaponsAmmo[3];
+} PLAYER_SPAWN_INFO;
 
 struct stPlayerInfo
 {
