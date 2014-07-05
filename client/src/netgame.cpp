@@ -13,29 +13,37 @@ extern int iDrunkLevel, iMoney;
 
 void Packet_AUTH_KEY(Packet *p, RakClientInterface *pRakClient)
 {
-	BYTE byteAuthKeyLen;
-	byteAuthKeyLen;
+	char* auth_key;
+	bool found_key = false;
 
-	char* auth_key = "";
-
-	for(int x = 0; x < 1279; x++)
+	for(int x = 0; x < 1535; x++)
 	{
 		if(!strcmp(((char*)p->data + 2), AuthKeyTable[x][0]))
 		{
 			auth_key = AuthKeyTable[x][1];
+			found_key = true;
 		}
 	}
 
-	//Log("[AUTH] %s -> %s", ((char*)p->data + 2), auth_key);
+	if(found_key)
+	{
+		RakNet::BitStream bsKey;
+		BYTE byteAuthKeyLen;
 
-	byteAuthKeyLen = (BYTE)strlen(auth_key);
-	
-	RakNet::BitStream bsKey;
-	bsKey.Write((BYTE)ID_AUTH_KEY);
-	bsKey.Write((BYTE)byteAuthKeyLen);
-	bsKey.Write(auth_key, byteAuthKeyLen);
+		byteAuthKeyLen = (BYTE)strlen(auth_key);
+		
+		bsKey.Write((BYTE)ID_AUTH_KEY);
+		bsKey.Write((BYTE)byteAuthKeyLen);
+		bsKey.Write(auth_key, byteAuthKeyLen);
 
-	pRakClient->Send(&bsKey, SYSTEM_PRIORITY, RELIABLE, NULL);
+		pRakClient->Send(&bsKey, SYSTEM_PRIORITY, RELIABLE, NULL);
+
+		//Log("[AUTH] %s -> %s", ((char*)p->data + 2), auth_key);
+	}
+	else
+	{
+		Log("Unknown AUTH_IN! (%s)", ((char*)p->data + 2));
+	}
 }
 
 void Packet_ConnectionSucceeded(Packet *p, RakClientInterface *pRakClient)
