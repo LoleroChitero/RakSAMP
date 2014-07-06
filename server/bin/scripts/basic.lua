@@ -1,4 +1,11 @@
+ICON_CONNECT = 200;
+ICON_DISCONNECT = 201;
+
 function onScriptStart()
+	setGameModeText("Basic LUA script")
+	setWebURL("github.com/P3ti/RakSAMP")
+	setMapName("ugbase.eu")
+
 	addStaticVehicle(Infernus, 2033.4061, 990.7976, 10.3924, 0.0, 0, 0, 1, 5000)
 	addStaticVehicle(Hydra, 391.11, 2527.03, 16.52, 0.0, 0, 0, 1, 5000)
 	addStaticVehicle(NRG500, 368.34, 2521.56, 16.59, 0.0, 0, 0, 1, 5000)
@@ -15,7 +22,6 @@ function onScriptExit()
 		removeVehicle(i)
 	end	
 end
-
 
 function onNewQuery(ip, srcport, isbanned)
 	if isbanned then
@@ -38,14 +44,13 @@ function onPlayerJoin(playerID, name, ip, srcport)
 		end
 	end
 	
-	setPlayerPos(playerID, 2337.71, -97.92, 5.86)
-	--setPlayerPos(playerID, 903.55, -504.32, 14.96)
-	setPlayerRotation(playerID, 330.0)
-	
-	setPlayerScore(playerID, 69)
+	sendDeathMessage(0xFFFF, playerID, ICON_CONNECT)
+	setupPlayerForClassSelection(playerID)
 end
 
 function onPlayerDisconnect(playerID, name, reason)
+	sendDeathMessage(0xFFFF, playerID, ICON_DISCONNECT)
+	
 	outputConsole("[" .. playerID ..":LEAVE] " .. name .. " (" .. reason .. ").")
 	for i = 0, MAX_PLAYERS do
 		if i ~= playerID then
@@ -56,12 +61,25 @@ end
 
 function onPlayerSpawn(playerID)
 	outputConsole("[" .. playerID ..":SPAWN] " .. getPlayerName(playerID) .. "")
+	
+	setPlayerInterior(playerid, 0)
+	setCameraBehindPlayer(playerid)
+	
 	clearPlayerWeapons(playerID)
+	resetPlayerMoney(playerID)
+	
+	setPlayerScore(playerID, 69)
+	
+	setPlayerPos(playerID, 405.3287, 2534.4934, 16.5461)
+	setPlayerRotation(playerID, 90.4686)
+	
+	setPlayerHealth(playerID, 100)
+	setPlayerArmour(playerid, 100)
 end
 
-function onPlayerDeath(playerID, killerID, weaponID)
-	--outputConsole("[" .. playerID ..":DEATH] " .. getPlayerName(playerID) .. " -> " .. getPlayerName(killerID) .. " (" .. getWeaponName(weaponID) ..")")
-	outputConsole("[" .. playerID ..":DEATH] " .. getPlayerName(playerID) .. " -> ")
+function onPlayerDeath(playerID, killerID, reasonID)
+	sendDeathMessage(killerID, playerID, reasonID)
+	outputConsole("[" .. playerID ..":DEATH] " .. getPlayerName(playerID) .. " -> " .. getPlayerName(killerID) .. " (" .. reasonID ..")")
 end
 
 function onPlayerWantsEnterVehicle(playerID, vehicleID, passenger)
@@ -77,56 +95,103 @@ function onPlayerMessage(playerID, message)
 	sendPlayerChatMessageToAll(playerID, message)
 end
 
+function split(s, delimiter)
+    result = {};
+    for match in (s..delimiter):gmatch("(.-)"..delimiter) do
+        table.insert(result, match);
+    end
+    return result;
+end
+
 function onPlayerCommand(playerID, command)
 	--outputConsole("[" .. playerID ..":CMD] " .. getPlayerName(playerID) .. ": " .. command .."")
-	
-	command = string.split(command, " ")
 
-	if command[1] == "kill" or command[1] == "KILL" then
+	command = split(command, " ")
+
+	if command[1] == "/kill" or command[1] == "/KILL" then
 		setPlayerHealth(playerID, 0)
 		return 1
 	end
-	if command[1] == "pm" or command[1] == "PM" then
+	if command[1] == "/pm" or command[1] == "/PM" then
 		local toplayerid = command[2]
 		local message = command[3]
-		outputConsole("" .. isPlayerConnected(toplayerid) .. " " .. toplayerid .. " " .. playerID .. "")
-		if playerID == toplayerid then -- fix!
-			sendPlayerMessage(playerID, -1, "You can't PM to yourself.")
-			return 1
+
+		if toplayerid and message then
+			if playerID == toplayerid then -- fix!
+				sendPlayerMessage(playerID, -1, "You can't PM to yourself.")
+				return 1
+			end
+			if isPlayerConnected(toplayerid) == 0 then
+				sendPlayerMessage(playerID, -1, "The player is not connected.")
+				return 1
+			end
+			outputConsole("[" .. playerID ..":PM] " .. getPlayerName(playerID) .. " to " .. getPlayerName(toplayerid) .." (" .. toplayerid .. "): " .. message .. "")
+			sendPlayerMessage(toplayerid, -1, "PM from " .. getPlayerName(playerID) .. " (" .. playerID .."): " .. message .. "")
+		else
+			sendPlayerMessage(playerID, -1, "USAGE: /pm <toplayerid> <message>")
 		end
-		if isPlayerConnected(toplayerid) == 0 then
-			sendPlayerMessage(playerID, -1, "The player is not connected.")
-			return 1
-		end
-		outputConsole("[" .. playerID ..":PM] " .. getPlayerName(playerID) .. " to " .. getPlayerName(toplayerid) .." (" .. toplayerid .. "): " .. message .. "")
-		sendPlayerMessage(toplayerid, -1, "PM from " .. getPlayerName(playerID) .. " (" .. playerID .."): " .. message .. "")
 		return 1
 	end
-	if command[1] == "v" or command[1] == "V" then
+	if command[1] == "/v" or command[1] == "/V" then
 		local vehid = command[2]
 		local x, y, z = getPlayerPos(playerID)
 		createVehicle(vehid, x + 5.0, y, z, 330.0, 0, 0)
 		return 1
 	end
-	if command[1] == "money" or command[1] == "MONEY" then
-		setPlayerMoney(playerID, 696969)
+	if command[1] == "/money" or command[1] == "/MONEY" then
+		givePlayerMoney(playerID, 696969)
 		return 1
 	end
-	if command[1] == "ha" or command[1] == "HA" then
+	if command[1] == "/ha" or command[1] == "/HA" then
 		setPlayerHealth(playerID, 69)
 		setPlayerArmour(playerID, 69)
 		return 1
 	end
-	if command[1] == "w" or command[1] == "W" then
-		giveWeapon(playerID, WEAPON_RLAUNCHER, 69)
-		setWeaponAmmo(playerID, WEAPON_RLAUNCHER, 69)
+	if command[1] == "/w" or command[1] == "/W" then
+		giveWeapon(playerID, 24, 1)
+		setWeaponAmmo(playerID, 24, 69)
+		
+		giveWeapon(playerID, 31, 1)
+		setWeaponAmmo(playerID, 31, 69)
 		return 1
 	end
-	if command[1] == "clearw" or command[1] == "CLEARW" then
+	if command[1] == "/clearw" or command[1] == "/CLEARW" then
 		clearPlayerWeapons(playerID)
+		return 1
+	end
+	if command[1] == "/audiostream" or command[1] == "/AUDIOSTREAM" then
+		playAudioStreamForPlayer(playerID, "http://somafm.com/tags.pls")
+		return 1
+	end
+	if command[1] == "/stopaudiostream" or command[1] == "/STOPAUDIOSTREAM" then
+		stopAudioStreamForPlayer(playerID)
 		return 1
 	end
 	
 	sendPlayerMessage(playerID, -1, "Unknown command.")
 	return 0
+end
+
+function onPlayerWeaponShot(playerID, weaponID, hitType, hitID, X, Y, Z)
+	--outputConsole("[" .. playerID ..":WEAPONSHOOT] " .. getPlayerName(playerID) .. ": " .. weaponID .." " .. hitType .. " " .. hitID .. " " .. X .. " " .. Y .. " ".. Z .. "")
+end
+
+function setupPlayerForClassSelection(playerID)
+ 	setPlayerInterior(playerID, 14)
+	setPlayerPos(playerID,258.4893, -41.4008, 1002.0234)
+	setPlayerRotation(playerID, 270.0)
+	setPlayerCameraPos(playerID, 256.0815, -43.0475, 1004.0234)
+	setPlayerCameraLookAt(playerID, 258.4893, -41.4008, 1002.0234)
+end
+
+function split(inputstr, sep)
+        if sep == nil then
+                sep = "%s"
+        end
+        local t={} ; i=1
+        for str in string.gmatch(inputstr, "([^"..sep.."]+)") do
+                t[i] = str
+                i = i + 1
+        end
+        return t
 end
