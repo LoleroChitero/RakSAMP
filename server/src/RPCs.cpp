@@ -4,7 +4,7 @@
 
 #include "main.h"
 
-float m_fGravity = 0.008;
+float m_fGravity = 0.008f;
 
 extern int iLagCompensation;
 
