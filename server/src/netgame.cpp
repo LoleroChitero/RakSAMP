@@ -4,6 +4,8 @@
 
 #include "main.h"
 
+extern int iLagCompensation;
+
 void resetPools()
 {
 	memset(playerInfo, 0, sizeof(stPlayerInfo));
@@ -249,6 +251,34 @@ void Packet_MarkersSync(Packet *p)
 	//Log("Packet_MarkersSync: %d  %d", pRakServer->GetIndexFromPlayerID(p->playerId), p->length);
 }
 
+void Packet_BulletSync(Packet *p)
+{
+	if(iLagCompensation)
+	{
+		RakNet::BitStream bsBulletSync((unsigned char *)p->data, p->length, false);
+		PLAYERID playerId = pRakServer->GetIndexFromPlayerID(p->playerId);
+
+		memset(&playerInfo[playerId].bulletData, 0, sizeof(BULLET_SYNC_DATA));
+
+		bsBulletSync.IgnoreBits(8);
+		bsBulletSync.Read((PCHAR)&playerInfo[playerId].bulletData, sizeof(BULLET_SYNC_DATA));
+
+		for(int i = 0; i < iScriptsRunning; i++)
+		{
+			if(script.scriptVM[i] != NULL && script.szScriptName[i][0] != 0x00)
+				ScriptEvent_OnPlayerWeaponShot(script.scriptVM[i], playerId, playerInfo[playerId].onfootData.byteCurrentWeapon, playerInfo[playerId].bulletData.bHitType, playerInfo[playerId].bulletData.iHitID, playerInfo[playerId].bulletData.fCenterOfHit[0], playerInfo[playerId].bulletData.fCenterOfHit[1], playerInfo[playerId].bulletData.fCenterOfHit[2]);
+		}
+
+		bsBulletSync.Reset();
+
+		bsBulletSync.Write((BYTE)ID_BULLET_SYNC);
+		bsBulletSync.Write((unsigned short)playerId);
+		bsBulletSync.Write((PCHAR)&playerInfo[playerId].bulletData, sizeof(BULLET_SYNC_DATA));
+
+		pRakServer->Send(&bsBulletSync, HIGH_PRIORITY, UNRELIABLE_SEQUENCED, 0, p->playerId, TRUE);
+	}
+}
+
 void UpdateNetwork()
 {
 	unsigned char packetIdentifier;
@@ -323,6 +353,8 @@ void UpdateNetwork()
 			case ID_MARKERS_SYNC:
 				Packet_MarkersSync(pkt);
 				break;
+			case ID_BULLET_SYNC:
+				Packet_BulletSync(pkt);
 		}
 
 		pRakServer->DeallocatePacket(pkt);
