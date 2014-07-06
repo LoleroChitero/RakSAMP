@@ -112,7 +112,7 @@ void ScriptEvent_OnPlayerSpawn(lua_State *L, int iPlayerID)
 }
 
 
-void ScriptEvent_OnPlayerDeath(lua_State *L, int iPlayerID, int iKillerID, int iWeaponID)
+void ScriptEvent_OnPlayerDeath(lua_State *L, int iPlayerID, int iKillerID, int iReasonID)
 {
 	lua_getglobal(L, "onPlayerDeath");
 	if(!lua_isfunction(L, -1))
@@ -123,7 +123,7 @@ void ScriptEvent_OnPlayerDeath(lua_State *L, int iPlayerID, int iKillerID, int i
 
 	lua_pushinteger(L, iPlayerID);
 	lua_pushinteger(L, iKillerID);
-	lua_pushinteger(L, iWeaponID);
+	lua_pushinteger(L, iReasonID);
 
 	if(lua_pcall(L, 3, 0, 0) != 0)
 		Log("WARNING: Error calling onPlayerDeath:\n%s", lua_tostring(L, -1));
@@ -194,3 +194,23 @@ void ScriptEvent_OnPlayerCommand(lua_State *L, int iPlayerID, char *pszCommand)
 		Log("WARNING: Error calling onPlayerCommand:\n%s", lua_tostring(L, -1));
 }
 
+void ScriptEvent_OnPlayerWeaponShot(lua_State *L, int iPlayerID, int iWeaponID, int bHitType, int iHitID, float fX, float fY, float fZ)
+{
+	lua_getglobal(L, "onPlayerWeaponShot");
+	if(!lua_isfunction(L, -1))
+	{
+		lua_pop(L, 1);
+		return;
+	}
+
+	lua_pushinteger(L, iPlayerID);
+	lua_pushinteger(L, iWeaponID);
+	lua_pushinteger(L, bHitType);
+	lua_pushinteger(L, iHitID);
+	lua_pushnumber(L, fX);
+	lua_pushnumber(L, fY);
+	lua_pushnumber(L, fZ);
+
+	if(lua_pcall(L, 7, 0, 0) != 0)
+		Log("WARNING: Error calling onPlayerWeaponShot:\n%s", lua_tostring(L, -1));
+}
