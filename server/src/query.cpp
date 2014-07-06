@@ -5,7 +5,7 @@
 #include "main.h"
 
 char serverName[256];
-char gmName[] = "Unknown";
+char* gmName = "Unknown";
 
 unsigned short numberOfRules = 6;
 struct stRules
@@ -15,13 +15,36 @@ struct stRules
 };
 struct stRules rules[] =
 {
-	{ "gravity", "0.008" },
+	{ "lagcomp", "Off" },
 	{ "mapname", "San Andreas" },
 	{ "version", "RakSAMP " RAKSAMP_VERSION },
 	{ "weather", "10" },
-	{ "weburl", "tr7network.com" },
+	{ "weburl", "github.com/P3ti/RakSAMP" },
 	{ "worldtime", "12:00" }
 };
+
+char* getRuleValue(char* szSRule)
+{
+	for(int x = 0; x < sizeof(rules); x++)
+	{
+		if(!strcmp(rules[x].szRule, szSRule))
+		{
+			return rules[x].szValue;
+		}
+	}
+	return NULL;
+}
+
+void modifyRuleValue(char* szSRule, char* szMValue)
+{
+	for(int x = 0; x < sizeof(rules); x++)
+	{
+		if(!strcmp(rules[x].szRule, szSRule))
+		{
+			sprintf_s(rules[x].szValue, 64, szMValue);
+		}
+	}
+}
 
 char queryBufferSend[4092];
 void handleQueries(SOCKET sListen, int iAddrSize, struct sockaddr_in client, char *buffer)
@@ -57,8 +80,10 @@ void handleQueries(SOCKET sListen, int iAddrSize, struct sockaddr_in client, cha
 		sendto(sListen, queryBufferSend, queryLen, 0, (struct sockaddr *)&client, iAddrSize);
 	}
 
-	else if(buffer[10] == 0x69) // Server name, player count, game mode name query
+	else if(buffer[10] == 0x69) // Server name, player count, game mode name, map name query
 	{
+		char* mapName = getRuleValue("mapname");
+
 		memcpy(queryBufferSend, buffer, 10); queryLen += 10;
 		*(unsigned short *)&queryBufferSend[10] = 0x69; queryLen += 2;
 		*(unsigned short *)&queryBufferSend[12] = playerCount; queryLen += 2;
@@ -67,9 +92,10 @@ void handleQueries(SOCKET sListen, int iAddrSize, struct sockaddr_in client, cha
 		strncpy(&queryBufferSend[20], serverName, serverNameLen); queryLen += serverNameLen;
 		int gmNameLen = (int)strlen(gmName); *(int *)&queryBufferSend[20 + serverNameLen] = gmNameLen; queryLen += 4;
 		strncpy(&queryBufferSend[20 + serverNameLen + 4], gmName, gmNameLen); queryLen += gmNameLen;
+		int mapNameLen = (int)strlen(mapName); *(int *)&queryBufferSend[24 + serverNameLen + gmNameLen] = mapNameLen; queryLen += 4;
+		strncpy(&queryBufferSend[24 + serverNameLen + gmNameLen + 4], mapName, mapNameLen); queryLen += mapNameLen;
 
 		sendto(sListen, queryBufferSend, queryLen, 0, (struct sockaddr *)&client, iAddrSize);
-
 		return;
 	}
 
