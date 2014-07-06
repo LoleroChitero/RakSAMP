@@ -8,10 +8,30 @@ using namespace RakNet;
 int iScriptsRunning = 0;
 struct stScript script;
 
+extern char* gmName;
+extern float m_fGravity;
+
 int OutputConsole(lua_State *L)
 {
 	Log("%s", lua_tostring(L, 1));
+	return 1;
+}
 
+int SetGameModeText(lua_State *L)
+{
+	gmName = (char*)lua_tostring(L, 1);
+	return 1;
+}
+
+int SetMapName(lua_State *L)
+{
+	modifyRuleValue("mapname", (char*)lua_tostring(L, 1));
+	return 1;
+}
+
+int SetWebURL(lua_State *L)
+{
+	modifyRuleValue("weburl", (char*)lua_tostring(L, 1));
 	return 1;
 }
 
@@ -220,11 +240,11 @@ int SetPlayerPos(lua_State *L)
 	lua_Number fY = lua_tonumber(L, 3);
 	lua_Number fZ = lua_tonumber(L, 4);
 
-	/*bs.Write((float)fX);
+	bs.Write((float)fX);
 	bs.Write((float)fY);
 	bs.Write((float)fZ);
-	rpc.Call("RPC_Script_SetPlayerPos", &bs, HIGH_PRIORITY, RELIABLE, 0, server->GetGUIDFromIndex(playerID), false);*/
 
+	pRakServer->RPC(&RPC_ScrSetPlayerPos, &bs, HIGH_PRIORITY, RELIABLE_ORDERED, 0, pRakServer->GetPlayerIDFromIndex(playerID), FALSE, FALSE, UNASSIGNED_NETWORK_ID, NULL);
 	return 1;
 }
 
@@ -234,21 +254,88 @@ int SetPlayerRotation(lua_State *L)
 	PLAYERID playerID = lua_tointeger(L, 1);
 	lua_Number fRot = lua_tonumber(L, 2);
 
-	/*bs.Write((float)fRot);
-	rpc.Call("RPC_Script_SetPlayerRotation", &bs, HIGH_PRIORITY, RELIABLE, 0, server->GetGUIDFromIndex(playerID), false);*/
+	bs.Write((float)fRot);
 
+	pRakServer->RPC(&RPC_ScrSetPlayerFacingAngle, &bs, HIGH_PRIORITY, RELIABLE_ORDERED, 0, pRakServer->GetPlayerIDFromIndex(playerID), FALSE, FALSE, UNASSIGNED_NETWORK_ID, NULL);
 	return 1;
 }
 
-int SetPlayerMoney(lua_State *L)
+int SetPlayerInterior(lua_State *L)
+{
+	BitStream bs;
+	PLAYERID playerID = lua_tointeger(L, 1);
+	lua_Number interiorID = lua_tointeger(L, 2);
+
+	bs.Write((BYTE)interiorID);
+
+	pRakServer->RPC(&RPC_ScrSetInterior, &bs, HIGH_PRIORITY, RELIABLE_ORDERED, 0, pRakServer->GetPlayerIDFromIndex(playerID), FALSE, FALSE, UNASSIGNED_NETWORK_ID, NULL);
+	return 1;
+}
+
+int SetPlayerCameraPos(lua_State *L)
+{
+	BitStream bs;
+	PLAYERID playerID = lua_tointeger(L, 1);
+
+	lua_Number fX = lua_tonumber(L, 2);
+	lua_Number fY = lua_tonumber(L, 3);
+	lua_Number fZ = lua_tonumber(L, 4);
+
+	bs.Write((float)fX);
+	bs.Write((float)fY);
+	bs.Write((float)fZ);
+
+	pRakServer->RPC(&RPC_ScrSetCameraPos, &bs, HIGH_PRIORITY, RELIABLE_ORDERED, 0, pRakServer->GetPlayerIDFromIndex(playerID), FALSE, FALSE, UNASSIGNED_NETWORK_ID, NULL);
+	return 1;
+}
+
+int SetPlayerCameraLookAt(lua_State *L)
+{
+	BitStream bs;
+	PLAYERID playerID = lua_tointeger(L, 1);
+
+	lua_Number fX = lua_tonumber(L, 2);
+	lua_Number fY = lua_tonumber(L, 3);
+	lua_Number fZ = lua_tonumber(L, 4);
+
+	lua_Number bCut = lua_tonumber(L, 5);
+
+	bs.Write((float)fX);
+	bs.Write((float)fY);
+	bs.Write((float)fZ);
+	bs.Write((BYTE)bCut);
+
+	pRakServer->RPC(&RPC_ScrSetCameraLookAt, &bs, HIGH_PRIORITY, RELIABLE_ORDERED, 0, pRakServer->GetPlayerIDFromIndex(playerID), FALSE, FALSE, UNASSIGNED_NETWORK_ID, NULL);
+	return 1;
+}
+
+int SetCameraBehindPlayer(lua_State *L)
+{
+	BitStream bs;
+	PLAYERID playerID = lua_tointeger(L, 1);
+
+	pRakServer->RPC(&RPC_ScrSetCameraBehindPlayer, &bs, HIGH_PRIORITY, RELIABLE_ORDERED, 0, pRakServer->GetPlayerIDFromIndex(playerID), FALSE, FALSE, UNASSIGNED_NETWORK_ID, NULL);
+	return 1;
+}
+
+int GivePlayerMoney(lua_State *L)
 {
 	BitStream bs;
 	PLAYERID playerID = lua_tointeger(L, 1);
 	lua_Number iMoney = lua_tonumber(L, 2);
 
-	/*bs.Write((int)iMoney);
-	rpc.Call("RPC_Script_SetPlayerMoney", &bs, HIGH_PRIORITY, RELIABLE, 0, server->GetGUIDFromIndex(playerID), false);*/
+	bs.Write((int)iMoney);
 
+	pRakServer->RPC(&RPC_ScrHaveSomeMoney, &bs, HIGH_PRIORITY, RELIABLE_ORDERED, 0, pRakServer->GetPlayerIDFromIndex(playerID), FALSE, FALSE, UNASSIGNED_NETWORK_ID, NULL);
+	return 1;
+}
+
+int ResetPlayerMoney(lua_State *L)
+{
+	BitStream bs;
+	PLAYERID playerID = lua_tointeger(L, 1);
+
+	pRakServer->RPC(&RPC_ScrResetMoney, &bs, HIGH_PRIORITY, RELIABLE_ORDERED, 0, pRakServer->GetPlayerIDFromIndex(playerID), FALSE, FALSE, UNASSIGNED_NETWORK_ID, NULL);
 	return 1;
 }
 
@@ -258,10 +345,9 @@ int SetPlayerHealth(lua_State *L)
 	PLAYERID playerID = lua_tointeger(L, 1);
 	lua_Number iHealth = lua_tonumber(L, 2);
 
-	/*iHealth += 100;
-	bs.Write((int)iHealth);
-	rpc.Call("RPC_Script_SetPlayerHealth", &bs, HIGH_PRIORITY, RELIABLE, 0, server->GetGUIDFromIndex(playerID), false);*/
+	bs.Write((float)iHealth);
 
+	pRakServer->RPC(&RPC_ScrSetPlayerHealth, &bs, HIGH_PRIORITY, RELIABLE_ORDERED, 0, pRakServer->GetPlayerIDFromIndex(playerID), FALSE, FALSE, UNASSIGNED_NETWORK_ID, NULL);
 	return 1;
 }
 
@@ -271,9 +357,9 @@ int SetPlayerArmour(lua_State *L)
 	PLAYERID playerID = lua_tointeger(L, 1);
 	lua_Number iArmour = lua_tonumber(L, 2);
 
-	/*bs.Write((int)iArmour);
-	rpc.Call("RPC_Script_SetPlayerArmour", &bs, HIGH_PRIORITY, RELIABLE, 0, server->GetGUIDFromIndex(playerID), false);*/
+	bs.Write((float)iArmour);
 
+	pRakServer->RPC(&RPC_ScrSetPlayerArmour, &bs, HIGH_PRIORITY, RELIABLE_ORDERED, 0, pRakServer->GetPlayerIDFromIndex(playerID), FALSE, FALSE, UNASSIGNED_NETWORK_ID, NULL);
 	return 1;
 }
 
@@ -284,10 +370,10 @@ int GiveWeapon(lua_State *L)
 	lua_Number iWeapon = lua_tonumber(L, 2);
 	lua_Number iAmmo = lua_tonumber(L, 3);
 
-	/*bs.Write((int)iWeapon);
-	bs.Write((int)iAmmo);
-	rpc.Call("RPC_Script_GiveWeapon", &bs, HIGH_PRIORITY, RELIABLE, 0, server->GetGUIDFromIndex(playerID), false;*/
+	bs.Write((unsigned long)iWeapon);
+	bs.Write((unsigned long)iAmmo);
 
+	pRakServer->RPC(&RPC_ScrGivePlayerWeapon, &bs, HIGH_PRIORITY, RELIABLE_ORDERED, 0, pRakServer->GetPlayerIDFromIndex(playerID), FALSE, FALSE, UNASSIGNED_NETWORK_ID, NULL);
 	return 1;
 }
 
@@ -298,10 +384,10 @@ int SetWeaponAmmo(lua_State *L)
 	lua_Number iWeapon = lua_tonumber(L, 2);
 	lua_Number iAmmo = lua_tonumber(L, 3);
 
-	/*bs.Write((int)iWeapon);
-	bs.Write((int)iAmmo);
-	rpc.Call("RPC_Script_SetWeaponAmmo", &bs, HIGH_PRIORITY, RELIABLE, 0, server->GetGUIDFromIndex(playerID), false);*/
+	bs.Write((unsigned char)iWeapon);
+	bs.Write((unsigned short)iAmmo);
 
+	pRakServer->RPC(&RPC_ScrSetWeaponAmmo, &bs, HIGH_PRIORITY, RELIABLE_ORDERED, 0, pRakServer->GetPlayerIDFromIndex(playerID), FALSE, FALSE, UNASSIGNED_NETWORK_ID, NULL);
 	return 1;
 }
 
@@ -310,7 +396,100 @@ int ClearPlayerWeapons(lua_State *L)
 	BitStream bs;
 	PLAYERID playerID = lua_tointeger(L, 1);
 
-	//rpc.Call("RPC_Script_ClearPlayerWeapons", &bs, HIGH_PRIORITY, RELIABLE, 0, server->GetGUIDFromIndex(playerID), false);
+	pRakServer->RPC(&RPC_ScrResetPlayerWeapons, &bs, HIGH_PRIORITY, RELIABLE_ORDERED, 0, pRakServer->GetPlayerIDFromIndex(playerID), FALSE, FALSE, UNASSIGNED_NETWORK_ID, NULL);
+	return 1;
+}
+
+int PlayAudioStreamForPlayer(lua_State *L)
+{
+	BitStream bs;
+
+	PLAYERID playerID = lua_tointeger(L, 1);
+	
+	char szURL[256];
+	sprintf_s(szURL, 256, lua_tostring(L, 2));
+
+	lua_Number PosX = lua_tonumber(L, 3);
+	lua_Number PosY = lua_tonumber(L, 4);
+	lua_Number PosZ = lua_tonumber(L, 5);
+	lua_Number Distance = lua_tonumber(L, 6);
+	lua_Number UsePos = lua_tointeger(L, 7);
+
+	bs.Write((unsigned char)strlen(szURL));
+	bs.Write(szURL, strlen(szURL));
+	bs.Write((float)PosX);
+	bs.Write((float)PosY);
+	bs.Write((float)PosZ);
+	bs.Write((float)Distance);
+	bs.Write((unsigned char)UsePos);
+
+	pRakServer->RPC(&RPC_PlayAudioStream, &bs, HIGH_PRIORITY, RELIABLE_ORDERED, 0, pRakServer->GetPlayerIDFromIndex(playerID), FALSE, FALSE, UNASSIGNED_NETWORK_ID, NULL);
+	return 1;
+}
+
+int StopAudioStreamForPlayer(lua_State *L)
+{
+	BitStream bs;
+	PLAYERID playerID = lua_tointeger(L, 1);
+
+	pRakServer->RPC(&RPC_StopAudioStream, &bs, HIGH_PRIORITY, RELIABLE_ORDERED, 0, pRakServer->GetPlayerIDFromIndex(playerID), FALSE, FALSE, UNASSIGNED_NETWORK_ID, NULL);
+	return 1;
+}
+
+int SendDeathMessage(lua_State *L)
+{
+	BitStream bs;
+
+	PLAYERID killerID = lua_tointeger(L, 1);
+	PLAYERID killeeID = lua_tointeger(L, 2);
+	unsigned char reasonID = lua_tointeger(L, 3);
+
+	bs.Write((unsigned short)killerID);
+	bs.Write((unsigned short)killeeID);
+	bs.Write((unsigned char)reasonID);
+
+	pRakServer->RPC(&RPC_ScrDeathMessage, &bs, HIGH_PRIORITY, RELIABLE_ORDERED, 0, pRakServer->GetPlayerIDFromIndex(0xFFFF), TRUE, FALSE, UNASSIGNED_NETWORK_ID, NULL);
+	return 1;
+}
+
+int SendDeathMessageForPlayer(lua_State *L)
+{
+	BitStream bs;
+
+	PLAYERID playerID = lua_tointeger(L, 1);
+	PLAYERID killerID = lua_tointeger(L, 2);
+	PLAYERID killeeID = lua_tointeger(L, 3);
+	unsigned char reasonID = lua_tointeger(L, 4);
+
+	bs.Write((unsigned short)killerID);
+	bs.Write((unsigned short)killeeID);
+	bs.Write((unsigned char)reasonID);
+
+	pRakServer->RPC(&RPC_ScrDeathMessage, &bs, HIGH_PRIORITY, RELIABLE_ORDERED, 0, pRakServer->GetPlayerIDFromIndex(playerID), FALSE, FALSE, UNASSIGNED_NETWORK_ID, NULL);
+	return 1;
+}
+
+int SetGravity(lua_State *L)
+{
+	BitStream bs;
+	lua_Number fGravity = lua_tointeger(L, 1);
+
+	m_fGravity = (float)fGravity;
+	bs.Write((float)fGravity);
+	
+	pRakServer->RPC(&RPC_ScrSetGravity, &bs, HIGH_PRIORITY, RELIABLE_ORDERED, 0, pRakServer->GetPlayerIDFromIndex(0xFFFF), TRUE, FALSE, UNASSIGNED_NETWORK_ID, NULL);
+	return 1;
+}
+
+int SetPlayerGravity(lua_State *L)
+{
+	BitStream bs;
+	PLAYERID playerID = lua_tointeger(L, 1);
+	lua_Number fGravity = lua_tointeger(L, 2);
+
+	bs.Write((float)fGravity);
+	
+	pRakServer->RPC(&RPC_ScrSetGravity, &bs, HIGH_PRIORITY, RELIABLE_ORDERED, 0, pRakServer->GetPlayerIDFromIndex(playerID), FALSE, FALSE, UNASSIGNED_NETWORK_ID, NULL);
 	return 1;
 }
 
@@ -320,6 +499,10 @@ void RegisterScriptingFunctions(lua_State *L)
 
 	lua_register(L, "outputConsole", OutputConsole);
 
+	lua_register(L, "setGameModeText", SetGameModeText);
+	lua_register(L, "setMapName", SetMapName);
+	lua_register(L, "setWebURL", SetWebURL);
+
 	lua_register(L, "isPlayerConnected", IsPlayerConnected);
 	lua_register(L, "getPlayerName", GetPlayerName);
 	lua_register(L, "getPlayerPos", GetPlayerPos);
@@ -327,12 +510,22 @@ void RegisterScriptingFunctions(lua_State *L)
 	lua_register(L, "setPlayerScore", SetPlayerScore);
 	lua_register(L, "getPlayerIP", GetPlayerIP);
 	lua_register(L, "getPlayerPing", GetPlayerPing);
+
 	lua_register(L, "sendPlayerMessage", SendPlayerMessage);
 	lua_register(L, "sendPlayerChatMessage", SendPlayerChatMessage);
 	lua_register(L, "sendPlayerChatMessageToAll", SendPlayerChatMessageToAll);
+
 	lua_register(L, "setPlayerPos", SetPlayerPos);
 	lua_register(L, "setPlayerRotation", SetPlayerRotation);
-	lua_register(L, "setPlayerMoney", SetPlayerMoney);
+	lua_register(L, "setPlayerInterior", SetPlayerInterior);
+
+	lua_register(L, "setPlayerCameraPos", SetPlayerCameraPos);
+	lua_register(L, "setPlayerCameraLookAt", SetPlayerCameraLookAt);
+	lua_register(L, "setCameraBehindPlayer", SetCameraBehindPlayer);
+
+	lua_register(L, "givePlayerMoney", GivePlayerMoney);
+	lua_register(L, "resetPlayerMoney", ResetPlayerMoney);
+
 	lua_register(L, "setPlayerHealth", SetPlayerHealth);
 	lua_register(L, "setPlayerArmour", SetPlayerArmour);
 
@@ -343,6 +536,15 @@ void RegisterScriptingFunctions(lua_State *L)
 	lua_register(L, "giveWeapon", GiveWeapon);
 	lua_register(L, "setWeaponAmmo", SetWeaponAmmo);
 	lua_register(L, "clearPlayerWeapons", ClearPlayerWeapons);
+
+	lua_register(L, "playAudioStreamForPlayer", PlayAudioStreamForPlayer);
+	lua_register(L, "stopAudioStreamForPlayer", StopAudioStreamForPlayer);
+
+	lua_register(L, "sendDeathMessage", SendDeathMessage);
+	lua_register(L, "sendDeathMessageForPlayer", SendDeathMessageForPlayer);
+
+	lua_register(L, "setGravity", SetGravity);
+	lua_register(L, "setPlayerGravity", SetPlayerGravity);
 }
 
 // ---------------------------------------------------------------------------------------------------------
