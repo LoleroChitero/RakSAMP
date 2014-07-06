@@ -4,6 +4,10 @@
 
 #include "main.h"
 
+float m_fGravity = 0.008;
+
+extern int iLagCompensation;
+
 void InitGameForPlayer(PLAYERID playerID)
 {
 	RakNet::BitStream bsInitGame;
@@ -23,7 +27,7 @@ void InitGameForPlayer(PLAYERID playerID)
 	bsInitGame.Write((int)1); // m_iShowPlayerMarkers
 	bsInitGame.Write((BYTE)12); // m_byteWorldTime
 	bsInitGame.Write((BYTE)10); // m_byteWeather
-	bsInitGame.Write((float)0.008); // m_fGravity
+	bsInitGame.Write((float)m_fGravity); // m_fGravity
 	bsInitGame.WriteCompressed((bool)0); // bLanMode
 	bsInitGame.Write((int)0); // m_iDeathDropMoney
 	bsInitGame.WriteCompressed((bool)0); // m_bInstagib
@@ -33,11 +37,11 @@ void InitGameForPlayer(PLAYERID playerID)
 	bsInitGame.Write((int)40); // iNetModeFiringSendRate
 	bsInitGame.Write((int)10); // iNetModeSendMultiplier
 
-	bsInitGame.Write((int)0); // m_bLagCompensation
+	bsInitGame.Write((BYTE)iLagCompensation); // m_bLagCompensation
 	
-	bsInitGame.Write((int)0); // unknown
-	bsInitGame.Write((int)0); // unknown
-	bsInitGame.Write((int)0); // unknown
+	bsInitGame.Write((BYTE)0); // unknown
+	bsInitGame.Write((BYTE)0); // unknown
+	bsInitGame.Write((BYTE)0); // unknown
 
 	BYTE bServerNameLen = (BYTE)strlen(serverName);
 	bsInitGame.Write(bServerNameLen);
@@ -276,7 +280,6 @@ void RPC_ClientUpdateScoresPingsIPs(RPCParameters *rpcParams)
 	{
 		if(isPlayerConnected(i))
 		{
-			playerPool[i].iPlayerScore = 0;
 			playerPool[i].dwPlayerPing = pRakServer->GetLastPing(playerPool[i].rakPlayerID);
 
 			bsUpdate.Write(i);
@@ -366,6 +369,70 @@ void RPC_ClientExitVehicle(RPCParameters *rpcParams)
 		0, sender, TRUE, FALSE, UNASSIGNED_NETWORK_ID, NULL);
 }
 
+void RPC_ClientCommandText(RPCParameters *rpcParams)
+{
+	PCHAR Data = reinterpret_cast<PCHAR>(rpcParams->input);
+	int iBitLength = rpcParams->numberOfBitsOfData;
+	PlayerID sender = rpcParams->sender;
+
+	RakNet::BitStream bsData((unsigned char *)Data,(iBitLength/8)+1,false);
+	PLAYERID playerID = pRakServer->GetIndexFromPlayerID(sender);
+
+	if(!playerPool[playerID].iIsConnected)
+		return;
+
+	char szCommand[256];
+	int szCommandLength = strlen(szCommand);
+
+	bsData.Read(szCommandLength);
+	bsData.Read(szCommand, szCommandLength);
+	szCommand[szCommandLength] = '\0';
+
+	for(int i = 0; i < iScriptsRunning; i++)
+	{
+		if(script.scriptVM[i] != NULL && script.szScriptName[i][0] != 0x00)
+			ScriptEvent_OnPlayerCommand(script.scriptVM[i], playerID, szCommand);
+	}
+}
+
+void RPC_ClientDeath(RPCParameters *rpcParams)
+{
+	PCHAR Data = reinterpret_cast<PCHAR>(rpcParams->input);
+	int iBitLength = rpcParams->numberOfBitsOfData;
+	PlayerID sender = rpcParams->sender;
+
+	RakNet::BitStream bsData((unsigned char *)Data,(iBitLength/8)+1,false);
+	PLAYERID playerID = pRakServer->GetIndexFromPlayerID(sender);
+
+	if(!playerPool[playerID].iIsConnected)
+		return;
+
+	unsigned char ReasonID;
+	unsigned short KillerID;
+
+	bsData.Read(ReasonID);
+	bsData.Read(KillerID);
+
+	if(KillerID != 0xFFFF)
+	{
+		if(!playerPool[KillerID].iIsConnected)
+			return;
+
+		if(ReasonID == 46 || ReasonID == 48 || ReasonID == 49)
+			return;
+	}
+
+	RakNet::BitStream bsDeath;
+
+	bsDeath.Write((unsigned short)playerID);
+	pRakServer->RPC(&RPC_WorldPlayerDeath, &bsDeath, HIGH_PRIORITY, RELIABLE_ORDERED, 0, pRakServer->GetPlayerIDFromIndex(playerID), TRUE, FALSE, UNASSIGNED_NETWORK_ID, NULL);
+
+	for(int i = 0; i < iScriptsRunning; i++)
+	{
+		if(script.scriptVM[i] != NULL && script.szScriptName[i][0] != 0x00)
+			ScriptEvent_OnPlayerDeath(script.scriptVM[i], playerID, KillerID, ReasonID);
+	}
+}
 
 void RegisterServerRPCs(RakServerInterface *pRakServer)
 {
@@ -378,6 +445,8 @@ void RegisterServerRPCs(RakServerInterface *pRakServer)
 	pRakServer->RegisterAsRemoteProcedureCall(&RPC_UpdateScoresPingsIPs, RPC_ClientUpdateScoresPingsIPs);
 	pRakServer->RegisterAsRemoteProcedureCall(&RPC_EnterVehicle, RPC_ClientEnterVehicle);
 	pRakServer->RegisterAsRemoteProcedureCall(&RPC_ExitVehicle, RPC_ClientExitVehicle);
+	pRakServer->RegisterAsRemoteProcedureCall(&RPC_ServerCommand, RPC_ClientCommandText);
+	pRakServer->RegisterAsRemoteProcedureCall(&RPC_Death, RPC_ClientDeath);
 }
 
 void UnRegisterServerRPCs(RakServerInterface * pRakServer)
@@ -391,4 +460,5 @@ void UnRegisterServerRPCs(RakServerInterface * pRakServer)
 	pRakServer->UnregisterAsRemoteProcedureCall(&RPC_UpdateScoresPingsIPs);
 	pRakServer->UnregisterAsRemoteProcedureCall(&RPC_EnterVehicle);
 	pRakServer->UnregisterAsRemoteProcedureCall(&RPC_ExitVehicle);
+	pRakServer->UnregisterAsRemoteProcedureCall(&RPC_ServerCommand);
 }
