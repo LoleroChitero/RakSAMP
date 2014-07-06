@@ -13,6 +13,8 @@ unsigned int _uiRndSrvChallenge;
 int iPort;
 unsigned short usMaxPlayers;
 
+int iLagCompensation;
+
 char szLogFile[MAX_PATH];
 FILE *flLog = NULL;
 
@@ -44,6 +46,12 @@ int main(int argc, char *argv[])
 		usMaxPlayers = (unsigned short)atoi(serverElement->Attribute("max_players"));
 		iPort = (int)atoi(serverElement->Attribute("port"));
 		strcpy(serverName, serverElement->Attribute("name"));
+		iLagCompensation = (int)atoi(serverElement->Attribute("lagcomp"));
+
+		if(iLagCompensation)
+			modifyRuleValue("lagcomp", "On");
+		else
+			modifyRuleValue("lagcomp", "Off");
 	}
 
 	Log("* ====================== *");
