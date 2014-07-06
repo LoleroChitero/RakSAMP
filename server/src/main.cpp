@@ -54,10 +54,14 @@ int main(int argc, char *argv[])
 			modifyRuleValue("lagcomp", "Off");
 	}
 
-	Log("* ====================== *");
-	Log("*     RakSAMP server     *");
-	Log("* ====================== *");
-	Log("");
+	Log(" ");
+	Log("  * ============================== *");
+	Log("            RakSAMP server          ");
+	Log("                                    ");
+	Log("    Version: " RAKSAMP_VERSION "    ");
+	Log("    Authors: " AUTHOR "             ");
+	Log("  * ============================== *");
+	Log(" ");
 
 	LoadScripts();
 
