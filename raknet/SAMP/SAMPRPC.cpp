@@ -49,6 +49,7 @@ int RPC_PickedUpWeapon = 255;
 int RPC_VehicleDestroyed = 136;
 int RPC_DialogResponse = 62;
 int RPC_PlayAudioStream = 41;
+int RPC_StopAudioStream = 42;
 int RPC_ClickPlayer = 23;
 int RPC_PlayerUpdate = 60;
 int RPC_ClickTextDraw = 83;
