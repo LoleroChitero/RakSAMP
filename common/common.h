@@ -196,6 +196,7 @@ struct stPlayerInfo
 	PASSENGER_SYNC_DATA passengerData;
 	AIM_SYNC_DATA aimData;
 	UNOCCUPIED_SYNC_DATA unocData;
+	BULLET_SYNC_DATA bulletData;
 };
 
 // GTA STUFF //////////////////////////////
