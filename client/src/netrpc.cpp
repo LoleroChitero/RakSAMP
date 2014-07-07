@@ -412,7 +412,7 @@ void UpdateScoresPingsIPs(RPCParameters *rpcParams)
 	RakNet::BitStream bsData((unsigned char *)Data,(iBitLength/8)+1,false);
 
 	PLAYERID playerId;
-	int  iPlayerScore;
+	int iPlayerScore;
 	DWORD dwPlayerPing;
 
 	for(PLAYERID i=0; i<(iBitLength/8)/9; i++)
@@ -761,7 +761,6 @@ void ScrGameText(RPCParameters *rpcParams)
 	Log("[GAMETEXT] %s", szMessage);
 }
 
-#ifndef SAMP_03c
 void ScrPlayAudioStream(RPCParameters *rpcParams)
 {
 	PCHAR Data = reinterpret_cast<PCHAR>(rpcParams->input);
@@ -777,7 +776,6 @@ void ScrPlayAudioStream(RPCParameters *rpcParams)
 
 	Log("[AUDIO_STREAM] %s", szURL);
 }
-#endif
 
 void ScrSetDrunkLevel(RPCParameters *rpcParams)
 {
@@ -814,9 +812,25 @@ void ScrSetPlayerPos(RPCParameters *rpcParams)
 
 	RakNet::BitStream bsData((unsigned char *)Data,(iBitLength/8)+1,false);
 
-	bsData.Read(settings.fNormalModePos[0]);
-	bsData.Read(settings.fNormalModePos[1]);
-	bsData.Read(settings.fNormalModePos[2]);
+	if(settings.iNormalModePosForce == 0)
+	{
+		bsData.Read(settings.fNormalModePos[0]);
+		bsData.Read(settings.fNormalModePos[1]);
+		bsData.Read(settings.fNormalModePos[2]);
+	}
+}
+
+void ScrSetPlayerFacingAngle(RPCParameters *rpcParams)
+{
+	PCHAR Data = reinterpret_cast<PCHAR>(rpcParams->input);
+	int iBitLength = rpcParams->numberOfBitsOfData;
+
+	RakNet::BitStream bsData((unsigned char *)Data,(iBitLength/8)+1,false);
+
+	if(settings.iNormalModePosForce == 0)
+	{
+		bsData.Read(settings.fNormalModeRot);
+	}
 }
 
 void ScrSetSpawnInfo(RPCParameters *rpcParams)
@@ -830,9 +844,32 @@ void ScrSetSpawnInfo(RPCParameters *rpcParams)
 
 	bsData.Read((PCHAR)&SpawnInfo, sizeof(PLAYER_SPAWN_INFO));
 
-	settings.fNormalModePos[0] = SpawnInfo.vecPos[0];
-	settings.fNormalModePos[1] = SpawnInfo.vecPos[1];
-	settings.fNormalModePos[2] = SpawnInfo.vecPos[2];
+	if(settings.iNormalModePosForce == 0)
+	{
+		settings.fNormalModePos[0] = SpawnInfo.vecPos[0];
+		settings.fNormalModePos[1] = SpawnInfo.vecPos[1];
+		settings.fNormalModePos[2] = SpawnInfo.vecPos[2];
+	}
+}
+
+void ScrSetPlayerHealth(RPCParameters *rpcParams)
+{
+	PCHAR Data = reinterpret_cast<PCHAR>(rpcParams->input);
+	int iBitLength = rpcParams->numberOfBitsOfData;
+
+	RakNet::BitStream bsData((unsigned char *)Data,(iBitLength/8)+1,false);
+
+	bsData.Read(settings.fPlayerHealth);
+}
+
+void ScrSetPlayerArmour(RPCParameters *rpcParams)
+{
+	PCHAR Data = reinterpret_cast<PCHAR>(rpcParams->input);
+	int iBitLength = rpcParams->numberOfBitsOfData;
+
+	RakNet::BitStream bsData((unsigned char *)Data,(iBitLength/8)+1,false);
+
+	bsData.Read(settings.fPlayerArmour);
 }
 
 void RegisterRPCs(RakClientInterface *pRakClient)
@@ -862,7 +899,10 @@ void RegisterRPCs(RakClientInterface *pRakClient)
 		pRakClient->RegisterAsRemoteProcedureCall(&RPC_ScrHaveSomeMoney, ScrHaveSomeMoney);
 		pRakClient->RegisterAsRemoteProcedureCall(&RPC_ScrResetMoney, ScrResetMoney);
 		pRakClient->RegisterAsRemoteProcedureCall(&RPC_ScrSetPlayerPos, ScrSetPlayerPos);
+		pRakClient->RegisterAsRemoteProcedureCall(&RPC_ScrSetPlayerFacingAngle, ScrSetPlayerFacingAngle);
 		pRakClient->RegisterAsRemoteProcedureCall(&RPC_ScrSetSpawnInfo, ScrSetSpawnInfo);
+		pRakClient->RegisterAsRemoteProcedureCall(&RPC_ScrSetPlayerHealth, ScrSetPlayerHealth);
+		pRakClient->RegisterAsRemoteProcedureCall(&RPC_ScrSetPlayerArmour, ScrSetPlayerArmour);
 	}
 }
 
@@ -893,6 +933,9 @@ void UnRegisterRPCs(RakClientInterface * pRakClient)
 		pRakClient->UnregisterAsRemoteProcedureCall(&RPC_ScrHaveSomeMoney);
 		pRakClient->UnregisterAsRemoteProcedureCall(&RPC_ScrResetMoney);
 		pRakClient->UnregisterAsRemoteProcedureCall(&RPC_ScrSetPlayerPos);
+		pRakClient->UnregisterAsRemoteProcedureCall(&RPC_ScrSetPlayerFacingAngle);
 		pRakClient->UnregisterAsRemoteProcedureCall(&RPC_ScrSetSpawnInfo);
+		pRakClient->UnregisterAsRemoteProcedureCall(&RPC_ScrSetPlayerHealth);
+		pRakClient->UnregisterAsRemoteProcedureCall(&RPC_ScrSetPlayerArmour);
 	}
 }
