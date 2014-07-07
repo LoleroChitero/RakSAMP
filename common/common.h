@@ -40,30 +40,36 @@ typedef unsigned long long	uint64_t;
 #define isfinite	_finite
 
 #define EVENT_TYPE_PAINTJOB			1
-#define EVENT_TYPE_CARCOMPONENT		2
+#define EVENT_TYPE_CARCOMPONENT			2
 #define EVENT_TYPE_CARCOLOR			3
-#define EVENT_ENTEREXIT_MODSHOP		4
+#define EVENT_ENTEREXIT_MODSHOP			4
 
-#define KEY_UP                      -128
-#define KEY_DOWN                    128
-#define KEY_LEFT                    -128
-#define KEY_RIGHT                   128
-#define KEY_ACTION                  1
-#define KEY_CROUCH                  2
-#define KEY_FIRE                    4
-#define KEY_SPRINT                  8
-#define KEY_SECONDARY_ATTACK        16
-#define KEY_JUMP                    32
-#define KEY_LOOK_RIGHT              64
-#define KEY_HANDBRAKE               128
-#define KEY_LOOK_LEFT               256
-#define KEY_SUBMISSION              512
-#define KEY_LOOK_BEHIND             512
-#define KEY_WALK                    1024
-#define KEY_ANALOG_UP               2048
-#define KEY_ANALOG_DOWN             4096
-#define KEY_ANALOG_LEFT             8192
-#define KEY_ANALOG_RIGHT            16384
+#define BULLET_HIT_TYPE_NONE            	0
+#define BULLET_HIT_TYPE_PLAYER          	1
+#define BULLET_HIT_TYPE_VEHICLE         	2
+#define BULLET_HIT_TYPE_OBJECT          	3
+#define BULLET_HIT_TYPE_PLAYER_OBJECT   	4
+
+#define KEY_UP					-128
+#define KEY_DOWN				128
+#define KEY_LEFT				-128
+#define KEY_RIGHT				128
+#define KEY_ACTION				1
+#define KEY_CROUCH				2
+#define KEY_FIRE				4
+#define KEY_SPRINT				8
+#define KEY_SECONDARY_ATTACK			16
+#define KEY_JUMP				32
+#define KEY_LOOK_RIGHT				64
+#define KEY_HANDBRAKE				128
+#define KEY_LOOK_LEFT				256
+#define KEY_SUBMISSION				512
+#define KEY_LOOK_BEHIND				512
+#define KEY_WALK				1024
+#define KEY_ANALOG_UP				2048
+#define KEY_ANALOG_DOWN				4096
+#define KEY_ANALOG_LEFT				8192
+#define KEY_ANALOG_RIGHT			16384
 
 #pragma pack(1)
 typedef struct _ONFOOT_SYNC_DATA
