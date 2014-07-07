@@ -49,6 +49,7 @@ extern int RPC_PickedUpWeapon;
 extern int RPC_VehicleDestroyed;
 extern int RPC_DialogResponse;
 extern int RPC_PlayAudioStream;
+extern int RPC_StopAudioStream;
 extern int RPC_ClickPlayer;
 
 extern int RPC_ScrSetSpawnInfo;
