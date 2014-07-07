@@ -36,11 +36,11 @@ LRESULT CALLBACK MainWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 			CenterWindow(hWnd, NULL);
 
 			// Create the info text at the the top.
-			hWndChild = CreateWindowEx(0, WC_STATIC, TEXT("RakSAMP " RAKSAMP_VERSION),
+			hWndChild = CreateWindowEx(0, WC_STATIC, TEXT("RakSAMP " RAKSAMP_VERSION "\n" "Authors: " AUTHOR),
 				SS_LEFT | WS_CHILD | WS_VISIBLE,
 				0, 0, 0, 0, hWnd, (HMENU)(IDC_LBLINFO), g_hInst, NULL);
 			if(!hWndChild) return -1;
-			SendMessage(hWndChild, WM_SETFONT, (WPARAM)g_hfInfo, FALSE);
+			SendMessage(hWndChild, WM_SETFONT, (WPARAM)g_hfInfo, TRUE);
 			texthwnd = hWndChild;
 
 			// Create the custom/owner drawn listbox
@@ -402,7 +402,7 @@ DWORD WINAPI windowThread(PVOID)
 
 	// Create an instance of the Main Window.
 	hwnd = CreateWindowEx(WS_EX_APPWINDOW, wcex.lpszClassName, TEXT("RakSAMP " RAKSAMP_VERSION),
-		WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN | WS_CLIPSIBLINGS, CW_USEDEFAULT, CW_USEDEFAULT, 660, 520,
+		WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN | WS_CLIPSIBLINGS, CW_USEDEFAULT, CW_USEDEFAULT, 760, 520,
 		HWND_DESKTOP, NULL, g_hInst, NULL);
 
 	if(hwnd)
