@@ -102,6 +102,7 @@ int LoadSettings()
 		{
 			normalPosElement->QueryVectorAttribute("position", (float *)&settings.fNormalModePos);
 			normalPosElement->QueryFloatAttribute("rotation", &settings.fNormalModeRot);
+			normalPosElement->QueryIntAttribute("force", (int *)&settings.iNormalModePosForce);
 		}
 
 		// get playing mode pos
