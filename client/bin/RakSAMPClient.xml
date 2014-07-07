@@ -8,7 +8,7 @@ Avalable runmodes:
 	5 = Follows a player with a vehicle
 -->
 
-<RakSAMPClient console="0" runmode="3" autorun="0" find="1" select_classid="0" manual_spawn="0"
+<RakSAMPClient console="0" runmode="3" autorun="0" find="1" select_classid="0" manual_spawn="1"
 			   print_timestamps="0" chatcolor_rgb="0 0 130" clientmsg_rgb="0 130 0"
 			   followplayer="P3ti" followplayerwithvehicleid="295" followXOffset="3.0" followYOffset="0.0" followZOffset="0.0"
 			   imitatechat="" updatestats="1" minfps="20" maxfps="90">
@@ -17,14 +17,15 @@ Avalable runmodes:
 	<server nickname="root" password="">127.0.0.1:7777</server>
 
 
-	<!-- If in normal mode, stay still at... -->
-	<normal_pos position="325.35 2512.09 16.56" rotation="0.0" />
+	<!-- In normal mode this will be your default position, but if you don't set 'force' to 1, then the server can move you with SetPlayerPos, SetPlayerFacingAngle or SetSpawnInfo. -->
+	<normal_pos position="325.35 2512.09 16.56" rotation="0.0" force="0" />
 
 	<!--
 	Available commands:
 		!exit or !quit: exits client.
 		!reconnect: reconnects the server.
 		!reload: reloads settings.
+		!runmode: sets current runmode.
 		!stats: shows raknet statistics.
 		!players: shows list of players.
 		!goto: go to players position.
@@ -33,6 +34,14 @@ Avalable runmodes:
 		!vdeath: send vehicle death notification.
 		!spawn: spawns fake player.
 		!menusel: selects an item from the GTA menu.
+		!weapon: sets the current weapon in the fake player's hand.
+		!selplayer: sets the followed player's name.
+		!selveh: sets the fake player's vehicle.
+		!followx: sets the following offset (X).
+		!followy: sets the following offset (Y).
+		!followz: sets the following offset (Z).
+		!bulletflood: flood the server with bullet sync packets to the players' positions.
+		!pulsehealth: pulse health & armor.
 	-->
 
 	<!-- These get called when we successfully connected to a server. -->
