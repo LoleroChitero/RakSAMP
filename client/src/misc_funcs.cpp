@@ -9,7 +9,8 @@ void onFootUpdateAtNormalPos()
 {
 	ONFOOT_SYNC_DATA ofSync;
 	memset(&ofSync, 0, sizeof(ONFOOT_SYNC_DATA));
-	ofSync.byteHealth = 100;
+	ofSync.byteHealth = (BYTE)settings.fPlayerHealth;
+	ofSync.byteArmour = (BYTE)settings.fPlayerArmour;
 	ofSync.fQuaternion[3] = settings.fNormalModeRot;
 	ofSync.vecPos[0] = settings.fNormalModePos[0];
 	ofSync.vecPos[1] = settings.fNormalModePos[1];
