@@ -78,23 +78,37 @@ int RunCommand(char *szCMD, int iFromAutorun)
 		return 1;
 	}
 
+	// SET RUNMODE
+	if(!strncmp(szCMD, "runmode", 7) || !strncmp(szCMD, "RUNMODE", 7))
+	{
+		int iRunModeID = atoi(&szCMD[8]);
+
+		if(iRunModeID > 0 && iRunModeID < 6)
+		{
+			settings.runMode = (eRunModes)iRunModeID;
+			Log("Runmode set to %d.", settings.runMode);
+		}
+
+		return 1;
+	}
+
 	// PLAYER LIST
 	if(!strncmp(szCMD, "players", 7) || !strncmp(szCMD, "PLAYERS", 7))
 	{
 		int iPlayerCount = 0;
 		Log(" ");
-		Log("=== PLAYER LIST ===");
-		Log("ID Name Ping Score");
+		Log("============ PLAYER LIST ============");
 		for(int i = 0; i < MAX_PLAYERS; i++)
 		{
 			if(!playerInfo[i].iIsConnected)
 				continue;
 
-			Log("(%d) %s %d %d", i, playerInfo[i].szPlayerName, playerInfo[i].dwPing, playerInfo[i].iScore);
+			Log("(ID: %d) %s - score: %d, ping: %d", i, playerInfo[i].szPlayerName, playerInfo[i].iScore, playerInfo[i].dwPing);
 			iPlayerCount++;
 		}
 		Log(" ");
-		Log("=== [COUNT: %d] ===", iPlayerCount);
+		Log("Count: %d.", iPlayerCount);
+		Log("=================================");
 		Log(" ");
 
 		return 1;
@@ -119,7 +133,8 @@ int RunCommand(char *szCMD, int iFromAutorun)
 
 			ONFOOT_SYNC_DATA ofSync;
 			memset(&ofSync, 0, sizeof(ONFOOT_SYNC_DATA));
-			ofSync.byteHealth = 100;
+			ofSync.byteHealth = (BYTE)settings.fPlayerHealth;
+			ofSync.byteArmour = (BYTE)settings.fPlayerArmour;
 			ofSync.vecPos[0] = playerInfo[iPlayerID].onfootData.vecPos[0];
 			ofSync.vecPos[1] = playerInfo[iPlayerID].onfootData.vecPos[1];
 			ofSync.vecPos[2] = playerInfo[iPlayerID].onfootData.vecPos[2];
@@ -185,12 +200,12 @@ int RunCommand(char *szCMD, int iFromAutorun)
 		return 1;
 	}
 
+	// SEND LOST CONNECTION PACKET TO THE SERVER
 	if(!strncmp(szCMD, "fu", 2) || !strncmp(szCMD, "fu", 2))
 	{
 		RakNet::BitStream bs;
 		bs.Write((BYTE)ID_CONNECTION_LOST);
 		pRakClient->Send(&bs, HIGH_PRIORITY, UNRELIABLE_SEQUENCED, 0);
-
 		return 1;
 	}
 
@@ -209,7 +224,7 @@ int RunCommand(char *szCMD, int iFromAutorun)
 		return 1;
 	}
 
-	//FAKE KILL :-)
+	// FAKE KILL :-)
 	if(!strncmp(szCMD, "kill", 4) || !strncmp(szCMD, "KILL", 4))
 	{
 		if(!settings.fakeKill) {
@@ -222,7 +237,7 @@ int RunCommand(char *szCMD, int iFromAutorun)
 		return 1;
 	}
 
-	//LAG :-)
+	// LAG :-)
 	if(!strncmp(szCMD, "lag", 4) || !strncmp(szCMD, "LAG", 4))
 	{
 		if(!settings.lag) {
@@ -235,6 +250,7 @@ int RunCommand(char *szCMD, int iFromAutorun)
 		return 1;
 	}
 
+	// SPAM :-)
 	if(!strncmp(szCMD, "spam", 4) || !strncmp(szCMD, "SPAM", 4))
 	{
 		if (settings.ispam) {
@@ -247,11 +263,105 @@ int RunCommand(char *szCMD, int iFromAutorun)
 		return 1;
 	}
 
+	// SPAWNS THE FAKE PLAYER
 	if(!strncmp(szCMD, "spawn", 5) || !strncmp(szCMD, "SPAWN", 5))
 	{
 		sampRequestClass(settings.iClassID);
 		sampSpawn();
 		iSpawned = 1;
+		return 1;
+	}
+
+	// PULSE HEALTH & ARMOR
+	if(!strncmp(szCMD, "pulsehealth", 11) || !strncmp(szCMD, "PULSEHEALTH", 11))
+	{
+		if (settings.pulseHealth)
+		{
+			Log("Stopped health pulser.");
+			settings.pulseHealth = false;
+
+			settings.fPlayerHealth = settings.fHealthBeforePulse;
+			settings.fPlayerArmour = settings.fArmourBeforePulse;
+		}
+		else
+		{
+			settings.fHealthBeforePulse = settings.fPlayerHealth;
+			settings.fArmourBeforePulse = settings.fPlayerArmour;
+
+			Log("Started health pulser...");
+			settings.pulseHealth = true;
+		}
+		return 1;
+	}
+
+	// SET THE FAKE PLAYER'S CURRENT WEAPON
+	if(!strncmp(szCMD, "weapon", 6) || !strncmp(szCMD, "WEAPON", 6))
+	{
+		settings.bCurrentWeapon = (BYTE)atoi(&szCMD[7]);
+		Log("Client's current weapon set to %d.", settings.bCurrentWeapon);
+		return 1;
+	}
+
+	// SET THE FOLLOWED PLAYER'S NAME
+	if(!strncmp(szCMD, "selplayer", 9) || !strncmp(szCMD, "SELPLAYER", 9))
+	{
+		char *szPlayerName = &szCMD[10];
+
+		sprintf_s(settings.szFollowingPlayerName, 20, szPlayerName);
+
+		settings.runMode = RUNMODE_FOLLOWPLAYER;
+
+		Log("[SELPLAYER] Following player changed to %s.", settings.szFollowingPlayerName);
+		return 1;
+	}
+
+	// SET THE FAKE PLAYER'S VEHICLE
+	if(!strncmp(szCMD, "selveh", 6) || !strncmp(szCMD, "SELVEH", 6))
+	{
+		int iSelectedVeh = atoi(&szCMD[7]);
+
+		if(settings.runMode == RUNMODE_FOLLOWPLAYERSVEHICLE)
+			settings.iFollowingWithVehicleID = (VEHICLEID)iSelectedVeh;
+
+		Log("[SELVEH] Changed to vehicle ID to %d.", iSelectedVeh);
+
+		return 1;
+	}
+	
+	// CHANGE FOLLOWING OFFSET (X)
+	if(!strncmp(szCMD, "followx", 7) || !strncmp(szCMD, "followX", 7) || !strncmp(szCMD, "FOLLOWX", 7))
+	{
+		settings.fFollowXOffset = (float)atof(&szCMD[8]);
+		return 1;
+	}
+
+	// CHANGE FOLLOWING OFFSET (Y)
+	if(!strncmp(szCMD, "followy", 7) || !strncmp(szCMD, "followY", 7) || !strncmp(szCMD, "FOLLOWY", 7))
+	{
+		settings.fFollowYOffset = (float)atof(&szCMD[8]);
+		return 1;
+	}
+
+	// CHANGE FOLLOWING OFFSET (Z)
+	if(!strncmp(szCMD, "followz", 7) || !strncmp(szCMD, "followZ", 7) || !strncmp(szCMD, "FOLLOWZ", 7))
+	{
+		settings.fFollowZOffset = (float)atof(&szCMD[8]);
+		return 1;
+	}
+
+	// SEND BULLETS TO PLAYERS' POSITION :-)
+	if(!strncmp(szCMD, "bulletflood", 11) || !strncmp(szCMD, "BULLETFLOOD", 11))
+	{
+		if (settings.bulletFlood)
+		{
+			Log("Stopped bullet flooding.");
+			settings.bulletFlood = false;
+		}
+		else
+		{
+			Log("Started bullet flooding...");
+			settings.bulletFlood = true;
+		}
 		return 1;
 	}
 
