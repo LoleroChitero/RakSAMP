@@ -384,7 +384,8 @@ void Packet_PassengerSync(Packet *p, RakClientInterface *pRakClient)
 		memset(&icSync, 0, sizeof(INCAR_SYNC_DATA));
 		icSync.VehicleID = psSync.VehicleID;
 		icSync.fCarHealth = 1000.00f;
-		icSync.bytePlayerHealth = 100;
+		icSync.bytePlayerHealth = (BYTE)settings.fPlayerHealth;
+		icSync.bytePlayerArmour = (BYTE)settings.fPlayerArmour;
 		SendInCarFullSyncData(&icSync, 1, -1);
 
 		iFollowingDriver = 1;
@@ -456,6 +457,11 @@ void resetPools(int iRestart, DWORD dwTimeReconnect)
 		iSpawned = 0;
 		iMoney = 0;
 		iDrunkLevel = 0;
+
+		settings.pulseHealth = false;
+
+		settings.fPlayerHealth = 100.0f;
+		settings.fPlayerArmour = 0.0f;
 
 		Sleep(dwTimeReconnect);
 	}
