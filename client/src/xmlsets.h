@@ -75,8 +75,23 @@ struct stSettings
 
 	float fNormalModePos[3];
 	float fNormalModeRot;
+	int iNormalModePosForce;
 	float fPlayPos[3];
 	float fPlayRot;
+
+	bool pulseHealth;
+
+	float fHealthBeforePulse;
+	float fArmourBeforePulse;
+
+	float fPlayerHealth;
+	float fPlayerArmour;
+
+	bool bulletFlood;
+
+	float fCurrentPosition[3];
+
+	BYTE bCurrentWeapon;
 
 	struct stAutoRunCMD autoRunCMDs[MAX_AUTORUN_CMDS];
 	struct stFindItem findItems[MAX_FIND_ITEMS];
