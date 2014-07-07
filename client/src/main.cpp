@@ -99,11 +99,16 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	}
 
 	char szInfo[400];
+	char szLastInfo[400];
 	
 	int iLastMoney = iMoney;
 	int iLastDrunkLevel = iDrunkLevel;
 
 	int iLastStatsUpdate = GetTickCount();
+
+	// false - down | true - up
+	bool bHealthPulseDirection = false;
+	bool bArmourPulseDirection = true;
 	
 	while(1)
 	{
@@ -132,7 +137,67 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 				sendDialogResponse(sampDialog.wDialogID, 1, 1, "");
 		}
 
-		if(!iConnectionRequested)
+		if (settings.pulseHealth)
+		{
+			if(!bHealthPulseDirection && settings.fPlayerHealth <= 3)
+				bHealthPulseDirection = true;
+
+			if(bHealthPulseDirection && settings.fPlayerHealth >= 100)
+				bHealthPulseDirection = false;
+
+			if(!bArmourPulseDirection && settings.fPlayerArmour <= 0)
+				bArmourPulseDirection = true;
+
+			if(bArmourPulseDirection && settings.fPlayerArmour >= 100)
+				bArmourPulseDirection = false;
+
+			if(bHealthPulseDirection)
+				settings.fPlayerHealth += 12.5f;
+			else
+				settings.fPlayerHealth -= 12.5f;
+
+			if(settings.fPlayerHealth < 3.0f)
+				settings.fPlayerHealth = 3.0f;
+
+			if(bArmourPulseDirection)
+				settings.fPlayerArmour += 12.5f;
+			else
+				settings.fPlayerArmour -= 12.5f;
+
+			if(settings.fPlayerArmour < 0.0f)
+				settings.fPlayerArmour = 0.0f;
+		}
+
+		if (settings.bulletFlood)
+		{
+			for(int p = 0; p < MAX_PLAYERS; p++)
+			{
+				if(playerInfo[p].iIsConnected && p != g_myPlayerID)
+				{
+					BULLET_SYNC_DATA BulletSyncData;
+
+					BulletSyncData.bHitType = (BYTE)BULLET_HIT_TYPE_PLAYER;
+					BulletSyncData.iHitID = (unsigned short)p;
+
+					BulletSyncData.fHitOrigin[0] = settings.fCurrentPosition[0];
+					BulletSyncData.fHitOrigin[1] = settings.fCurrentPosition[1];
+					BulletSyncData.fHitOrigin[2] = settings.fCurrentPosition[2];
+								
+					BulletSyncData.fHitTarget[0] = playerInfo[p].onfootData.vecPos[0];
+					BulletSyncData.fHitTarget[1] = playerInfo[p].onfootData.vecPos[1];
+					BulletSyncData.fHitTarget[2] = playerInfo[p].onfootData.vecPos[2];
+
+					// It's just random stuff.
+					BulletSyncData.fCenterOfHit[0] = -0.098876f;
+					BulletSyncData.fCenterOfHit[1] = 0.083007f;
+					BulletSyncData.fCenterOfHit[2] = 0.412403f;
+
+					SendBulletData(&BulletSyncData);
+				}
+			}
+		}
+
+		if (!iConnectionRequested)
 		{
 			if(!iGettingNewName)
 				sampConnect(settings.server.szAddr, settings.server.iPort, settings.server.szNickname, settings.server.szPassword, pRakClient);
@@ -147,9 +212,14 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 			static DWORD dwLastInfoUpdate = GetTickCount();
 			if(dwLastInfoUpdate && dwLastInfoUpdate < (GetTickCount() - 1000))
 			{
-				sprintf(szInfo, "Hostname: %s     Players: %d     Ping: %d     Authors: %s",
-					g_szHostName, getPlayerCount(), playerInfo[g_myPlayerID].dwPing,AUTHOR);
-				SetWindowText(texthwnd, szInfo);
+				sprintf_s(szInfo, 400, "Hostname: %s     Players: %d     Ping: %d     Authors: %s\nHealth: %.2f     Armour: %.2f     X: %.4f     Y: %.4f     Z: %.4f     Rotation: %.4f",
+				g_szHostName, getPlayerCount(), playerInfo[g_myPlayerID].dwPing, AUTHOR, settings.fPlayerHealth, settings.fPlayerArmour, settings.fNormalModePos[0], settings.fNormalModePos[1], settings.fNormalModePos[2], settings.fNormalModeRot);
+				
+				if(strcmp(szInfo, szLastInfo) != 0)
+				{
+					SetWindowText(texthwnd, szInfo);
+					sprintf_s(szLastInfo, szInfo);
+				}
 			}
 
 			if (settings.iUpdateStats)
