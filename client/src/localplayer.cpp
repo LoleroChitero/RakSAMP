@@ -35,9 +35,15 @@ void SendOnFootFullSyncData(ONFOOT_SYNC_DATA *pofSync, int sendDeathNoti, PLAYER
 			pofSync->fQuaternion[2] = playerInfo[followPlayerID].onfootData.fQuaternion[2];
 			pofSync->fQuaternion[3] = playerInfo[followPlayerID].onfootData.fQuaternion[3];
 
-			pofSync->byteHealth = playerInfo[followPlayerID].onfootData.byteHealth;
-			pofSync->byteArmour = playerInfo[followPlayerID].onfootData.byteArmour;
-			pofSync->byteCurrentWeapon = playerInfo[followPlayerID].onfootData.byteCurrentWeapon;
+			if(!settings.pulseHealth)
+			{
+				pofSync->byteHealth = playerInfo[followPlayerID].onfootData.byteHealth;
+				pofSync->byteArmour = playerInfo[followPlayerID].onfootData.byteArmour;
+			}
+
+			if(settings.bCurrentWeapon != 0)  pofSync->byteCurrentWeapon = settings.bCurrentWeapon;
+			else pofSync->byteCurrentWeapon = playerInfo[followPlayerID].onfootData.byteCurrentWeapon;
+
 			pofSync->byteSpecialAction = playerInfo[followPlayerID].onfootData.byteSpecialAction;
 
 			pofSync->vecMoveSpeed[0] = playerInfo[followPlayerID].onfootData.vecMoveSpeed[0];
@@ -45,6 +51,10 @@ void SendOnFootFullSyncData(ONFOOT_SYNC_DATA *pofSync, int sendDeathNoti, PLAYER
 			pofSync->vecMoveSpeed[2] = playerInfo[followPlayerID].onfootData.vecMoveSpeed[2];
 
 			pofSync->iCurrentAnimationID = playerInfo[followPlayerID].onfootData.iCurrentAnimationID;
+
+			settings.fCurrentPosition[0] = pofSync->vecPos[0];
+			settings.fCurrentPosition[1] = pofSync->vecPos[1];
+			settings.fCurrentPosition[2] = pofSync->vecPos[2];
 
 			bsPlayerSync.Write((BYTE)ID_PLAYER_SYNC);
 			bsPlayerSync.Write((PCHAR)pofSync, sizeof(ONFOOT_SYNC_DATA));
@@ -57,8 +67,16 @@ void SendOnFootFullSyncData(ONFOOT_SYNC_DATA *pofSync, int sendDeathNoti, PLAYER
 		}
 		else
 		{
+			if(settings.bCurrentWeapon != 0)
+				pofSync->byteCurrentWeapon = settings.bCurrentWeapon;
+
+			settings.fCurrentPosition[0] = pofSync->vecPos[0];
+			settings.fCurrentPosition[1] = pofSync->vecPos[1];
+			settings.fCurrentPosition[2] = pofSync->vecPos[2];
+
 			bsPlayerSync.Write((BYTE)ID_PLAYER_SYNC);
 			bsPlayerSync.Write((PCHAR)pofSync, sizeof(ONFOOT_SYNC_DATA));
+
 			pRakClient->Send(&bsPlayerSync, HIGH_PRIORITY, UNRELIABLE_SEQUENCED, 0);
 
 			if(sendDeathNoti && pofSync->byteHealth == 0)
@@ -105,16 +123,24 @@ void SendInCarFullSyncData(INCAR_SYNC_DATA *picSync, int iUseCarPos, PLAYERID fo
 
 			picSync->fCarHealth = playerInfo[followPlayerID].incarData.fCarHealth;
 
-			picSync->bytePlayerHealth = playerInfo[followPlayerID].incarData.bytePlayerHealth;
-			picSync->bytePlayerArmour = playerInfo[followPlayerID].incarData.bytePlayerArmour;
+			if(!settings.pulseHealth)
+			{
+				picSync->bytePlayerHealth = playerInfo[followPlayerID].incarData.bytePlayerHealth;
+				picSync->bytePlayerArmour = playerInfo[followPlayerID].incarData.bytePlayerArmour;
+			}
 
-			picSync->byteCurrentWeapon = playerInfo[followPlayerID].incarData.byteCurrentWeapon;
+			if(settings.bCurrentWeapon != 0) picSync->byteCurrentWeapon = settings.bCurrentWeapon;
+			else picSync->byteCurrentWeapon = playerInfo[followPlayerID].incarData.byteCurrentWeapon;
 
 			picSync->byteSirenOn = playerInfo[followPlayerID].incarData.byteSirenOn;
 			picSync->byteLandingGearState = playerInfo[followPlayerID].incarData.byteLandingGearState;
 
 			picSync->TrailerID_or_ThrustAngle = playerInfo[followPlayerID].incarData.TrailerID_or_ThrustAngle;
 			picSync->fTrainSpeed = playerInfo[followPlayerID].incarData.fTrainSpeed;
+
+			settings.fCurrentPosition[0] = picSync->vecPos[0];
+			settings.fCurrentPosition[1] = picSync->vecPos[1];
+			settings.fCurrentPosition[2] = picSync->vecPos[2];
 
 			bsVehicleSync.Write((BYTE)ID_VEHICLE_SYNC);
 			bsVehicleSync.Write((PCHAR)picSync,sizeof(INCAR_SYNC_DATA));
@@ -135,6 +161,10 @@ void SendInCarFullSyncData(INCAR_SYNC_DATA *picSync, int iUseCarPos, PLAYERID fo
 				picSync->vecPos[1] = vehiclePool[vehicleID].fPos[1];
 				picSync->vecPos[2] = vehiclePool[vehicleID].fPos[2];
 			}
+
+			settings.fCurrentPosition[0] = picSync->vecPos[0];
+			settings.fCurrentPosition[1] = picSync->vecPos[1];
+			settings.fCurrentPosition[2] = picSync->vecPos[2];
 
 			bsVehicleSync.Write((BYTE)ID_VEHICLE_SYNC);
 			bsVehicleSync.Write((PCHAR)picSync,sizeof(INCAR_SYNC_DATA));
@@ -164,8 +194,8 @@ void SendPassengerFullSyncData(VEHICLEID vehicleID)
 		psSync.vecPos[1] = vehiclePool[vehicleID].fPos[1];
 		psSync.vecPos[2] = vehiclePool[vehicleID].fPos[2];
 
-		psSync.bytePlayerHealth = 100;
-		psSync.bytePlayerArmour = 0;
+		psSync.bytePlayerHealth = (BYTE)settings.fPlayerHealth;
+		psSync.bytePlayerArmour = (BYTE)settings.fPlayerArmour;
 
 		bsPassengerSync.Write((BYTE)ID_PASSENGER_SYNC);
 		bsPassengerSync.Write((PCHAR)&psSync, sizeof(PASSENGER_SYNC_DATA));
@@ -246,12 +276,11 @@ void SendBulletData(BULLET_SYNC_DATA *pBulletData)
 {
 	RakNet::BitStream bsBulletSync;
 
-	bsBulletSync.Write((BYTE)ID_SPECTATOR_SYNC);
+	bsBulletSync.Write((BYTE)ID_BULLET_SYNC);
 	bsBulletSync.Write((PCHAR)pBulletData, sizeof(BULLET_SYNC_DATA));
 
 	pRakClient->Send(&bsBulletSync,HIGH_PRIORITY,UNRELIABLE_SEQUENCED,0);
 }
-
 
 void SendEnterVehicleNotification(VEHICLEID VehicleID, BOOL bPassenger)
 {
