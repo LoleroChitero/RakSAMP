@@ -443,7 +443,7 @@ void SetCheckpoint(RPCParameters *rpcParams)
 	settings.CurrentCheckpoint.bActive = true;
 
 	char SetCheckpointAlert[256];
-	sprintf_s(SetCheckpointAlert, 256, "Checkpoint set to %.2f %.2f %.2f position. (size: %.2f)", settings.CurrentCheckpoint.fPosition[0], settings.CurrentCheckpoint.fPosition[1], settings.CurrentCheckpoint.fPosition[2], settings.CurrentCheckpoint.fSize);
+	sprintf_s(SetCheckpointAlert, 256, "[CP] Checkpoint set to %.2f %.2f %.2f position. (size: %.2f)", settings.CurrentCheckpoint.fPosition[0], settings.CurrentCheckpoint.fPosition[1], settings.CurrentCheckpoint.fPosition[2], settings.CurrentCheckpoint.fSize);
 	Log(SetCheckpointAlert);
 }
 
@@ -453,7 +453,7 @@ void DisableCheckpoint(RPCParameters *rpcParams)
 
 	settings.CurrentCheckpoint.bActive = false;
 
-	Log("Current checkpoint disabled.");
+	Log("[CP] Current checkpoint disabled.");
 }
 
 void ScrInitMenu(RPCParameters *rpcParams)
