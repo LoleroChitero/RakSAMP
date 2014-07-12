@@ -56,6 +56,10 @@ int LoadSettings()
 		// get client message color
 		rakSAMPElement->QueryColorAttribute("clientmsg_rgb",
 			(unsigned char *)&settings.bCMsgRed, (unsigned char *)&settings.bCMsgGreen, (unsigned char *)&settings.bCMsgBlue);
+		
+		// get checkpoint alert color
+		rakSAMPElement->QueryColorAttribute("cpalert_rgb",
+			(unsigned char *)&settings.bCPAlertRed, (unsigned char *)&settings.bCPAlertGreen, (unsigned char *)&settings.bCPAlertBlue);
 
 		// get followplayer
 		strcpy(settings.szFollowingPlayerName, (char *)rakSAMPElement->Attribute("followplayer"));
