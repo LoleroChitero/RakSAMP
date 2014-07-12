@@ -287,9 +287,8 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 						settings.fNormalModePos[1] = settings.CurrentCheckpoint.fPosition[1];
 						settings.fNormalModePos[2] = settings.CurrentCheckpoint.fPosition[2];
 					}
-					
-					if(normalMode_goto == (PLAYERID)-1)
-						onFootUpdateAtNormalPos();
+
+					onFootUpdateAtNormalPos();
 				}
 
 				// Run autorun commands
