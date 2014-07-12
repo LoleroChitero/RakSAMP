@@ -43,14 +43,15 @@ struct stGTAMenu
 	char szColumnContent[MAX_COLUMNS][MAX_MENU_LINE];
 };
 
-#define IDB_BUTTON1				10
-#define IDB_BUTTON2				11
+#define IDB_BUTTON1			10
+#define IDB_BUTTON2			11
 #define IDE_INPUTEDIT			12
-#define IDL_LISTBOX				13
+#define IDL_LISTBOX			13
 
 #define DIALOG_STYLE_MSGBOX		0
 #define DIALOG_STYLE_INPUT		1
 #define DIALOG_STYLE_LIST		2
+#define DIALOG_STYLE_PASSWORD		3
 
 struct stSAMPDialog
 {
