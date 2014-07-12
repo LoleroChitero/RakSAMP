@@ -214,3 +214,33 @@ void ScriptEvent_OnPlayerWeaponShot(lua_State *L, int iPlayerID, int iWeaponID, 
 	if(lua_pcall(L, 7, 0, 0) != 0)
 		Log("WARNING: Error calling onPlayerWeaponShot:\n%s", lua_tostring(L, -1));
 }
+
+void ScriptEvent_OnPlayerEnterCheckpoint(lua_State *L, int iPlayerID)
+{
+	lua_getglobal(L, "onPlayerEnterCheckpoint");
+	if(!lua_isfunction(L, -1))
+	{
+		lua_pop(L, 1);
+		return;
+	}
+
+	lua_pushinteger(L, iPlayerID);
+
+	if(lua_pcall(L, 1, 0, 0) != 0)
+		Log("WARNING: Error calling onPlayerEnterCheckpoint:\n%s", lua_tostring(L, -1));
+}
+
+void ScriptEvent_OnPlayerLeaveCheckpoint(lua_State *L, int iPlayerID)
+{
+	lua_getglobal(L, "onPlayerLeaveCheckpoint");
+	if(!lua_isfunction(L, -1))
+	{
+		lua_pop(L, 1);
+		return;
+	}
+
+	lua_pushinteger(L, iPlayerID);
+
+	if(lua_pcall(L, 1, 0, 0) != 0)
+		Log("WARNING: Error calling onPlayerLeaveCheckpoint:\n%s", lua_tostring(L, -1));
+}
