@@ -8,7 +8,7 @@
 
 #include "SAMP_VER.h"
 
-#define RAKSAMP_VERSION "v0.8.3-0.3z"
+#define RAKSAMP_VERSION "v0.8.4-0.3z"
 #define NETCODE_OPENCONNLULZ 6969
 #define NETGAME_VERSION 4047
 
@@ -27,11 +27,11 @@
 typedef unsigned short PLAYERID;
 typedef unsigned short VEHICLEID;
 
-typedef signed char			int8_t;
+typedef signed char		int8_t;
 typedef unsigned char		uint8_t;
 typedef signed short		int16_t;
 typedef unsigned short		uint16_t;
-typedef signed int			int32_t;
+typedef signed int		int32_t;
 typedef unsigned int		uint32_t;
 typedef signed long long	int64_t;
 typedef unsigned long long	uint64_t;
@@ -204,24 +204,30 @@ struct stPlayerInfo
 	AIM_SYNC_DATA aimData;
 	UNOCCUPIED_SYNC_DATA unocData;
 	BULLET_SYNC_DATA bulletData;
+	
+	// CHECKPOINT DATA
+	bool bCheckpointActive;
+	float vecCheckpointPos[3];
+	float fCheckpointSize;
+	bool bPlayerInCheckpoint;
 };
 
 // GTA STUFF //////////////////////////////
 ///////////////////////////////////////////
 ///////////////////////////////////////////
 
-#define VEHICLE_LIST_ID_START		400
+#define VEHICLE_LIST_ID_START			400
 #define VEHICLE_LIST_SIZE			212
 
 #define VEHICLE_CLASS_CAR			0
-#define VEHICLE_CLASS_CAR_FAST		1
+#define VEHICLE_CLASS_CAR_FAST			1
 #define VEHICLE_CLASS_HEAVY			2
 #define VEHICLE_CLASS_HELI			3
-#define VEHICLE_CLASS_AIRPLANE		4
+#define VEHICLE_CLASS_AIRPLANE			4
 #define VEHICLE_CLASS_BIKE			5
 #define VEHICLE_CLASS_BOAT			6
 #define VEHICLE_CLASS_MINI			7
-#define VEHICLE_CLASS_TRAILER		8
+#define VEHICLE_CLASS_TRAILER			8
 #define VEHICLE_CLASS_COUNT			9	/* # of classes */
 
 struct vehicle_entry
