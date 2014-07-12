@@ -16,7 +16,6 @@ struct stVehiclePool vehiclePool[MAX_VEHICLES];
 
 FILE *flLog = NULL;
 
-PLAYERID normalMode_goto = -1;
 DWORD dwAutoRunTick = GetTickCount();
 int dd = 0;
 
