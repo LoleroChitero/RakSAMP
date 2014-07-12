@@ -502,13 +502,13 @@ int SetPlayerCheckpoint(lua_State *L)
 	lua_Number fCheckpointZ = lua_tointeger(L, 4);
 	lua_Number fCheckpointSize = lua_tointeger(L, 5);
 
-	playerInfo[playerID].vecCheckpointPos[0] = (float)fCheckpointX;
-	playerInfo[playerID].vecCheckpointPos[1] = (float)fCheckpointY;
-	playerInfo[playerID].vecCheckpointPos[2] = (float)fCheckpointZ;
-	playerInfo[playerID].fCheckpointSize = (float)fCheckpointSize;
+	playerPool[playerID].vecCheckpointPos[0] = (float)fCheckpointX;
+	playerPool[playerID].vecCheckpointPos[1] = (float)fCheckpointY;
+	playerPool[playerID].vecCheckpointPos[2] = (float)fCheckpointZ;
+	playerPool[playerID].fCheckpointSize = (float)fCheckpointSize;
 
-	playerInfo[playerID].bPlayerInCheckpoint = false;
-	playerInfo[playerID].bCheckpointActive = true;
+	playerPool[playerID].bPlayerInCheckpoint = false;
+	playerPool[playerID].bCheckpointActive = true;
 
 	bs.Write((float)fCheckpointX);
 	bs.Write((float)fCheckpointY);
@@ -524,8 +524,8 @@ int DisablePlayerCheckpoint(lua_State *L)
 	BitStream bs;
 	PLAYERID playerID = lua_tointeger(L, 1);
 
-	playerInfo[playerID].bPlayerInCheckpoint = false;
-	playerInfo[playerID].bCheckpointActive = false;
+	playerPool[playerID].bPlayerInCheckpoint = false;
+	playerPool[playerID].bCheckpointActive = false;
 
 	pRakServer->RPC(&RPC_DisableCheckpoint, &bs, HIGH_PRIORITY, RELIABLE_ORDERED, 0, pRakServer->GetPlayerIDFromIndex(playerID), FALSE, FALSE, UNASSIGNED_NETWORK_ID, NULL);
 	return 1;
