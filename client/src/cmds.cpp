@@ -393,7 +393,7 @@ int RunCommand(char *szCMD, int iFromAutorun)
 		bsSend.Write(uiClientChallengeResponse);
 		bsSend.Write(byteAuthBSLen);
 		bsSend.Write(auth_bs, byteAuthBSLen);
-		char szClientVer[] = "0.3z-R1";
+		char szClientVer[] = "0.3z";
 		const BYTE iClientVerLen = (sizeof(szClientVer)-1);
 		bsSend.Write(iClientVerLen);
 		bsSend.Write(szClientVer, iClientVerLen);
