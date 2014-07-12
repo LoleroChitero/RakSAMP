@@ -96,6 +96,22 @@ void ScriptEvent_OnPlayerDisconnect(lua_State *L, int iPlayerID, char *pszPlayer
 		Log("WARNING: Error calling onPlayerDisconnect:\n%s", lua_tostring(L, -1));
 }
 
+void ScriptEvent_OnPlayerRequestClass(lua_State *L, int iPlayerID, int iClassID)
+{
+	lua_getglobal(L, "onPlayerRequestClass");
+	if(!lua_isfunction(L, -1))
+	{
+		lua_pop(L, 1);
+		return;
+	}
+
+	lua_pushinteger(L, iPlayerID);
+	lua_pushinteger(L, iClassID);
+
+	if(lua_pcall(L, 2, 0, 0) != 0)
+		Log("WARNING: Error calling onPlayerRequestClass:\n%s", lua_tostring(L, -1));
+}
+
 void ScriptEvent_OnPlayerSpawn(lua_State *L, int iPlayerID)
 {
 	lua_getglobal(L, "onPlayerSpawn");
@@ -110,7 +126,6 @@ void ScriptEvent_OnPlayerSpawn(lua_State *L, int iPlayerID)
 	if(lua_pcall(L, 1, 0, 0) != 0)
 		Log("WARNING: Error calling onPlayerSpawn:\n%s", lua_tostring(L, -1));
 }
-
 
 void ScriptEvent_OnPlayerDeath(lua_State *L, int iPlayerID, int iKillerID, int iReasonID)
 {
