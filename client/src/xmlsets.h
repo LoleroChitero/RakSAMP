@@ -73,6 +73,10 @@ struct stSettings
 	unsigned char bCMsgGreen;
 	unsigned char bCMsgBlue;
 
+	unsigned char bCPAlertRed;
+	unsigned char bCPAlertGreen;
+	unsigned char bCPAlertBlue;
+
 	char szFollowingPlayerName[20];
 	int iFollowingWithVehicleID;
 	float fFollowXOffset;
