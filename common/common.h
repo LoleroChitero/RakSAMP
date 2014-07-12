@@ -180,6 +180,7 @@ typedef struct _PLAYER_SPAWN_INFO
 {
 	BYTE byteTeam;
 	int iSkin;
+	BYTE unk;
 	float vecPos[3];
 	float fRotation;
 	int iSpawnWeapons[3];
