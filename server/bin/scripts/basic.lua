@@ -45,12 +45,11 @@ function onPlayerJoin(playerID, name, ip, srcport)
 	end
 	
 	sendDeathMessage(0xFFFF, playerID, ICON_CONNECT)
-	setupPlayerForClassSelection(playerID)
 end
 
 function onPlayerDisconnect(playerID, name, reason)
 	sendDeathMessage(0xFFFF, playerID, ICON_DISCONNECT)
-	
+
 	outputConsole("[" .. playerID ..":LEAVE] " .. name .. " (" .. reason .. ").")
 	for i = 0, MAX_PLAYERS do
 		if i ~= playerID then
@@ -59,11 +58,17 @@ function onPlayerDisconnect(playerID, name, reason)
 	end
 end
 
+function onPlayerRequestClass(playerID, classID)
+	outputConsole("[" .. playerID ..":REQUESTCLASS] " .. getPlayerName(playerID) .. " (" .. classID .. ").")
+
+	setupPlayerForClassSelection(playerID)
+end
+
 function onPlayerSpawn(playerID)
 	outputConsole("[" .. playerID ..":SPAWN] " .. getPlayerName(playerID) .. "")
 	
-	setPlayerInterior(playerid, 0)
-	setCameraBehindPlayer(playerid)
+	setPlayerInterior(playerID, 0)
+	setCameraBehindPlayer(playerID)
 	
 	clearPlayerWeapons(playerID)
 	resetPlayerMoney(playerID)
@@ -79,7 +84,13 @@ end
 
 function onPlayerDeath(playerID, killerID, reasonID)
 	sendDeathMessage(killerID, playerID, reasonID)
-	outputConsole("[" .. playerID ..":DEATH] " .. getPlayerName(playerID) .. " -> " .. getPlayerName(killerID) .. " (" .. reasonID ..")")
+	gameTextForPlayer(playerID, "Wasted", 5000, 2)
+	
+	if killerID == 0xFFFF then
+		outputConsole("[" .. playerID ..":DEATH] " .. getPlayerName(playerID) .. " -> (" .. reasonID ..")")
+	else
+		outputConsole("[" .. playerID ..":DEATH] " .. getPlayerName(playerID) .. " -> " .. getPlayerName(killerID) .. " (" .. reasonID ..")")
+	end
 end
 
 function onPlayerWantsEnterVehicle(playerID, vehicleID, passenger)
@@ -160,11 +171,22 @@ function onPlayerCommand(playerID, command)
 		return 1
 	end
 	if command[1] == "/audiostream" or command[1] == "/AUDIOSTREAM" then
-		playAudioStreamForPlayer(playerID, "http://somafm.com/tags.pls")
+		playAudioStreamForPlayer(playerID, "http://somafm.com/tags.pls", 0.0, 0.0, 0.0, 0)
 		return 1
 	end
 	if command[1] == "/stopaudiostream" or command[1] == "/STOPAUDIOSTREAM" then
 		stopAudioStreamForPlayer(playerID)
+		return 1
+	end
+	if command[1] == "/cp" or command[1] == "/CP" then
+		local x, y, z = getPlayerPos(playerID)
+		setPlayerCheckpoint(playerID, x, y, z, 2.5)
+		sendPlayerMessage(playerID, -1, "Checkpoint set to your position.")
+		return 1
+	end
+	if command[1] == "/disablecp" or command[1] == "/DISABLECP" then
+		disablePlayerCheckpoint(playerID)
+		sendPlayerMessage(playerID, -1, "Checkpoint disabled.")
 		return 1
 	end
 	
@@ -174,6 +196,14 @@ end
 
 function onPlayerWeaponShot(playerID, weaponID, hitType, hitID, X, Y, Z)
 	--outputConsole("[" .. playerID ..":WEAPONSHOOT] " .. getPlayerName(playerID) .. ": " .. weaponID .." " .. hitType .. " " .. hitID .. " " .. X .. " " .. Y .. " ".. Z .. "")
+end
+
+function onPlayerEnterCheckpoint(playerID)
+	sendPlayerMessage(playerID, -1, "onPlayerEnterCheckpoint event called.")
+end
+
+function onPlayerLeaveCheckpoint(playerID)
+	sendPlayerMessage(playerID, -1, "onPlayerLeaveCheckpoint event called.")
 end
 
 function setupPlayerForClassSelection(playerID)
