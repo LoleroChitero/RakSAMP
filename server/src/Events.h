@@ -9,6 +9,7 @@ void ScriptEvent_OnNewQuery(lua_State *L, char *pszIP, int iSourcePort, bool bBa
 void ScriptEvent_OnNewConnection(lua_State *L, int iPlayerID, char *pszIP, int iSourcePort);
 void ScriptEvent_OnPlayerJoin(lua_State *L, int iPlayerID, char *pszPlayerName, char *pszIP, int iSourcePort);
 void ScriptEvent_OnPlayerDisconnect(lua_State *L, int iPlayerID, char *pszPlayerName, char *pszReason);
+void ScriptEvent_OnPlayerRequestClass(lua_State *L, int iPlayerID, int iClassID);
 void ScriptEvent_OnPlayerSpawn(lua_State *L, int iPlayerID);
 void ScriptEvent_OnPlayerDeath(lua_State *L, int iPlayerID, int iKillerID, int iReasonID);
 void ScriptEvent_OnPlayerWantsEnterVehicle(lua_State *L, int iPlayerID, int iVehicleID, int iAsPassenger);
