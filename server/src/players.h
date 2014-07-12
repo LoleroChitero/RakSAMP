@@ -20,6 +20,12 @@ struct stPlayerPool
 	float fRotation;
 	DWORD dwColor;
 	BYTE fightingStyle;
+
+	// checkpoint info
+	bool bCheckpointActive;
+	float vecCheckpointPos[3];
+	float fCheckpointSize;
+	bool bPlayerInCheckpoint;
 };
 
 extern PLAYERID playerCount;
