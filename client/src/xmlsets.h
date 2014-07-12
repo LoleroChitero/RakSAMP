@@ -32,6 +32,13 @@ struct stFindItem
 	unsigned char bTextBlue;
 };
 
+struct stCheckpointData
+{
+	bool bActive;
+	float fPosition[3];
+	float fSize;
+};
+
 struct stSettings
 {
 	struct stServer server;
@@ -97,6 +104,10 @@ struct stSettings
 	struct stFindItem findItems[MAX_FIND_ITEMS];
 
 	unsigned int uiChallange;
+	
+	struct stCheckpointData CurrentCheckpoint;
+
+	bool AutoGotoCP;
 };
 extern struct stSettings settings;
 
