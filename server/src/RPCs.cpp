@@ -137,6 +137,7 @@ void RPC_ClientJoins(RPCParameters *rpcParams)
 	bsData.Read(uiChallengeResponse);
 	bsData.Read(byteAuthBSLen);
 	bsData.Read(pszAuthBullshit, byteAuthBSLen);
+	pszAuthBullshit[byteAuthBSLen] = 0;
 
 	PlayerID MyPlayerID = pRakServer->GetPlayerIDFromIndex(playerID);
 	in_addr in;
@@ -168,18 +169,18 @@ void RPC_ClientJoins(RPCParameters *rpcParams)
 		return;
 	}
 
+	addPlayerToPool(rpcParams->sender, playerID, szNickName);
+
+	InitGameForPlayer(playerID);
+	SendPlayerPoolToPlayer(playerID);
+	SpawnAllVehiclesForPlayer(playerID);
+
 	for(int i = 0; i < iScriptsRunning; i++)
 	{
 		if(script.scriptVM[i] != NULL && script.szScriptName[i][0] != 0x00)
 			ScriptEvent_OnPlayerJoin(script.scriptVM[i], playerID, szNickName,
 			rpcParams->sender.ToString(false), rpcParams->sender.port);
 	}
-
-	addPlayerToPool(rpcParams->sender, playerID, szNickName);
-
-	InitGameForPlayer(playerID);
-	SendPlayerPoolToPlayer(playerID);
-	SpawnAllVehiclesForPlayer(playerID);
 }
 
 void RPC_ClientRequestsClass(RPCParameters *rpcParams)
@@ -202,6 +203,12 @@ void RPC_ClientRequestsClass(RPCParameters *rpcParams)
 	psInfo.fRotation = 90.0f;
 	psInfo.iSpawnWeapons[0] = 38;
 	psInfo.iSpawnWeaponsAmmo[0] = 69;
+
+	for(int i = 0; i < iScriptsRunning; i++)
+	{
+		if(script.scriptVM[i] != NULL && script.szScriptName[i][0] != 0x00)
+			ScriptEvent_OnPlayerRequestClass(script.scriptVM[i], pRakServer->GetIndexFromPlayerID(rpcParams->sender), iClass);
+	}
 
 	RakNet::BitStream bsReply;
 	bsReply.Write((BYTE)1);
