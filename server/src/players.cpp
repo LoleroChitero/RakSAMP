@@ -11,16 +11,22 @@ void addPlayerToPool(PlayerID rakPlayerID, PLAYERID playerID, char *szNick)
 {
 	BYTE byteNameLen = (BYTE)strlen(szNick);
 
-	playerPool[playerCount].iIsConnected = 1;
-	playerPool[playerCount].rakPlayerID.binaryAddress = rakPlayerID.binaryAddress;
-	playerPool[playerCount].rakPlayerID.port = rakPlayerID.port;
-	playerPool[playerCount].playerID = playerCount;
-	strcpy(playerPool[playerCount].szIP, rakPlayerID.ToString(false));
-	strcpy(playerPool[playerCount].szPlayerName, szNick);
-	playerPool[playerCount].usClientPort = rakPlayerID.port;
-	playerPool[playerCount].iPlayerScore = 0;
-	playerPool[playerCount].dwPlayerPing = 0;
-	playerPool[playerCount].bTeam = 0xFF;
+	playerPool[playerID].iIsConnected = 1;
+	playerPool[playerID].rakPlayerID.binaryAddress = rakPlayerID.binaryAddress;
+	playerPool[playerID].rakPlayerID.port = rakPlayerID.port;
+	playerPool[playerID].playerID = playerCount;
+	strcpy(playerPool[playerID].szIP, rakPlayerID.ToString(false));
+	strcpy(playerPool[playerID].szPlayerName, szNick);
+	playerPool[playerID].usClientPort = rakPlayerID.port;
+	playerPool[playerID].iPlayerScore = 0;
+	playerPool[playerID].dwPlayerPing = 0;
+	playerPool[playerID].bTeam = 0xFF;
+	playerPool[playerID].bCheckpointActive = false;
+	playerPool[playerID].bPlayerInCheckpoint = false;
+	playerPool[playerID].vecCheckpointPos[0] = 0.0f;
+	playerPool[playerID].vecCheckpointPos[1] = 0.0f;
+	playerPool[playerID].vecCheckpointPos[2] = 0.0f;
+	playerPool[playerID].fCheckpointSize = 0.0f;
 
 	RakNet::BitStream bsJoinAnn;
 	bsJoinAnn.Write(playerID);
@@ -46,7 +52,9 @@ void removePlayerFromPool(PLAYERID playerID, int iTimeout)
 	memset(playerPool[playerID].szPlayerName, 0, 32);
 	playerPool[playerID].iPlayerScore = 0;
 	playerPool[playerID].dwPlayerPing = 0;
-	playerPool[playerCount].bTeam = 0;
+	playerPool[playerID].bTeam = 0;
+	playerPool[playerID].bCheckpointActive = false;
+	playerPool[playerID].bPlayerInCheckpoint = false;
 
 	RakNet::BitStream bsSend;
 	BYTE byteReason;
