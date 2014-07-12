@@ -281,6 +281,13 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 
 				if(settings.runMode == RUNMODE_NORMAL)
 				{
+					if(settings.AutoGotoCP && settings.CurrentCheckpoint.bActive)
+					{
+						settings.fNormalModePos[0] = settings.CurrentCheckpoint.fPosition[0];
+						settings.fNormalModePos[1] = settings.CurrentCheckpoint.fPosition[1];
+						settings.fNormalModePos[2] = settings.CurrentCheckpoint.fPosition[2];
+					}
+					
 					if(normalMode_goto == (PLAYERID)-1)
 						onFootUpdateAtNormalPos();
 				}
