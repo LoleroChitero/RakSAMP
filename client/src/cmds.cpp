@@ -405,6 +405,39 @@ int RunCommand(char *szCMD, int iFromAutorun)
 		Log("Changed name to %s and rejoined to the game.", g_szNickName);
 		return 1;
 	}
+	
+	// TELEPORT TO THE CURRENT CHECKPOINT
+	if(!strncmp(szCMD, "gotocp", 6) || !strncmp(szCMD, "GOTOCP", 6))
+	{
+		if(settings.CurrentCheckpoint.bActive)
+		{
+			if(settings.runMode != RUNMODE_NORMAL)
+				return Log("[GOTOCP] You need to be in normal runmode to teleport into the checkpoint."), 1;
+
+			settings.fNormalModePos[0] = settings.CurrentCheckpoint.fPosition[0];
+			settings.fNormalModePos[1] = settings.CurrentCheckpoint.fPosition[1];
+			settings.fNormalModePos[2] = settings.CurrentCheckpoint.fPosition[2];
+
+			return Log("[GOTOCP] You have been teleported to the active checkpoint."), 1;
+		}
+		else return Log("[GOTOCP] There is no active checkpoint."), 1;
+	}
+
+	// AUTOMATIC CHECKPOINT TELEPORTER
+	if(!strncmp(szCMD, "autogotocp", 10) || !strncmp(szCMD, "AUTOGOTOCP", 10))
+	{
+		if (settings.AutoGotoCP)
+		{
+			Log("Stopped automatic checkpoint teleporter.");
+			settings.AutoGotoCP = false;
+		}
+		else
+		{
+			Log("Started automatic checkpoint teleporter...");
+			settings.AutoGotoCP = true;
+		}
+		return 1;
+	}
 
 	Log("Command %s was not found.", szCMD);
 
