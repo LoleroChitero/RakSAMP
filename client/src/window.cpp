@@ -117,6 +117,9 @@ LRESULT CALLBACK MainWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 				if(!strncmp(lpText, "[CMSG] ", 7))
 					textColor = RGB(settings.bCMsgRed, settings.bCMsgGreen, settings.bCMsgBlue);
 
+				if(!strncmp(lpText, "[CP] ", 5))
+					textColor = RGB(settings.bCPAlertRed, settings.bCPAlertGreen, settings.bCPAlertBlue);
+
 				if(settings.iFind)
 				{
 					for(int i = 0; i < MAX_FIND_ITEMS; i++)
