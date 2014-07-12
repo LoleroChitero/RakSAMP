@@ -16,3 +16,5 @@ void ScriptEvent_OnPlayerLeaveVehicle(lua_State *L, int iPlayerID, int iVehicleI
 void ScriptEvent_OnPlayerMessage(lua_State *L, int iPlayerID, char *pszMessage);
 void ScriptEvent_OnPlayerCommand(lua_State *L, int iPlayerID, char *pszCommand);
 void ScriptEvent_OnPlayerWeaponShot(lua_State *L, int iPlayerID, int iWeaponID, int bHitType, int iHitID, float fX, float fY, float fZ);
+void ScriptEvent_OnPlayerEnterCheckpoint(lua_State *L, int iPlayerID);
+void ScriptEvent_OnPlayerLeaveCheckpoint(lua_State *L, int iPlayerID);
