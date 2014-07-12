@@ -4,7 +4,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <conio.h> // need sum coños and vaginas
+#include <conio.h> // need sum coï¿½os and vaginas
 #include <windows.h>
 #include <time.h>
 #include "../../common/common.h"
@@ -69,7 +69,6 @@ extern char g_szNickName[32];
 extern struct stPlayerInfo playerInfo[MAX_PLAYERS];
 extern struct stVehiclePool vehiclePool[MAX_VEHICLES];
 
-extern PLAYERID normalMode_goto;
 extern PLAYERID imitateID;
 
 void handleQueries(char *s, int len);
