@@ -368,17 +368,17 @@ void UpdateNetwork()
 
 void UpdatePosition(int iPlayerID, float fX, float fY, float fZ)
 {
-	if(playerInfo[iPlayerID].bCheckpointActive)
+	if(playerPool[iPlayerID].bCheckpointActive)
 	{
-		float fSX = (fX - playerInfo[iPlayerID].vecCheckpointPos[0]) * (fX - playerInfo[iPlayerID].vecCheckpointPos[0]);
-		float fSY = (fY - playerInfo[iPlayerID].vecCheckpointPos[1]) * (fY - playerInfo[iPlayerID].vecCheckpointPos[1]);
-		float fSZ = (fZ - playerInfo[iPlayerID].vecCheckpointPos[2]) * (fZ - playerInfo[iPlayerID].vecCheckpointPos[2]);
+		float fSX = (fX - playerPool[iPlayerID].vecCheckpointPos[0]) * (fX - playerPool[iPlayerID].vecCheckpointPos[0]);
+		float fSY = (fY - playerPool[iPlayerID].vecCheckpointPos[1]) * (fY - playerPool[iPlayerID].vecCheckpointPos[1]);
+		float fSZ = (fZ - playerPool[iPlayerID].vecCheckpointPos[2]) * (fZ - playerPool[iPlayerID].vecCheckpointPos[2]);
 
-		if((float)sqrt(fSX + fSY + fSZ) < playerInfo[iPlayerID].fCheckpointSize)
+		if((float)sqrt(fSX + fSY + fSZ) < playerPool[iPlayerID].fCheckpointSize)
 		{
-			if(!playerInfo[iPlayerID].bPlayerInCheckpoint)
+			if(!playerPool[iPlayerID].bPlayerInCheckpoint)
 			{
-				playerInfo[iPlayerID].bPlayerInCheckpoint = true;
+				playerPool[iPlayerID].bPlayerInCheckpoint = true;
 
 				for(int i = 0; i < iScriptsRunning; i++)
 				{
@@ -389,9 +389,9 @@ void UpdatePosition(int iPlayerID, float fX, float fY, float fZ)
 		} 
 		else
 		{
-			if(playerInfo[iPlayerID].bPlayerInCheckpoint)
+			if(playerPool[iPlayerID].bPlayerInCheckpoint)
 			{
-				playerInfo[iPlayerID].bPlayerInCheckpoint = false;
+				playerPool[iPlayerID].bPlayerInCheckpoint = false;
 
 				for(int i = 0; i < iScriptsRunning; i++)
 				{
