@@ -364,6 +364,47 @@ int RunCommand(char *szCMD, int iFromAutorun)
 		}
 		return 1;
 	}
+	
+	// CHANGE NAME AND REJOIN GAME :-)
+	if(!strncmp(szCMD, "changename", 10) || !strncmp(szCMD, "CHANGENAME", 10))
+	{
+		char *szNewPlayerName = &szCMD[11];
+
+		sprintf_s(g_szNickName, 32, szNewPlayerName);
+
+		int iVersion = NETGAME_VERSION;
+		BYTE byteMod = 1;
+
+		char auth_bs[4*16] = {0};
+		pSamp->getSerial(auth_bs);
+
+		BYTE byteAuthBSLen;
+		byteAuthBSLen = (BYTE)strlen(auth_bs);
+		BYTE byteNameLen = (BYTE)strlen(g_szNickName);
+
+		unsigned int uiClientChallengeResponse = settings.uiChallange ^ iVersion;
+
+		RakNet::BitStream bsSend;
+		bsSend.Write(iVersion);
+		bsSend.Write(byteMod);
+		bsSend.Write(byteNameLen);
+		bsSend.Write(g_szNickName, byteNameLen);
+		
+		bsSend.Write(uiClientChallengeResponse);
+		bsSend.Write(byteAuthBSLen);
+		bsSend.Write(auth_bs, byteAuthBSLen);
+		char szClientVer[] = "0.3z-R1";
+		const BYTE iClientVerLen = (sizeof(szClientVer)-1);
+		bsSend.Write(iClientVerLen);
+		bsSend.Write(szClientVer, iClientVerLen);
+
+		pRakClient->RPC(&RPC_ClientJoin, &bsSend, HIGH_PRIORITY, RELIABLE, 0, FALSE, UNASSIGNED_NETWORK_ID, NULL);
+
+		iAreWeConnected = 1;
+
+		Log("Changed name to %s and rejoined to the game.", g_szNickName);
+		return 1;
+	}
 
 	Log("Command %s was not found.", szCMD);
 
