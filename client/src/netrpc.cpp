@@ -426,6 +426,34 @@ void UpdateScoresPingsIPs(RPCParameters *rpcParams)
 	}
 }
 
+void SetCheckpoint(RPCParameters *rpcParams)
+{
+	if(!iGameInited) return;
+
+	PCHAR Data = reinterpret_cast<PCHAR>(rpcParams->input);
+	int iBitLength = rpcParams->numberOfBitsOfData;
+
+	RakNet::BitStream bsData((unsigned char *)Data,(iBitLength/8)+1,false);
+
+	bsData.Read(settings.CurrentCheckpoint.fPosition[0]);
+	bsData.Read(settings.CurrentCheckpoint.fPosition[1]);
+	bsData.Read(settings.CurrentCheckpoint.fPosition[2]);
+	bsData.Read(settings.CurrentCheckpoint.fSize);
+
+	settings.CurrentCheckpoint.bActive = true;
+
+	Log("Checkpoint set to %.2f %.2f %.2f position. (size: %.2f)", settings.CurrentCheckpoint.fPosition[0], settings.CurrentCheckpoint.fPosition[1], settings.CurrentCheckpoint.fPosition[2], settings.CurrentCheckpoint.fSize);
+}
+
+void DisableCheckpoint(RPCParameters *rpcParams)
+{
+	if(!iGameInited) return;
+
+	settings.CurrentCheckpoint.bActive = false;
+
+	Log("Current checkpoint disabled.");
+}
+
 void ScrInitMenu(RPCParameters *rpcParams)
 {
 	if(!iGameInited) return;
@@ -891,6 +919,8 @@ void RegisterRPCs(RakClientInterface *pRakClient)
 		pRakClient->RegisterAsRemoteProcedureCall(&RPC_ClientMessage, ClientMessage);
 		pRakClient->RegisterAsRemoteProcedureCall(&RPC_Chat, Chat);
 		pRakClient->RegisterAsRemoteProcedureCall(&RPC_UpdateScoresPingsIPs, UpdateScoresPingsIPs);
+		pRakClient->RegisterAsRemoteProcedureCall(&RPC_SetCheckpoint, SetCheckpoint);
+		pRakClient->RegisterAsRemoteProcedureCall(&RPC_DisableCheckpoint, DisableCheckpoint);
 
 		// Scripting RPCs
 		pRakClient->RegisterAsRemoteProcedureCall(&RPC_ScrInitMenu, ScrInitMenu);
@@ -925,6 +955,8 @@ void UnRegisterRPCs(RakClientInterface * pRakClient)
 		pRakClient->UnregisterAsRemoteProcedureCall(&RPC_ClientMessage);
 		pRakClient->UnregisterAsRemoteProcedureCall(&RPC_Chat);
 		pRakClient->UnregisterAsRemoteProcedureCall(&RPC_UpdateScoresPingsIPs);
+		pRakClient->UnregisterAsRemoteProcedureCall(&RPC_SetCheckpoint);
+		pRakClient->UnregisterAsRemoteProcedureCall(&RPC_DisableCheckpoint);
 
 		// Scripting RPCs
 		pRakClient->UnregisterAsRemoteProcedureCall(&RPC_ScrInitMenu);
