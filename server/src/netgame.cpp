@@ -12,7 +12,6 @@ void resetPools()
 	memset(vehiclePool, 0, sizeof(stVehiclePool));
 }
 
-
 void Packet_PlayerSync(Packet *p)
 {
 	//Log("Packet_PlayerSync: %d  %d", pRakServer->GetIndexFromPlayerID(p->playerId), p->length);
@@ -98,6 +97,8 @@ void Packet_PlayerSync(Packet *p)
 	}
 	else
 		bsOnFootBC.Write(false);
+
+	UpdatePosition(playerId, playerInfo[playerId].onfootData.vecPos[0], playerInfo[playerId].onfootData.vecPos[1], playerInfo[playerId].onfootData.vecPos[2]);
 
 	pRakServer->Send(&bsOnFootBC, HIGH_PRIORITY, UNRELIABLE_SEQUENCED, 0, p->playerId, TRUE);
 }
@@ -187,6 +188,8 @@ void Packet_VehicleSync(Packet *p)
 		bsSync.Read(wSpeed);
 		playerInfo[playerId].incarData.fTrainSpeed = (float)wSpeed;
 	}*/
+	
+	UpdatePosition(playerId, playerInfo[playerId].incarData.vecPos[0], playerInfo[playerId].incarData.vecPos[1], playerInfo[playerId].incarData.vecPos[2]);
 
 	pRakServer->Send(&bsInVehicleBC, HIGH_PRIORITY, UNRELIABLE_SEQUENCED, 0, p->playerId, TRUE);
 }
@@ -203,6 +206,8 @@ void Packet_PassengerSync(Packet *p)
 
 	bsPassengerSync.IgnoreBits(8);
 	bsPassengerSync.Read((PCHAR)&playerInfo[playerId].passengerData, sizeof(PASSENGER_SYNC_DATA));
+
+	UpdatePosition(playerId, playerInfo[playerId].passengerData.vecPos[0], playerInfo[playerId].passengerData.vecPos[1], playerInfo[playerId].passengerData.vecPos[2]);
 }
 
 void Packet_AimSync(Packet *p)
@@ -358,5 +363,42 @@ void UpdateNetwork()
 		}
 
 		pRakServer->DeallocatePacket(pkt);
+	}
+}
+
+void UpdatePosition(int iPlayerID, float fX, float fY, float fZ)
+{
+	if(playerInfo[iPlayerID].bCheckpointActive)
+	{
+		float fSX = (fX - playerInfo[iPlayerID].vecCheckpointPos[0]) * (fX - playerInfo[iPlayerID].vecCheckpointPos[0]);
+		float fSY = (fY - playerInfo[iPlayerID].vecCheckpointPos[1]) * (fY - playerInfo[iPlayerID].vecCheckpointPos[1]);
+		float fSZ = (fZ - playerInfo[iPlayerID].vecCheckpointPos[2]) * (fZ - playerInfo[iPlayerID].vecCheckpointPos[2]);
+
+		if((float)sqrt(fSX + fSY + fSZ) < playerInfo[iPlayerID].fCheckpointSize)
+		{
+			if(!playerInfo[iPlayerID].bPlayerInCheckpoint)
+			{
+				playerInfo[iPlayerID].bPlayerInCheckpoint = true;
+
+				for(int i = 0; i < iScriptsRunning; i++)
+				{
+					if(script.scriptVM[i] != NULL && script.szScriptName[i][0] != 0x00)
+						ScriptEvent_OnPlayerEnterCheckpoint(script.scriptVM[i], iPlayerID);
+				}
+			}
+		} 
+		else
+		{
+			if(playerInfo[iPlayerID].bPlayerInCheckpoint)
+			{
+				playerInfo[iPlayerID].bPlayerInCheckpoint = false;
+
+				for(int i = 0; i < iScriptsRunning; i++)
+				{
+					if(script.scriptVM[i] != NULL && script.szScriptName[i][0] != 0x00)
+						ScriptEvent_OnPlayerLeaveCheckpoint(script.scriptVM[i], iPlayerID);
+				}
+			}
+		}
 	}
 }
