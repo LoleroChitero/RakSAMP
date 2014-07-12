@@ -117,10 +117,34 @@ int RunCommand(char *szCMD, int iFromAutorun)
 	// GOTO
 	if(!strncmp(szCMD, "goto", 4) || !strncmp(szCMD, "GOTO", 4))
 	{
-		int iPlayerID = atoi(&szCMD[5]);
-		if(iPlayerID == -1)
+		// TELEPORT TO THE CURRENT CHECKPOINT
+		if(!strncmp(szCMD, "gotocp", 6) || !strncmp(szCMD, "GOTOCP", 6))
 		{
-			normalMode_goto = -1;
+			if(settings.CurrentCheckpoint.bActive)
+			{
+				if(settings.runMode != RUNMODE_NORMAL)
+				{
+					Log("[GOTOCP] You need to be in normal runmode to teleport into the checkpoint.");
+					return 1;
+				}
+
+				settings.fNormalModePos[0] = settings.CurrentCheckpoint.fPosition[0];
+				settings.fNormalModePos[1] = settings.CurrentCheckpoint.fPosition[1];
+				settings.fNormalModePos[2] = settings.CurrentCheckpoint.fPosition[2];
+
+				Log("[GOTOCP] You have been teleported to the active checkpoint.");
+			}
+			else
+				Log("[GOTOCP] There is no active checkpoint.");
+
+			return 1;
+		}
+
+		int iPlayerID = atoi(&szCMD[5]);
+
+		if(strlen(szCMD) == 4)
+		{
+			Log("[USAGE] !goto <PlayerID>");
 			return 1;
 		}
 
@@ -129,17 +153,11 @@ int RunCommand(char *szCMD, int iFromAutorun)
 
 		if(playerInfo[iPlayerID].iIsConnected)
 		{
-			normalMode_goto = (PLAYERID)iPlayerID;
+			settings.fNormalModePos[0] = playerInfo[iPlayerID].onfootData.vecPos[0];
+			settings.fNormalModePos[1] = playerInfo[iPlayerID].onfootData.vecPos[1];
+			settings.fNormalModePos[2] = playerInfo[iPlayerID].onfootData.vecPos[2];
 
-			ONFOOT_SYNC_DATA ofSync;
-			memset(&ofSync, 0, sizeof(ONFOOT_SYNC_DATA));
-			ofSync.byteHealth = (BYTE)settings.fPlayerHealth;
-			ofSync.byteArmour = (BYTE)settings.fPlayerArmour;
-			ofSync.vecPos[0] = playerInfo[iPlayerID].onfootData.vecPos[0];
-			ofSync.vecPos[1] = playerInfo[iPlayerID].onfootData.vecPos[1];
-			ofSync.vecPos[2] = playerInfo[iPlayerID].onfootData.vecPos[2];
-
-			SendOnFootFullSyncData(&ofSync, 0, -1);
+			Log("[GOTO] Teleported to %s.", playerInfo[iPlayerID].szPlayerName);
 		}
 		else
 			Log("[GOTO] Player %d is not connected.", iPlayerID);
@@ -364,7 +382,7 @@ int RunCommand(char *szCMD, int iFromAutorun)
 		}
 		return 1;
 	}
-	
+
 	// CHANGE NAME AND REJOIN GAME :-)
 	if(!strncmp(szCMD, "changename", 10) || !strncmp(szCMD, "CHANGENAME", 10))
 	{
@@ -404,23 +422,6 @@ int RunCommand(char *szCMD, int iFromAutorun)
 
 		Log("Changed name to %s and rejoined to the game.", g_szNickName);
 		return 1;
-	}
-	
-	// TELEPORT TO THE CURRENT CHECKPOINT
-	if(!strncmp(szCMD, "gotocp", 6) || !strncmp(szCMD, "GOTOCP", 6))
-	{
-		if(settings.CurrentCheckpoint.bActive)
-		{
-			if(settings.runMode != RUNMODE_NORMAL)
-				return Log("[GOTOCP] You need to be in normal runmode to teleport into the checkpoint."), 1;
-
-			settings.fNormalModePos[0] = settings.CurrentCheckpoint.fPosition[0];
-			settings.fNormalModePos[1] = settings.CurrentCheckpoint.fPosition[1];
-			settings.fNormalModePos[2] = settings.CurrentCheckpoint.fPosition[2];
-
-			return Log("[GOTOCP] You have been teleported to the active checkpoint."), 1;
-		}
-		else return Log("[GOTOCP] There is no active checkpoint."), 1;
 	}
 
 	// AUTOMATIC CHECKPOINT TELEPORTER
