@@ -204,12 +204,6 @@ struct stPlayerInfo
 	AIM_SYNC_DATA aimData;
 	UNOCCUPIED_SYNC_DATA unocData;
 	BULLET_SYNC_DATA bulletData;
-	
-	// CHECKPOINT DATA
-	bool bCheckpointActive;
-	float vecCheckpointPos[3];
-	float fCheckpointSize;
-	bool bPlayerInCheckpoint;
 };
 
 // GTA STUFF //////////////////////////////
