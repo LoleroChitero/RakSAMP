@@ -523,6 +523,7 @@ LRESULT CALLBACK SAMPDlgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 					break;
 
 				case DIALOG_STYLE_INPUT:
+				case DIALOG_STYLE_PASSWORD:
 					{
 						CreateWindowEx(NULL, "EDIT", "", WS_CHILD | WS_VISIBLE | WS_BORDER,
 							50, 200, 300, 24, hwnd, (HMENU)IDE_INPUTEDIT, hInst, NULL);
@@ -719,6 +720,7 @@ void ScrDialogBox(RPCParameters *rpcParams)
 		case DIALOG_STYLE_MSGBOX:
 		case DIALOG_STYLE_INPUT:
 		case DIALOG_STYLE_LIST:
+		case DIALOG_STYLE_PASSWORD:
 			if(!sampDialog.iIsActive)
 			{
 				sampDialog.iIsActive = 1;
