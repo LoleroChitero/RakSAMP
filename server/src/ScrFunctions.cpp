@@ -531,6 +531,41 @@ int DisablePlayerCheckpoint(lua_State *L)
 	return 1;
 }
 
+int GameTextForAll(lua_State *L)
+{
+	BitStream bs;
+	char *szText = (char *)lua_tostring(L, 1);
+	int iTime = lua_tointeger(L, 2);
+	int iStyle = lua_tointeger(L, 3);
+	int iLength = strlen(szText);
+
+	bs.Write(iStyle);
+	bs.Write(iTime);
+	bs.Write(iLength);
+	bs.Write(szText, iLength);
+
+	pRakServer->RPC(&RPC_ScrDisplayGameText, &bs, HIGH_PRIORITY, RELIABLE_ORDERED, 0, pRakServer->GetPlayerIDFromIndex(0xFFFF), TRUE, FALSE, UNASSIGNED_NETWORK_ID, NULL);
+	return 1;
+}
+
+int GameTextForPlayer(lua_State *L)
+{
+	BitStream bs;
+	PLAYERID iPlayerIndex = lua_tointeger(L, 1);
+	char *szText = (char *)lua_tostring(L, 2);
+	int iTime = lua_tointeger(L, 3);
+	int iStyle = lua_tointeger(L, 4);
+	int iLength = strlen(szText);
+
+	bs.Write(iStyle);
+	bs.Write(iTime);
+	bs.Write(iLength);
+	bs.Write(szText, iLength);
+
+	pRakServer->RPC(&RPC_ScrDisplayGameText, &bs, HIGH_PRIORITY, RELIABLE_ORDERED, 0, pRakServer->GetPlayerIDFromIndex(iPlayerIndex), FALSE, FALSE, UNASSIGNED_NETWORK_ID, NULL);
+	return 1;
+}
+
 void RegisterScriptingFunctions(lua_State *L)
 {
 	generateAndLoadInternalScript(L);
@@ -586,6 +621,9 @@ void RegisterScriptingFunctions(lua_State *L)
 	
 	lua_register(L, "setPlayerCheckpoint", SetPlayerCheckpoint);
 	lua_register(L, "disablePlayerCheckpoint", DisablePlayerCheckpoint);
+	
+	lua_register(L, "gameTextForAll", GameTextForAll);
+	lua_register(L, "gameTextForPlayer", GameTextForPlayer);
 }
 
 // ---------------------------------------------------------------------------------------------------------
