@@ -347,23 +347,23 @@ int RunCommand(char *szCMD, int iFromAutorun)
 	}
 	
 	// CHANGE FOLLOWING OFFSET (X)
-	if(!strncmp(szCMD, "followx", 7) || !strncmp(szCMD, "followX", 7) || !strncmp(szCMD, "FOLLOWX", 7))
+	if(!strncmp(szCMD, "follow_x", 8) || !strncmp(szCMD, "follow_X", 8) || !strncmp(szCMD, "FOLLOW_X", 8))
 	{
-		settings.fFollowXOffset = (float)atof(&szCMD[8]);
+		settings.fFollowXOffset = (float)atof(&szCMD[9]);
 		return 1;
 	}
 
 	// CHANGE FOLLOWING OFFSET (Y)
-	if(!strncmp(szCMD, "followy", 7) || !strncmp(szCMD, "followY", 7) || !strncmp(szCMD, "FOLLOWY", 7))
+	if(!strncmp(szCMD, "follow_y", 8) || !strncmp(szCMD, "follow_Y", 8) || !strncmp(szCMD, "FOLLOW_Y", 8))
 	{
-		settings.fFollowYOffset = (float)atof(&szCMD[8]);
+		settings.fFollowYOffset = (float)atof(&szCMD[9]);
 		return 1;
 	}
 
 	// CHANGE FOLLOWING OFFSET (Z)
-	if(!strncmp(szCMD, "followz", 7) || !strncmp(szCMD, "followZ", 7) || !strncmp(szCMD, "FOLLOWZ", 7))
+	if(!strncmp(szCMD, "follow_z", 8) || !strncmp(szCMD, "follow_Z", 8) || !strncmp(szCMD, "FOLLOW_Z", 8))
 	{
-		settings.fFollowZOffset = (float)atof(&szCMD[8]);
+		settings.fFollowZOffset = (float)atof(&szCMD[9]);
 		return 1;
 	}
 
@@ -437,6 +437,27 @@ int RunCommand(char *szCMD, int iFromAutorun)
 			Log("Started automatic checkpoint teleporter...");
 			settings.AutoGotoCP = true;
 		}
+		return 1;
+	}
+
+	// CHANGE POSITION (X)
+	if(!strncmp(szCMD, "pos_x", 5) || !strncmp(szCMD, "pos_X", 5) || !strncmp(szCMD, "POS_X", 5))
+	{
+		settings.fNormalModePos[0] = (float)atof(&szCMD[6]);
+		return 1;
+	}
+
+	// CHANGE POSITION (Y)
+	if(!strncmp(szCMD, "pos_y", 5) || !strncmp(szCMD, "pos_Y", 5) || !strncmp(szCMD, "POS_Y", 5))
+	{
+		settings.fNormalModePos[1] = (float)atof(&szCMD[6]);
+		return 1;
+	}
+
+	// CHANGE POSITION (Z)
+	if(!strncmp(szCMD, "pos_z", 5) || !strncmp(szCMD, "pos_Z", 5) || !strncmp(szCMD, "POS_Z", 5))
+	{
+		settings.fNormalModePos[2] = (float)atof(&szCMD[6]);
 		return 1;
 	}
 
