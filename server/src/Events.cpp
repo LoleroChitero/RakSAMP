@@ -144,6 +144,22 @@ void ScriptEvent_OnPlayerDeath(lua_State *L, int iPlayerID, int iKillerID, int i
 		Log("WARNING: Error calling onPlayerDeath:\n%s", lua_tostring(L, -1));
 }
 
+void ScriptEvent_OnPlayerDamageVehicle(lua_State *L, int iPlayerID, int iVehicleID)
+{
+	lua_getglobal(L, "onPlayerDamageVehicle");
+	if(!lua_isfunction(L, -1))
+	{
+		lua_pop(L, 1);
+		return;
+	}
+
+	lua_pushinteger(L, iPlayerID);
+	lua_pushinteger(L, iVehicleID);
+
+	if(lua_pcall(L, 2, 0, 0) != 0)
+		Log("WARNING: Error calling onPlayerDamageVehicle:\n%s", lua_tostring(L, -1));
+}
+
 void ScriptEvent_OnPlayerWantsEnterVehicle(lua_State *L, int iPlayerID, int iVehicleID, int iAsPassenger)
 {
 	lua_getglobal(L, "onPlayerWantsEnterVehicle");
@@ -258,4 +274,41 @@ void ScriptEvent_OnPlayerLeaveCheckpoint(lua_State *L, int iPlayerID)
 
 	if(lua_pcall(L, 1, 0, 0) != 0)
 		Log("WARNING: Error calling onPlayerLeaveCheckpoint:\n%s", lua_tostring(L, -1));
+}
+
+void ScriptEvent_OnPlayerClickMap(lua_State *L, int iPlayerID, float fX, float fY, float fZ)
+{
+	lua_getglobal(L, "onPlayerClickMap");
+	if(!lua_isfunction(L, -1))
+	{
+		lua_pop(L, 1);
+		return;
+	}
+
+	lua_pushinteger(L, iPlayerID);
+	lua_pushnumber(L, fX);
+	lua_pushnumber(L, fY);
+	lua_pushnumber(L, fZ);
+
+	if(lua_pcall(L, 4, 0, 0) != 0)
+		Log("WARNING: Error calling onPlayerClickMap:\n%s", lua_tostring(L, -1));
+}
+
+void ScriptEvent_OnDialogResponse(lua_State *L, int iPlayerID, int iDialogID, int iButtonID, int iListBoxItem, char* szInputResp)
+{
+	lua_getglobal(L, "onDialogResponse");
+	if(!lua_isfunction(L, -1))
+	{
+		lua_pop(L, 1);
+		return;
+	}
+
+	lua_pushinteger(L, iPlayerID);
+	lua_pushinteger(L, iDialogID);
+	lua_pushinteger(L, iButtonID);
+	lua_pushinteger(L, iListBoxItem);
+	lua_pushstring(L, szInputResp);
+
+	if(lua_pcall(L, 5, 0, 0) != 0)
+		Log("WARNING: Error calling onDialogResponse:\n%s", lua_tostring(L, -1));
 }

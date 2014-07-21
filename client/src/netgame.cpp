@@ -4,12 +4,13 @@
 
 #include "main.h"
 
+extern int iFollowingPassenger, iFollowingDriver;
+extern int iDrunkLevel, iMoney, iLocalPlayerSkin;
+extern BYTE m_bLagCompensation;
+
 DWORD dwTimeReconnect = 10000;
 
 int iPassengerNotificationSent = 0, iDriverNotificationSent = 0;
-
-extern int iFollowingPassenger, iFollowingDriver;
-extern int iDrunkLevel, iMoney;
 
 void Packet_AUTH_KEY(Packet *p, RakClientInterface *pRakClient)
 {
@@ -69,30 +70,28 @@ void Packet_ConnectionSucceeded(Packet *p, RakClientInterface *pRakClient)
 	Log("Connected. Joining the game...");
 
 	int iVersion = NETGAME_VERSION;
+	unsigned int uiClientChallengeResponse = uiChallenge ^ iVersion;
 	BYTE byteMod = 1;
 
 	char auth_bs[4*16] = {0};
-	pSamp->getSerial(auth_bs);
+	gen_gpci(auth_bs, 0x3e9);
 
 	BYTE byteAuthBSLen;
 	byteAuthBSLen = (BYTE)strlen(auth_bs);
 	BYTE byteNameLen = (BYTE)strlen(g_szNickName);
-
-	unsigned int uiClientChallengeResponse = uiChallenge ^ iVersion;
+	BYTE iClientVerLen = (BYTE)strlen(settings.szClientVersion);
 
 	RakNet::BitStream bsSend;
+
 	bsSend.Write(iVersion);
 	bsSend.Write(byteMod);
 	bsSend.Write(byteNameLen);
 	bsSend.Write(g_szNickName, byteNameLen);
-	
 	bsSend.Write(uiClientChallengeResponse);
 	bsSend.Write(byteAuthBSLen);
 	bsSend.Write(auth_bs, byteAuthBSLen);
-	char szClientVer[] = "0.3z";
-	const BYTE iClientVerLen = (sizeof(szClientVer)-1);
 	bsSend.Write(iClientVerLen);
-	bsSend.Write(szClientVer, iClientVerLen);
+	bsSend.Write(settings.szClientVersion, iClientVerLen);
 
 	pRakClient->RPC(&RPC_ClientJoin, &bsSend, HIGH_PRIORITY, RELIABLE, 0, FALSE, UNASSIGNED_NETWORK_ID, NULL);
 
@@ -445,6 +444,31 @@ void Packet_MarkersSync(Packet *p, RakClientInterface *pRakClient)
 	}
 }
 
+void Packet_BulletSync(Packet *p, RakClientInterface *pRakClient)
+{
+	RakNet::BitStream bsBulletSync((unsigned char *)p->data, p->length, false);
+
+	if(m_bLagCompensation)
+	{
+		PLAYERID PlayerID;
+
+		bsBulletSync.IgnoreBits(8);
+		bsBulletSync.Read(PlayerID);
+
+		memset(&playerInfo[PlayerID].bulletData, 0, sizeof(BULLET_SYNC_DATA));
+
+		bsBulletSync.Read((PCHAR)&playerInfo[PlayerID].bulletData, sizeof(BULLET_SYNC_DATA));
+
+		PLAYERID copyingID = getPlayerIDFromPlayerName(settings.szFollowingPlayerName);
+
+		if(copyingID != (PLAYERID)-1)
+		{
+			if(copyingID == PlayerID)
+				SendBulletData(&playerInfo[PlayerID].bulletData);
+		}
+	}
+}
+
 void resetPools(int iRestart, DWORD dwTimeReconnect)
 {
 	memset(playerInfo, 0, sizeof(stPlayerInfo));
@@ -457,6 +481,7 @@ void resetPools(int iRestart, DWORD dwTimeReconnect)
 		iSpawned = 0;
 		iMoney = 0;
 		iDrunkLevel = 0;
+		iLocalPlayerSkin = 0;
 
 		settings.pulseHealth = false;
 
@@ -576,6 +601,9 @@ void UpdateNetwork(RakClientInterface *pRakClient)
 				break;
 			case ID_MARKERS_SYNC:
 				Packet_MarkersSync(pkt, pRakClient);
+				break;
+			case ID_BULLET_SYNC:
+				Packet_BulletSync(pkt, pRakClient);
 				break;
 		}
 

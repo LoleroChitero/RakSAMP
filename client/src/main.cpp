@@ -17,11 +17,8 @@ struct stVehiclePool vehiclePool[MAX_VEHICLES];
 FILE *flLog = NULL;
 
 DWORD dwAutoRunTick = GetTickCount();
-int dd = 0;
 
-SAMP * pSamp = NULL;
-
-extern int iMoney, iDrunkLevel;
+extern int iMoney, iDrunkLevel, iLocalPlayerSkin;
 
 int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd)
 {
@@ -41,22 +38,6 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	{
 		SetUpWindow(hInstance);
 		Sleep(500); // wait a bit for the dialog to create
-	}
-
-	pSamp = new SAMP("samp.dll");
-
-	if (pSamp->GetHMODULE() == NULL)
-	{
-		Log("Copy samp.dll AND bass.dll to the RakSAMP directory.");
-
-		if(flLog != NULL)
-		{
-			fclose(flLog);
-			flLog = NULL;
-		}
-		Sleep(8000);
-		
-		return 0;
 	}
 
 	// RCON mode
@@ -113,28 +94,14 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	{
 		UpdateNetwork(pRakClient);
 
-		if(settings.ispam) sampSpam();
+		if(settings.bSpam)
+			sampSpam();
 
-		if (settings.fakeKill) {
-			for(int a=0;a<46;a++){
-				for(int b=0;b<getPlayerCount();b++){
-					if(settings.fakeKill){
-						SendWastedNotification(a, b);
-					}
-				}
-			}
-		}
+		if (settings.bFakeKill)
+			sampFakeKill();
 
-		if (settings.lag) {
-				RakNet::BitStream bsDeath;
-				bsDeath.Write(dd++);
-				pRakClient->RPC(&RPC_ClickPlayer, &bsDeath, HIGH_PRIORITY, RELIABLE_SEQUENCED, 0, FALSE, UNASSIGNED_NETWORK_ID, NULL);
-				pRakClient->RPC(&RPC_EnterVehicle, &bsDeath, HIGH_PRIORITY, RELIABLE_SEQUENCED, 0, FALSE, UNASSIGNED_NETWORK_ID, NULL);
-				pRakClient->RPC(&RPC_ExitVehicle, &bsDeath, HIGH_PRIORITY, RELIABLE_SEQUENCED, 0, FALSE, UNASSIGNED_NETWORK_ID, NULL);
-				pRakClient->RPC(&RPC_PickedUpPickup, &bsDeath, HIGH_PRIORITY, RELIABLE_SEQUENCED, 0, FALSE, UNASSIGNED_NETWORK_ID, NULL);
-				pRakClient->RPC(&RPC_RequestSpawn, &bsDeath, HIGH_PRIORITY, RELIABLE_SEQUENCED, 0, FALSE, UNASSIGNED_NETWORK_ID, NULL);
-				sendDialogResponse(sampDialog.wDialogID, 1, 1, "");
-		}
+		if (settings.bLag)
+			sampLag();
 
 		if (settings.pulseHealth)
 		{
@@ -187,9 +154,9 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 					BulletSyncData.fHitTarget[2] = playerInfo[p].onfootData.vecPos[2];
 
 					// It's just random stuff.
-					BulletSyncData.fCenterOfHit[0] = -0.098876f;
-					BulletSyncData.fCenterOfHit[1] = 0.083007f;
-					BulletSyncData.fCenterOfHit[2] = 0.412403f;
+					BulletSyncData.fCenterOfHit[0] = -0.098f;
+					BulletSyncData.fCenterOfHit[1] = 0.08f;
+					BulletSyncData.fCenterOfHit[2] = 0.4f;
 
 					SendBulletData(&BulletSyncData);
 				}
@@ -211,8 +178,20 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 			static DWORD dwLastInfoUpdate = GetTickCount();
 			if(dwLastInfoUpdate && dwLastInfoUpdate < (GetTickCount() - 1000))
 			{
-				sprintf_s(szInfo, 400, "Hostname: %s     Players: %d     Ping: %d     Authors: %s\nHealth: %.2f     Armour: %.2f     X: %.4f     Y: %.4f     Z: %.4f     Rotation: %.4f",
-				g_szHostName, getPlayerCount(), playerInfo[g_myPlayerID].dwPing, AUTHOR, settings.fPlayerHealth, settings.fPlayerArmour, settings.fNormalModePos[0], settings.fNormalModePos[1], settings.fNormalModePos[2], settings.fNormalModeRot);
+				char szHealthText[16], szArmourText[16];
+
+				if(settings.fPlayerHealth > 200.0f)
+					sprintf_s(szHealthText, sizeof(szHealthText), "N/A");
+				else
+					sprintf_s(szHealthText, sizeof(szHealthText), "%.2f", settings.fPlayerHealth);
+
+				if(settings.fPlayerArmour > 200.0f)
+					sprintf_s(szArmourText, sizeof(szArmourText), "N/A");
+				else
+					sprintf_s(szArmourText, sizeof(szArmourText), "%.2f", settings.fPlayerArmour);
+
+				sprintf_s(szInfo, 400, "Hostname: %s     Players: %d     Ping: %d     Authors: %s\nHealth: %s     Armour: %s     Skin: %d     X: %.4f     Y: %.4f     Z: %.4f     Rotation: %.4f",
+				g_szHostName, getPlayerCount(), playerInfo[g_myPlayerID].dwPing, AUTHOR, szHealthText, szArmourText, iLocalPlayerSkin, settings.fNormalModePos[0], settings.fNormalModePos[1], settings.fNormalModePos[2], settings.fNormalModeRot);
 				
 				if(strcmp(szInfo, szLastInfo) != 0)
 				{

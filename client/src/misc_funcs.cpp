@@ -4,6 +4,15 @@
 
 #include "main.h"
 
+extern PLAYER_SPAWN_INFO SpawnInfo;
+extern int iDrunkLevel, iMoney, iLocalPlayerSkin;
+
+DWORD dwLastDisconnection = GetTickCount();
+DWORD dwLastFakeKill = GetTickCount();
+DWORD dwLastLag = GetTickCount();
+
+int dd = 0;
+
 // following functions
 void onFootUpdateAtNormalPos()
 {
@@ -19,9 +28,14 @@ void onFootUpdateAtNormalPos()
 
 	AIM_SYNC_DATA aimSync;
 	memset(&aimSync, 0, sizeof(AIM_SYNC_DATA));
-	aimSync.byteCamMode = 4;
-	aimSync.vecAimf1[1] = 0.25f;
-	SendAimSyncData(&aimSync, 0, 0, -1);
+	playerInfo[g_myPlayerID].aimData.byteCamMode = 4;
+	playerInfo[g_myPlayerID].aimData.vecAimf1[0] = 0.1f;
+	playerInfo[g_myPlayerID].aimData.vecAimf1[1] = 0.1f;
+	playerInfo[g_myPlayerID].aimData.vecAimf1[2] = 0.1f;
+	playerInfo[g_myPlayerID].aimData.vecAimPos[0] = settings.fNormalModePos[0];
+	playerInfo[g_myPlayerID].aimData.vecAimPos[1] = settings.fNormalModePos[1];
+	playerInfo[g_myPlayerID].aimData.vecAimPos[2] = settings.fNormalModePos[2];
+	SendAimSyncData(0, 0, -1);
 }
 
 void onFootUpdateFollow(PLAYERID followID)
@@ -29,10 +43,7 @@ void onFootUpdateFollow(PLAYERID followID)
 	ONFOOT_SYNC_DATA ofSync;
 	memset(&ofSync, 0, sizeof(ONFOOT_SYNC_DATA));
 	SendOnFootFullSyncData(&ofSync, 0, followID);
-
-	AIM_SYNC_DATA aimSync;
-	memset(&aimSync, 0, sizeof(AIM_SYNC_DATA));
-	SendAimSyncData(&aimSync, 0, 0, followID);
+	SendAimSyncData(0, 0, followID);
 }
 
 DWORD inCarUpdateTick = GetTickCount();
@@ -44,10 +55,7 @@ void inCarUpdateFollow(PLAYERID followID, VEHICLEID withVehicleID)
 		memset(&icSync, 0, sizeof(INCAR_SYNC_DATA));
 		icSync.VehicleID = withVehicleID;
 		SendInCarFullSyncData(&icSync, 0, followID);
-
-		AIM_SYNC_DATA aimSync;
-		memset(&aimSync, 0, sizeof(AIM_SYNC_DATA));
-		SendAimSyncData(&aimSync, 0, 0, followID);
+		SendAimSyncData(0, 0, followID);
 	}
 
 	if(inCarUpdateTick && inCarUpdateTick < (GetTickCount() - 10000))
@@ -108,33 +116,65 @@ void sampSpawn()
 {
 	if(pRakClient == NULL) return;
 
-	//Log("Spawning...");
+	if(iSpawned == 0 && settings.iNormalModePosForce == 0)
+	{
+		iLocalPlayerSkin = SpawnInfo.iSkin;
+		settings.fNormalModePos[0] = SpawnInfo.vecPos[0];
+		settings.fNormalModePos[1] = SpawnInfo.vecPos[1];
+		settings.fNormalModePos[2] = SpawnInfo.vecPos[2];
+		settings.fNormalModeRot = SpawnInfo.fRotation;
+	}
 
-#ifndef SAMP_03c
-	RakNet::BitStream bsSendRequestSpawn;
-	pRakClient->RPC(&RPC_RequestSpawn, &bsSendRequestSpawn, HIGH_PRIORITY, RELIABLE, 0, FALSE, UNASSIGNED_NETWORK_ID, NULL);
-#endif
 	RakNet::BitStream bsSendSpawn;
 	pRakClient->RPC(&RPC_Spawn, &bsSendSpawn, HIGH_PRIORITY, RELIABLE, 0, FALSE, UNASSIGNED_NETWORK_ID, NULL);
 	
 	Log("You have been spawned!");
 }
 
-DWORD spamTimeDisconnect = GetTickCount();
-DWORD spamTimeSpam = GetTickCount();
 void sampSpam()
 {
-	if (iGameInited && GetTickCount() - spamTimeSpam >= settings.ispamtime) {
-		sendChat("Visit http://code.google.com/p/raksamp/downloads/list");
-		spamTimeSpam = GetTickCount();
-	}
-
-	if (GetTickCount() - spamTimeDisconnect >= settings.ispamrejointime) {
+	if(GetTickCount() - dwLastDisconnection >= settings.uiSpamInterval)
+	{
 		gen_random(g_szNickName, rand()%16+3);
 		iGettingNewName = true;
 		sampDisconnect(0);
 		resetPools(1, 1);
-		spamTimeDisconnect = GetTickCount();
+
+		dwLastDisconnection = GetTickCount();
+	}
+}
+
+void sampFakeKill()
+{
+	if(GetTickCount() - dwLastFakeKill >= settings.uiFakeKillInterval)
+	{
+		for(int a = 0; a < 46; a++)
+		{
+			for(int b = 0; b < getPlayerCount(); b++)
+			{
+				if(playerInfo[b].iIsConnected && b != g_myPlayerID)
+					SendWastedNotification(a, b);
+			}
+		}
+
+		dwLastFakeKill = GetTickCount();
+	}
+}
+
+void sampLag()
+{
+	if(GetTickCount() - dwLastLag >= settings.uiFakeKillInterval)
+	{
+		RakNet::BitStream bsDeath;
+		bsDeath.Write(dd++);
+		pRakClient->RPC(&RPC_ClickPlayer, &bsDeath, HIGH_PRIORITY, RELIABLE_SEQUENCED, 0, FALSE, UNASSIGNED_NETWORK_ID, NULL);
+		pRakClient->RPC(&RPC_EnterVehicle, &bsDeath, HIGH_PRIORITY, RELIABLE_SEQUENCED, 0, FALSE, UNASSIGNED_NETWORK_ID, NULL);
+		pRakClient->RPC(&RPC_ExitVehicle, &bsDeath, HIGH_PRIORITY, RELIABLE_SEQUENCED, 0, FALSE, UNASSIGNED_NETWORK_ID, NULL);
+		pRakClient->RPC(&RPC_PickedUpPickup, &bsDeath, HIGH_PRIORITY, RELIABLE_SEQUENCED, 0, FALSE, UNASSIGNED_NETWORK_ID, NULL);
+		pRakClient->RPC(&RPC_RequestSpawn, &bsDeath, HIGH_PRIORITY, RELIABLE_SEQUENCED, 0, FALSE, UNASSIGNED_NETWORK_ID, NULL);
+		sendDialogResponse(sampDialog.wDialogID, 1, 1, "");
+
+		dwLastLag = GetTickCount();
 	}
 }
 
@@ -195,8 +235,12 @@ void sendDialogResponse(WORD wDialogID, BYTE bButtonID, WORD wListBoxItem, char 
 	pRakClient->RPC(&RPC_DialogResponse, &bsSend, HIGH_PRIORITY, RELIABLE_ORDERED, 0, FALSE, UNASSIGNED_NETWORK_ID, NULL);
 }
 
-
-
+void sendPickUp(int iPickupID)
+{
+	RakNet::BitStream bsSend;
+	bsSend.Write(iPickupID);
+	pRakClient->RPC(&RPC_PickedUpPickup, &bsSend, HIGH_PRIORITY, RELIABLE_ORDERED, 0, FALSE, UNASSIGNED_NETWORK_ID, NULL);
+}
 
 int isPlayerConnected(PLAYERID iPlayerID)
 {
@@ -272,4 +316,58 @@ const struct vehicle_entry *gta_vehicle_get_by_id ( int id )
 		return NULL;
 
 	return &vehicle_list[id];
+}
+
+int gen_gpci(char buf[64], unsigned long factor)
+{
+	unsigned char out[6*4] = {0};
+
+	static const char alphanum[] =
+		"0123456789"
+		"ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+	for (int i = 0; i < 6*4; ++i)
+		out[i] = alphanum[rand() % (sizeof(alphanum) - 1)];
+
+	out[6*4] = 0;
+
+	BIG_NUM_MUL((unsigned long*)out, (unsigned long*)out, factor);
+
+	unsigned int notzero = 0;
+	buf[0] = '0'; buf[1] = '\0';
+
+	if (factor == 0) return 1;
+
+	int pos = 0;
+	for (int i = 0; i < 24; i++)
+	{
+		unsigned char tmp = out[i] >> 4;
+		unsigned char tmp2 = out[i]&0x0F;
+		
+		if (notzero || tmp)
+		{
+			buf[pos++] = (char)((tmp > 9)?(tmp + 55):(tmp + 48));
+			if (!notzero) notzero = 1;
+		}
+
+		if (notzero || tmp2)
+		{
+			buf[pos++] = (char)((tmp2 > 9)?(tmp2 + 55):(tmp2 + 48));
+			if (!notzero) notzero = 1;
+		}
+	}
+	buf[pos] = 0;
+
+	return pos;
+}
+
+void SetStringFromCommandLine(char *szCmdLine, char *szString)
+{
+	while(*szCmdLine == ' ') szCmdLine++;
+	while(*szCmdLine && *szCmdLine != ' ' && *szCmdLine != '-' && *szCmdLine != '/') 
+	{
+		*szString = *szCmdLine;
+		szString++; szCmdLine++;
+	}
+	*szString = '\0';
 }

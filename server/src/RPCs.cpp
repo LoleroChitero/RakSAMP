@@ -299,6 +299,53 @@ void RPC_ClientUpdateScoresPingsIPs(RPCParameters *rpcParams)
 		rpcParams->sender, FALSE, FALSE, UNASSIGNED_NETWORK_ID, NULL);
 }
 
+void RPC_ClientDamageVehicle(RPCParameters *rpcParams)
+{
+	PCHAR Data = reinterpret_cast<PCHAR>(rpcParams->input);
+	int iBitLength = rpcParams->numberOfBitsOfData;
+	PlayerID sender = rpcParams->sender;
+
+	RakNet::BitStream bsData((unsigned char *)Data,(iBitLength/8)+1,false);
+	PLAYERID playerID = pRakServer->GetIndexFromPlayerID(sender);
+
+	if(!playerPool[playerID].iIsConnected)
+		return;
+
+	VEHICLEID vehID;
+	uint32_t vehPanels;
+	uint32_t vehDoors;
+	uint8_t vehLights;
+	uint8_t vehTires;
+
+	bsData.Read(vehID);
+	bsData.Read(vehPanels);
+	bsData.Read(vehDoors);
+	bsData.Read(vehLights);
+	bsData.Read(vehTires);
+
+	if(vehID == (VEHICLEID)-1)
+	{
+		SendClientMessage(playerID, -1, "You are sending an invalid vehicle ID. Unlike kye, we wont kick you :)");
+		return;
+	}
+
+	for(int i = 0; i < iScriptsRunning; i++)
+	{
+		if(script.scriptVM[i] != NULL && script.szScriptName[i][0] != 0x00)
+			ScriptEvent_OnPlayerDamageVehicle(script.scriptVM[i], playerID, vehID);
+	}
+
+	RakNet::BitStream bsDamage;
+
+	bsDamage.Write(vehID);
+	bsDamage.Write(vehPanels);
+	bsDamage.Write(vehDoors);
+	bsDamage.Write(vehLights);
+	bsDamage.Write(vehTires);	
+
+	pRakServer->RPC(&RPC_DamageVehicle, &bsDamage, HIGH_PRIORITY, RELIABLE_ORDERED, 0, sender, TRUE, FALSE, UNASSIGNED_NETWORK_ID, NULL);
+}
+
 void RPC_ClientEnterVehicle(RPCParameters *rpcParams)
 {
 	PCHAR Data = reinterpret_cast<PCHAR>(rpcParams->input);
@@ -441,6 +488,62 @@ void RPC_ClientDeath(RPCParameters *rpcParams)
 	}
 }
 
+void RPC_ClientMapMarker(RPCParameters *rpcParams)
+{
+	PCHAR Data = reinterpret_cast<PCHAR>(rpcParams->input);
+	int iBitLength = rpcParams->numberOfBitsOfData;
+	PlayerID sender = rpcParams->sender;
+
+	RakNet::BitStream bsData((unsigned char *)Data,(iBitLength/8)+1,false);
+	PLAYERID playerID = pRakServer->GetIndexFromPlayerID(sender);
+
+	if(!playerPool[playerID].iIsConnected)
+		return;
+
+	float vecPos[3];
+	bsData.Read(vecPos[0]);
+	bsData.Read(vecPos[1]);
+	bsData.Read(vecPos[2]);
+
+	for(int i = 0; i < iScriptsRunning; i++)
+	{
+		if(script.scriptVM[i] != NULL && script.szScriptName[i][0] != 0x00)
+			ScriptEvent_OnPlayerClickMap(script.scriptVM[i], playerID, vecPos[0], vecPos[1], vecPos[2]);
+	}
+}
+
+void RPC_ClientDialogResponse(RPCParameters *rpcParams)
+{
+	PCHAR Data = reinterpret_cast<PCHAR>(rpcParams->input);
+	int iBitLength = rpcParams->numberOfBitsOfData;
+	PlayerID sender = rpcParams->sender;
+
+	RakNet::BitStream bsData((unsigned char *)Data,(iBitLength/8)+1,false);
+	PLAYERID playerID = pRakServer->GetIndexFromPlayerID(sender);
+
+	if(!playerPool[playerID].iIsConnected)
+		return;
+
+	WORD wDialogID;
+	BYTE bButtonID;
+	WORD wListBoxItem;
+	char szInputResp[128+1];
+	unsigned char iInputRespLen;
+
+	bsData.Read(wDialogID);
+	bsData.Read(bButtonID);
+	bsData.Read(wListBoxItem);
+	bsData.Read(iInputRespLen);
+	bsData.Read(szInputResp, iInputRespLen);
+	szInputResp[iInputRespLen] = 0;
+
+	for(int i = 0; i < iScriptsRunning; i++)
+	{
+		if(script.scriptVM[i] != NULL && script.szScriptName[i][0] != 0x00)
+			ScriptEvent_OnDialogResponse(script.scriptVM[i], playerID, wDialogID, bButtonID, wListBoxItem, szInputResp);
+	}
+}
+
 void RegisterServerRPCs(RakServerInterface *pRakServer)
 {
 	// Core RPCs
@@ -450,10 +553,13 @@ void RegisterServerRPCs(RakServerInterface *pRakServer)
 	pRakServer->RegisterAsRemoteProcedureCall(&RPC_Spawn, RPC_ClientSpawns);
 	pRakServer->RegisterAsRemoteProcedureCall(&RPC_Chat, RPC_ClientChat);
 	pRakServer->RegisterAsRemoteProcedureCall(&RPC_UpdateScoresPingsIPs, RPC_ClientUpdateScoresPingsIPs);
+	pRakServer->RegisterAsRemoteProcedureCall(&RPC_DamageVehicle, RPC_ClientDamageVehicle);
 	pRakServer->RegisterAsRemoteProcedureCall(&RPC_EnterVehicle, RPC_ClientEnterVehicle);
 	pRakServer->RegisterAsRemoteProcedureCall(&RPC_ExitVehicle, RPC_ClientExitVehicle);
 	pRakServer->RegisterAsRemoteProcedureCall(&RPC_ServerCommand, RPC_ClientCommandText);
 	pRakServer->RegisterAsRemoteProcedureCall(&RPC_Death, RPC_ClientDeath);
+	pRakServer->RegisterAsRemoteProcedureCall(&RPC_MapMarker, RPC_ClientMapMarker);
+	pRakServer->RegisterAsRemoteProcedureCall(&RPC_DialogResponse, RPC_ClientDialogResponse);
 }
 
 void UnRegisterServerRPCs(RakServerInterface * pRakServer)
@@ -465,7 +571,10 @@ void UnRegisterServerRPCs(RakServerInterface * pRakServer)
 	pRakServer->UnregisterAsRemoteProcedureCall(&RPC_Spawn);
 	pRakServer->UnregisterAsRemoteProcedureCall(&RPC_Chat);
 	pRakServer->UnregisterAsRemoteProcedureCall(&RPC_UpdateScoresPingsIPs);
+	pRakServer->UnregisterAsRemoteProcedureCall(&RPC_DamageVehicle);
 	pRakServer->UnregisterAsRemoteProcedureCall(&RPC_EnterVehicle);
 	pRakServer->UnregisterAsRemoteProcedureCall(&RPC_ExitVehicle);
 	pRakServer->UnregisterAsRemoteProcedureCall(&RPC_ServerCommand);
+	pRakServer->UnregisterAsRemoteProcedureCall(&RPC_MapMarker);
+	pRakServer->UnregisterAsRemoteProcedureCall(&RPC_DialogResponse);
 }

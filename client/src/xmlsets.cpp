@@ -49,6 +49,9 @@ int LoadSettings()
 		// get max simulated fps
 		rakSAMPElement->QueryIntAttribute("maxfps", (int *)&settings.iMaxFPS);
 
+		// get client version
+		strcpy(settings.szClientVersion, (char *)rakSAMPElement->Attribute("clientversion"));
+
 		// get chat color
 		rakSAMPElement->QueryColorAttribute("chatcolor_rgb",
 			(unsigned char *)&settings.bChatColorRed, (unsigned char *)&settings.bChatColorGreen, (unsigned char *)&settings.bChatColorBlue);
@@ -100,6 +103,23 @@ int LoadSettings()
 			}
 		}
 
+		// get intervals
+		TiXmlElement* intervalsElement = rakSAMPElement->FirstChildElement("intervals");
+		if(intervalsElement)
+		{
+			intervalsElement->QueryIntAttribute("spam", (int *)&settings.uiSpamInterval);
+			intervalsElement->QueryIntAttribute("fakekill", (int *)&settings.uiFakeKillInterval);
+			intervalsElement->QueryIntAttribute("lag", (int *)&settings.uiLagInterval);
+		}
+
+		// get logging settings
+		TiXmlElement* logElement = rakSAMPElement->FirstChildElement("log");
+		if(logElement)
+		{
+			logElement->QueryIntAttribute("objects", (int *)&settings.uiObjectsLogging);
+			logElement->QueryIntAttribute("pickups", (int *)&settings.uiPickupsLogging);
+		}
+
 		// get normal mode pos
 		TiXmlElement* normalPosElement = rakSAMPElement->FirstChildElement("normal_pos");
 		if(normalPosElement)
@@ -107,14 +127,6 @@ int LoadSettings()
 			normalPosElement->QueryVectorAttribute("position", (float *)&settings.fNormalModePos);
 			normalPosElement->QueryFloatAttribute("rotation", &settings.fNormalModeRot);
 			normalPosElement->QueryIntAttribute("force", (int *)&settings.iNormalModePosForce);
-		}
-
-		// get playing mode pos
-		TiXmlElement* playPosElement = rakSAMPElement->FirstChildElement("play_pos");
-		if(playPosElement)
-		{
-			playPosElement->QueryVectorAttribute("position", (float *)&settings.fPlayPos);
-			playPosElement->QueryFloatAttribute("rotation", &settings.fPlayRot);
 		}
 
 		// get auto run commands
@@ -162,6 +174,38 @@ int LoadSettings()
 	}
 
 	xmlSettings.Clear();
+
+	PCHAR szCmdLine = GetCommandLineA();
+	CHAR szPort[20];
+
+	while(*szCmdLine)
+	{
+		if(*szCmdLine == '-' || *szCmdLine == '/')
+		{
+			szCmdLine++;
+			switch(*szCmdLine)
+			{
+				case 'h':
+					szCmdLine++;
+					SetStringFromCommandLine(szCmdLine, settings.server.szAddr);
+					break;
+				case 'p':
+					szCmdLine++;
+					SetStringFromCommandLine(szCmdLine, szPort); settings.server.iPort = atoi(szPort);
+					break;
+				case 'n':
+					szCmdLine++;
+					SetStringFromCommandLine(szCmdLine, settings.server.szNickname);
+					break;
+				case 'z':
+					szCmdLine++;
+					SetStringFromCommandLine(szCmdLine, settings.server.szPassword);
+					break;
+			}
+		}
+		szCmdLine++;
+	}
+
 	return 1;
 }
 

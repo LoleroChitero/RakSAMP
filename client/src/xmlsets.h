@@ -59,11 +59,18 @@ struct stSettings
 	int iMinFPS;
 	int iMaxFPS;
 
-	bool fakeKill;
-	bool lag;
-	bool ispam;
-	unsigned int ispamrejointime;
-	unsigned int ispamtime;
+	char szClientVersion[20];
+
+	bool bSpam;
+	bool bFakeKill;
+	bool bLag;
+
+	unsigned int uiSpamInterval;
+	unsigned int uiFakeKillInterval;
+	unsigned int uiLagInterval;
+
+	unsigned int uiObjectsLogging;
+	unsigned int uiPickupsLogging;
 
 	unsigned char bChatColorRed;
 	unsigned char bChatColorGreen;
@@ -87,8 +94,6 @@ struct stSettings
 	float fNormalModePos[3];
 	float fNormalModeRot;
 	int iNormalModePosForce;
-	float fPlayPos[3];
-	float fPlayRot;
 
 	bool pulseHealth;
 

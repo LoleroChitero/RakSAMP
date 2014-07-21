@@ -12,7 +12,7 @@ BYTE m_bLagCompensation;
 PLAYERID imitateID = -1;
 bool iGettingNewName=false;
 
-int iMoney, iDrunkLevel;
+int iMoney, iDrunkLevel, iLocalPlayerSkin;
 
 struct stGTAMenu GTAMenu;
 
@@ -20,6 +20,8 @@ struct stSAMPDialog sampDialog;
 HFONT hSAMPDlgFont = NULL;
 HANDLE hDlgThread = NULL;
 HWND hwndSAMPDlg = NULL;
+
+PLAYER_SPAWN_INFO SpawnInfo;
 
 void ServerJoin(RPCParameters *rpcParams)
 {
@@ -358,7 +360,30 @@ void ClientMessage(RPCParameters *rpcParams)
 		}
 	}
 
-	Log("[CMSG] %s", szMsg);
+	char szNonColorEmbeddedMsg[257];
+	int iNonColorEmbeddedMsgLen = 0;
+
+	for (size_t pos = 0; pos < strlen(szMsg) && szMsg[pos] != '\0'; pos++)
+	{
+		if (!((*(unsigned char*)(&szMsg[pos]) - 32) >= 0 && (*(unsigned char*)(&szMsg[pos]) - 32) < 224))
+			continue;
+
+		if(pos+7 < strlen(szMsg))
+		{
+			if (szMsg[pos] == '{' && szMsg[pos+7] == '}')
+			{
+				pos += 7;
+				continue;
+			}
+		}
+
+		szNonColorEmbeddedMsg[iNonColorEmbeddedMsgLen] = szMsg[pos];
+		iNonColorEmbeddedMsgLen++;
+	}
+
+	szNonColorEmbeddedMsg[iNonColorEmbeddedMsgLen] = 0;
+
+	Log("[CMSG] %s", szNonColorEmbeddedMsg);
 }
 
 void Chat(RPCParameters *rpcParams)
@@ -454,6 +479,63 @@ void DisableCheckpoint(RPCParameters *rpcParams)
 	settings.CurrentCheckpoint.bActive = false;
 
 	Log("[CP] Current checkpoint disabled.");
+}
+
+void Pickup(RPCParameters *rpcParams)
+{
+	PCHAR Data = reinterpret_cast<PCHAR>(rpcParams->input);
+	int iBitLength = rpcParams->numberOfBitsOfData;
+
+	RakNet::BitStream bsData((unsigned char *)Data,(iBitLength/8)+1,false);
+
+	int PickupID;
+	PICKUP Pickup;
+
+	bsData.Read(PickupID);
+	bsData.Read((PCHAR)&Pickup, sizeof(PICKUP));
+
+	if(settings.uiPickupsLogging != 0)
+	{
+		char szCreatePickupAlert[256];
+		sprintf_s(szCreatePickupAlert, sizeof(szCreatePickupAlert), "[CREATEPICKUP] ID: %d | Model: %d | Type: %d | X: %.2f | Y: %.2f | Z: %.2f", PickupID, Pickup.iModel, Pickup.iType, Pickup.fX, Pickup.fY, Pickup.fZ);
+		Log(szCreatePickupAlert);
+	}
+}
+
+void DestroyPickup(RPCParameters *rpcParams)
+{
+	PCHAR Data = reinterpret_cast<PCHAR>(rpcParams->input);
+	int iBitLength = rpcParams->numberOfBitsOfData;
+
+	RakNet::BitStream bsData((unsigned char *)Data,(iBitLength/8)+1,false);
+
+	int PickupID;
+
+	bsData.Read(PickupID);
+
+	if(settings.uiPickupsLogging != 0)
+	{
+		Log("[DESTROYPICKUP] %d", PickupID);
+	}
+}
+
+void RequestClass(RPCParameters *rpcParams)
+{
+	PCHAR Data = reinterpret_cast<PCHAR>(rpcParams->input);
+	int iBitLength = rpcParams->numberOfBitsOfData;
+
+	RakNet::BitStream bsData((unsigned char *)Data,(iBitLength/8)+1,false);
+
+	BYTE byteRequestOutcome = 0;
+
+	bsData.Read(byteRequestOutcome);
+
+	if(byteRequestOutcome)
+	{
+		bsData.Read((PCHAR)&SpawnInfo,sizeof(PLAYER_SPAWN_INFO));
+
+		iLocalPlayerSkin = SpawnInfo.iSkin;
+	}
 }
 
 void ScrInitMenu(RPCParameters *rpcParams)
@@ -904,6 +986,56 @@ void ScrSetPlayerArmour(RPCParameters *rpcParams)
 	bsData.Read(settings.fPlayerArmour);
 }
 
+void ScrSetPlayerSkin(RPCParameters *rpcParams)
+{
+	PCHAR Data = reinterpret_cast<PCHAR>(rpcParams->input);
+	int iBitLength = rpcParams->numberOfBitsOfData;
+
+	RakNet::BitStream bsData((unsigned char *)Data,(iBitLength/8)+1,false);
+
+	int iPlayerID;
+	unsigned int uiSkin;
+
+	bsData.Read(iPlayerID);
+	bsData.Read(uiSkin);
+
+	iLocalPlayerSkin = uiSkin;
+}
+
+void ScrCreateObject(RPCParameters *rpcParams)
+{
+	PCHAR Data = reinterpret_cast<PCHAR>(rpcParams->input);
+	int iBitLength = rpcParams->numberOfBitsOfData;
+
+	RakNet::BitStream bsData((unsigned char *)Data,(iBitLength/8)+1,false);
+
+	unsigned short ObjectID;
+	bsData.Read(ObjectID);
+
+	unsigned long ModelID;
+	bsData.Read(ModelID);
+
+	float vecPos[3];
+	bsData.Read(vecPos[0]);
+	bsData.Read(vecPos[1]);
+	bsData.Read(vecPos[2]);
+
+	float vecRot[3];
+	bsData.Read(vecRot[0]);
+	bsData.Read(vecRot[1]);
+	bsData.Read(vecRot[2]);
+
+	float fDrawDistance;
+	bsData.Read(fDrawDistance);
+
+	if(settings.uiObjectsLogging != 0)
+	{
+		char szCreateObjectAlert[256];
+		sprintf_s(szCreateObjectAlert, sizeof(szCreateObjectAlert), "[CREATEOBJECT] %d, %d, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f", ObjectID, ModelID, vecPos[0], vecPos[1], vecPos[2], vecRot[0], vecRot[1], vecRot[2], fDrawDistance);
+		Log(szCreateObjectAlert);
+	}
+}
+
 void RegisterRPCs(RakClientInterface *pRakClient)
 {
 	if (pRakClient == ::pRakClient)
@@ -923,6 +1055,9 @@ void RegisterRPCs(RakClientInterface *pRakClient)
 		pRakClient->RegisterAsRemoteProcedureCall(&RPC_UpdateScoresPingsIPs, UpdateScoresPingsIPs);
 		pRakClient->RegisterAsRemoteProcedureCall(&RPC_SetCheckpoint, SetCheckpoint);
 		pRakClient->RegisterAsRemoteProcedureCall(&RPC_DisableCheckpoint, DisableCheckpoint);
+		pRakClient->RegisterAsRemoteProcedureCall(&RPC_Pickup, Pickup);
+		pRakClient->RegisterAsRemoteProcedureCall(&RPC_DestroyPickup, DestroyPickup);
+		pRakClient->RegisterAsRemoteProcedureCall(&RPC_RequestClass, RequestClass);
 
 		// Scripting RPCs
 		pRakClient->RegisterAsRemoteProcedureCall(&RPC_ScrInitMenu, ScrInitMenu);
@@ -937,6 +1072,8 @@ void RegisterRPCs(RakClientInterface *pRakClient)
 		pRakClient->RegisterAsRemoteProcedureCall(&RPC_ScrSetSpawnInfo, ScrSetSpawnInfo);
 		pRakClient->RegisterAsRemoteProcedureCall(&RPC_ScrSetPlayerHealth, ScrSetPlayerHealth);
 		pRakClient->RegisterAsRemoteProcedureCall(&RPC_ScrSetPlayerArmour, ScrSetPlayerArmour);
+		pRakClient->RegisterAsRemoteProcedureCall(&RPC_ScrSetPlayerSkin, ScrSetPlayerSkin);
+		pRakClient->RegisterAsRemoteProcedureCall(&RPC_ScrCreateObject, ScrCreateObject);
 	}
 }
 
@@ -959,6 +1096,9 @@ void UnRegisterRPCs(RakClientInterface * pRakClient)
 		pRakClient->UnregisterAsRemoteProcedureCall(&RPC_UpdateScoresPingsIPs);
 		pRakClient->UnregisterAsRemoteProcedureCall(&RPC_SetCheckpoint);
 		pRakClient->UnregisterAsRemoteProcedureCall(&RPC_DisableCheckpoint);
+		pRakClient->UnregisterAsRemoteProcedureCall(&RPC_Pickup);
+		pRakClient->UnregisterAsRemoteProcedureCall(&RPC_DestroyPickup);
+		pRakClient->UnregisterAsRemoteProcedureCall(&RPC_RequestClass);
 
 		// Scripting RPCs
 		pRakClient->UnregisterAsRemoteProcedureCall(&RPC_ScrInitMenu);
@@ -973,5 +1113,7 @@ void UnRegisterRPCs(RakClientInterface * pRakClient)
 		pRakClient->UnregisterAsRemoteProcedureCall(&RPC_ScrSetSpawnInfo);
 		pRakClient->UnregisterAsRemoteProcedureCall(&RPC_ScrSetPlayerHealth);
 		pRakClient->UnregisterAsRemoteProcedureCall(&RPC_ScrSetPlayerArmour);
+		pRakClient->UnregisterAsRemoteProcedureCall(&RPC_ScrSetPlayerSkin);
+		pRakClient->UnregisterAsRemoteProcedureCall(&RPC_ScrCreateObject);
 	}
 }

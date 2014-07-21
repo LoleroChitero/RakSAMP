@@ -12,6 +12,7 @@ struct stPlayerPool
 	unsigned short usClientPort;
 	int iPlayerScore;
 	DWORD dwPlayerPing;
+	VEHICLEID currentVehicleID;
 
 	// spawn info
 	BYTE bTeam;

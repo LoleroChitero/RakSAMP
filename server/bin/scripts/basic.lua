@@ -93,6 +93,10 @@ function onPlayerDeath(playerID, killerID, reasonID)
 	end
 end
 
+function onPlayerDamageVehicle(playerID, vehicleID)
+	outputConsole("[" .. playerID ..":VDAMAGE] " .. getPlayerName(playerID) .. " <- " .. vehicleID .. "")
+end
+
 function onPlayerWantsEnterVehicle(playerID, vehicleID, passenger)
 	outputConsole("[" .. playerID ..":WVEHENTER] " .. getPlayerName(playerID) .. " -> " .. vehicleID .. ", passenger: " .. passenger .. "")
 end
@@ -123,6 +127,7 @@ function onPlayerCommand(playerID, command)
 		setPlayerHealth(playerID, 0)
 		return 1
 	end
+	
 	if command[1] == "/pm" or command[1] == "/PM" then
 		local toplayerid = command[2]
 		local message = command[3]
@@ -143,21 +148,25 @@ function onPlayerCommand(playerID, command)
 		end
 		return 1
 	end
+	
 	if command[1] == "/v" or command[1] == "/V" then
 		local vehid = command[2]
 		local x, y, z = getPlayerPos(playerID)
 		createVehicle(vehid, x + 5.0, y, z, 330.0, 0, 0)
 		return 1
 	end
+	
 	if command[1] == "/money" or command[1] == "/MONEY" then
 		givePlayerMoney(playerID, 696969)
 		return 1
 	end
+	
 	if command[1] == "/ha" or command[1] == "/HA" then
 		setPlayerHealth(playerID, 69)
 		setPlayerArmour(playerID, 69)
 		return 1
 	end
+	
 	if command[1] == "/w" or command[1] == "/W" then
 		giveWeapon(playerID, 24, 1)
 		setWeaponAmmo(playerID, 24, 69)
@@ -166,30 +175,60 @@ function onPlayerCommand(playerID, command)
 		setWeaponAmmo(playerID, 31, 69)
 		return 1
 	end
+	
 	if command[1] == "/clearw" or command[1] == "/CLEARW" then
 		clearPlayerWeapons(playerID)
 		return 1
 	end
+	
 	if command[1] == "/audiostream" or command[1] == "/AUDIOSTREAM" then
 		playAudioStreamForPlayer(playerID, "http://somafm.com/tags.pls", 0.0, 0.0, 0.0, 0)
 		return 1
 	end
+	
 	if command[1] == "/stopaudiostream" or command[1] == "/STOPAUDIOSTREAM" then
 		stopAudioStreamForPlayer(playerID)
 		return 1
 	end
+	
 	if command[1] == "/cp" or command[1] == "/CP" then
 		local x, y, z = getPlayerPos(playerID)
 		setPlayerCheckpoint(playerID, x, y, z, 2.5)
 		sendPlayerMessage(playerID, -1, "Checkpoint set to your position.")
 		return 1
 	end
+	
 	if command[1] == "/disablecp" or command[1] == "/DISABLECP" then
 		disablePlayerCheckpoint(playerID)
 		sendPlayerMessage(playerID, -1, "Checkpoint disabled.")
 		return 1
 	end
 	
+	if command[1] == "/vr" or command[1] == "/VR" then
+		repairVehicle(getPlayerVehicleID(playerID))
+		return 1
+	end	
+	
+	if command[1] == "/dmsgbox" or command[1] == "/DMSGBOX" then
+		showPlayerDialog(playerid, 0, DIALOG_STYLE_MSGBOX, "DIALOG_STYLE_MSGBOX", "This is a message box dialog.\nIt can be used to display a message to a player.", "Button 1", "Button 2")
+		return 1
+	end	
+	
+	if command[1] == "/dinput" or command[1] == "/DINPUT" then
+		showPlayerDialog(playerid, 1, DIALOG_STYLE_INPUT, "DIALOG_STYLE_INPUT", "The input dialog style allows players to input text into the dialog.", "Button 1", "Button 2")
+		return 1
+	end	
+	
+	if command[1] == "/dlist" or command[1] == "/DLIST" then
+		showPlayerDialog(playerid, 2, DIALOG_STYLE_LIST, "DIALOG_STYLE_LIST", "Item 0\nItem 1\nItem 2", "Button 1", "Button 2")
+		return 1
+	end	
+	
+	if command[1] == "/dpassword" or command[1] == "/DPASSWORD" then
+		showPlayerDialog(playerid, 3, DIALOG_STYLE_PASSWORD, "DIALOG_STYLE_PASSWORD", "The password dialog style allows players to input text into the dialog without revealing it.", "Button 1", "Button 2")
+		return 1
+	end	
+
 	sendPlayerMessage(playerID, -1, "Unknown command.")
 	return 0
 end
@@ -204,6 +243,14 @@ end
 
 function onPlayerLeaveCheckpoint(playerID)
 	sendPlayerMessage(playerID, -1, "onPlayerLeaveCheckpoint event called.")
+end
+
+function onPlayerClickMap(playerID, X, Y, Z)
+	setPlayerPosFindZ(playerID, X, Y, Z)
+end
+
+function onDialogResponse(playerID, dialogID, response, listitem, inputtext)
+	outputConsole("[" .. playerID ..":DIALOGRESPONSE] " .. getPlayerName(playerID) .. " (" .. dialogID .. " " .. response .. " " .. listitem .. " " .. inputtext ..")")
 end
 
 function setupPlayerForClassSelection(playerID)

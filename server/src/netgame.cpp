@@ -98,6 +98,8 @@ void Packet_PlayerSync(Packet *p)
 	else
 		bsOnFootBC.Write(false);
 
+	playerPool[playerId].currentVehicleID = 0;
+
 	UpdatePosition(playerId, playerInfo[playerId].onfootData.vecPos[0], playerInfo[playerId].onfootData.vecPos[1], playerInfo[playerId].onfootData.vecPos[2]);
 
 	pRakServer->Send(&bsOnFootBC, HIGH_PRIORITY, UNRELIABLE_SEQUENCED, 0, p->playerId, TRUE);
@@ -116,6 +118,7 @@ void Packet_VehicleSync(Packet *p)
 	bsVehicleSync.IgnoreBits(8);
 	bsVehicleSync.Read((PCHAR)&playerInfo[playerId].incarData, sizeof(INCAR_SYNC_DATA));
 
+	playerPool[playerId].currentVehicleID = playerInfo[playerId].incarData.VehicleID;
 
 	// BROADCAST DATA
 	RakNet::BitStream bsInVehicleBC;

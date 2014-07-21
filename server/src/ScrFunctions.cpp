@@ -139,12 +139,26 @@ int GetPlayerIP(lua_State *L)
 int GetPlayerPing(lua_State *L)
 {
 	PLAYERID playerID = lua_tointeger(L, 1);
+
 	if(isPlayerConnected(playerID))
 	{
 		DWORD dwPing = playerPool[playerID].dwPlayerPing;
 
 		lua_pushnumber(L, (DWORD)dwPing);
 
+		return 1;
+	}
+
+	return 0;
+}
+
+int GetPlayerVehicleID(lua_State *L)
+{
+	PLAYERID playerID = lua_tointeger(L, 1);
+
+	if(isPlayerConnected(playerID))
+	{
+		lua_pushnumber(L, playerPool[playerID].currentVehicleID);
 		return 1;
 	}
 
@@ -198,6 +212,48 @@ int RemoveVehicle(lua_State *L)
 	return 1;
 }
 
+int RepairVehicle(lua_State *L)
+{
+	VEHICLEID vehicleID = lua_tointeger(L, 1);
+
+	if(!doesVehicleExist(vehicleID)) return 0;
+
+	RakNet::BitStream bs;
+
+	bs.Write(vehicleID);
+	bs.Write(1000.0f);
+
+	pRakServer->RPC(&RPC_ScrSetVehicleHealth, &bs, HIGH_PRIORITY, RELIABLE, 0, UNASSIGNED_PLAYER_ID, TRUE, FALSE, UNASSIGNED_NETWORK_ID, NULL);
+
+	bs.Reset();
+
+	bs.Write(vehicleID);
+	bs.Write((uint32_t)0);
+	bs.Write((uint32_t)0);
+	bs.Write((uint8_t)0);
+	bs.Write((uint8_t)0);
+
+	pRakServer->RPC(&RPC_DamageVehicle, &bs, HIGH_PRIORITY, RELIABLE, 0, UNASSIGNED_PLAYER_ID, TRUE, FALSE, UNASSIGNED_NETWORK_ID, NULL);
+	return 1;
+}
+
+int SetVehicleHealth(lua_State *L)
+{
+	VEHICLEID vehicleID = lua_tointeger(L, 1);
+
+	if(!doesVehicleExist(vehicleID)) return 0;
+
+	lua_Number iVehicleHealth = lua_tonumber(L, 2);
+
+	RakNet::BitStream bs;
+
+	bs.Write(vehicleID);
+	bs.Write((float)iVehicleHealth);
+
+	pRakServer->RPC(&RPC_ScrSetVehicleHealth, &bs, HIGH_PRIORITY, RELIABLE, 0, UNASSIGNED_PLAYER_ID, TRUE, FALSE, UNASSIGNED_NETWORK_ID, NULL);
+	return 1;
+}
+
 int SendPlayerMessage(lua_State *L)
 {
 	PLAYERID playerID = lua_tointeger(L, 1);
@@ -245,6 +301,22 @@ int SetPlayerPos(lua_State *L)
 	bs.Write((float)fZ);
 
 	pRakServer->RPC(&RPC_ScrSetPlayerPos, &bs, HIGH_PRIORITY, RELIABLE_ORDERED, 0, pRakServer->GetPlayerIDFromIndex(playerID), FALSE, FALSE, UNASSIGNED_NETWORK_ID, NULL);
+	return 1;
+}
+
+int SetPlayerPosFindZ(lua_State *L)
+{
+	BitStream bs;
+	PLAYERID playerID = lua_tointeger(L, 1);
+	lua_Number fX = lua_tonumber(L, 2);
+	lua_Number fY = lua_tonumber(L, 3);
+	lua_Number fZ = lua_tonumber(L, 4);
+
+	bs.Write((float)fX);
+	bs.Write((float)fY);
+	bs.Write((float)fZ);
+
+	pRakServer->RPC(&RPC_ScrSetPlayerPosFindZ, &bs, HIGH_PRIORITY, RELIABLE_ORDERED, 0, pRakServer->GetPlayerIDFromIndex(playerID), FALSE, FALSE, UNASSIGNED_NETWORK_ID, NULL);
 	return 1;
 }
 
@@ -566,6 +638,41 @@ int GameTextForPlayer(lua_State *L)
 	return 1;
 }
 
+int ShowPlayerDialog(lua_State *L)
+{
+	BitStream bs;
+	PLAYERID iPlayerIndex = lua_tointeger(L, 1);
+
+	unsigned short wDialogID = lua_tointeger(L, 2);
+	unsigned char bDialogStyle = lua_tointeger(L, 3);
+
+	char *szCaption = (char *)lua_tostring(L, 4);
+	char *szInfo = (char *)lua_tostring(L, 5);
+	char *szButton1 = (char *)lua_tostring(L, 6);
+	char *szButton2 = (char *)lua_tostring(L, 7);
+
+	unsigned char iCaptionLength = strlen(szCaption);
+	unsigned char iButton1Length = strlen(szButton1);
+	unsigned char iButton2Length = strlen(szButton2);
+
+	bs.Write(wDialogID);
+	bs.Write(bDialogStyle);
+
+	bs.Write(iCaptionLength);
+	bs.Write(szCaption, iCaptionLength);
+
+	bs.Write(iButton1Length);
+	bs.Write(szButton1, iButton1Length);
+
+	bs.Write(iButton2Length);
+	bs.Write(szButton2, iButton2Length);
+
+	stringCompressor->EncodeString(szInfo, strlen(szInfo)+1, &bs);
+
+	pRakServer->RPC(&RPC_ScrDialogBox, &bs, HIGH_PRIORITY, RELIABLE_ORDERED, 0, pRakServer->GetPlayerIDFromIndex(iPlayerIndex), FALSE, FALSE, UNASSIGNED_NETWORK_ID, NULL);
+	return 1;
+}
+
 void RegisterScriptingFunctions(lua_State *L)
 {
 	generateAndLoadInternalScript(L);
@@ -578,11 +685,18 @@ void RegisterScriptingFunctions(lua_State *L)
 
 	lua_register(L, "isPlayerConnected", IsPlayerConnected);
 	lua_register(L, "getPlayerName", GetPlayerName);
+
 	lua_register(L, "getPlayerPos", GetPlayerPos);
+	lua_register(L, "setPlayerPos", SetPlayerPos);
+	lua_register(L, "setPlayerPosFindZ", SetPlayerPosFindZ);
+
 	lua_register(L, "getPlayerScore", GetPlayerScore);
 	lua_register(L, "setPlayerScore", SetPlayerScore);
+
 	lua_register(L, "getPlayerIP", GetPlayerIP);
 	lua_register(L, "getPlayerPing", GetPlayerPing);
+
+	lua_register(L, "getPlayerVehicleID", GetPlayerVehicleID);
 
 	lua_register(L, "sendPlayerMessage", SendPlayerMessage);
 	lua_register(L, "sendPlayerChatMessage", SendPlayerChatMessage);
@@ -605,6 +719,8 @@ void RegisterScriptingFunctions(lua_State *L)
 	lua_register(L, "addStaticVehicle", AddStaticVehicle);
 	lua_register(L, "createVehicle", CreateVehicle);
 	lua_register(L, "removeVehicle", RemoveVehicle);
+	lua_register(L, "repairVehicle", RepairVehicle);
+	lua_register(L, "setVehicleHealth", SetVehicleHealth);
 
 	lua_register(L, "giveWeapon", GiveWeapon);
 	lua_register(L, "setWeaponAmmo", SetWeaponAmmo);
@@ -624,6 +740,8 @@ void RegisterScriptingFunctions(lua_State *L)
 	
 	lua_register(L, "gameTextForAll", GameTextForAll);
 	lua_register(L, "gameTextForPlayer", GameTextForPlayer);
+
+	lua_register(L, "showPlayerDialog", ShowPlayerDialog);
 }
 
 // ---------------------------------------------------------------------------------------------------------

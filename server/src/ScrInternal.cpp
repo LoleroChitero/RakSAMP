@@ -10,6 +10,8 @@ void generateAndLoadInternalScript(lua_State *L)
 
 	sprintf(szScript, "MAX_PLAYERS = %u\nMAX_VEHICLES = %u\n", MAX_PLAYERS, MAX_VEHICLES);
 
+	strcat(szScript, "DIALOG_STYLE_MSGBOX = 0\nDIALOG_STYLE_INPUT = 1\nDIALOG_STYLE_LIST = 2\nDIALOG_STYLE_PASSWORD = 3\n");
+
 	char buf[256];
 	for(int n = 0; n < VEHICLE_LIST_SIZE; n++)
 	{

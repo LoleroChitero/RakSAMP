@@ -11,11 +11,12 @@ Avalable runmodes:
 <RakSAMPClient console="0" runmode="3" autorun="0" find="1" select_classid="0" manual_spawn="1"
 			   print_timestamps="0" chatcolor_rgb="0 0 130" clientmsg_rgb="0 130 0" cpalert_rgb="170 0 0"
 			   followplayer="P3ti" followplayerwithvehicleid="295" followXOffset="3.0" followYOffset="0.0" followZOffset="0.0"
-			   imitatechat="" updatestats="1" minfps="20" maxfps="90">
+			   imitatechat="" updatestats="1" minfps="20" maxfps="90" clientversion="0.3z">
 
-	<!-- The first one is the one it will connect to -->
 	<server nickname="root" password="">127.0.0.1:7777</server>
 
+	<intervals spam="150" fakekill="50" lag="20" />
+	<log objects="0" pickups="0" />
 
 	<!-- In normal mode this will be your default position, but if you don't set 'force' to 1, then the server can move you with SetPlayerPos, SetPlayerFacingAngle or SetSpawnInfo. -->
 	<normal_pos position="325.35 2512.09 16.56" rotation="0.0" force="0" />
@@ -28,14 +29,22 @@ Avalable runmodes:
 		!runmode: sets current runmode.
 		!stats: shows raknet statistics.
 		!players: shows list of players.
+		!login: login to RCON.
+		!rcon: send an RCON command.
 		!goto: go to players position.
 		!gotocp: go to the current checkpoint.
 		!autogotocp: toggle automatic checkpoint teleporter.
 		!imitate: change imitate name.
 		!vlist: shows list of vehicles.
 		!vdeath: send vehicle death notification.
+		!fu: send lost connection packet to server.
 		!spawn: spawns fake player.
+		!pickup: pick up a pickup by ID.
+		!class: select a class.
 		!menusel: selects an item from the GTA menu.
+		!kill: toggle fake kill flooder.
+		!lag: toggle server lagger.
+		!spam: toggle reconnect spammer.
 		!weapon: sets the current weapon in the fake player's hand.
 		!selplayer: sets the followed player's name.
 		!selveh: sets the fake player's vehicle.

@@ -245,12 +245,12 @@ int RunCommand(char *szCMD, int iFromAutorun)
 	// FAKE KILL :-)
 	if(!strncmp(szCMD, "kill", 4) || !strncmp(szCMD, "KILL", 4))
 	{
-		if(!settings.fakeKill) {
-			Log("Started flooding :-)");
-			settings.fakeKill=true;
+		if(!settings.bFakeKill) {
+			Log("Started flooding.. :-)");
+			settings.bFakeKill = true;
 		}else{
-			settings.fakeKill=false;
-			Log("Stopped flooding...");
+			settings.bFakeKill = false;
+			Log("Stopped flooding.");
 		}
 		return 1;
 	}
@@ -258,12 +258,12 @@ int RunCommand(char *szCMD, int iFromAutorun)
 	// LAG :-)
 	if(!strncmp(szCMD, "lag", 4) || !strncmp(szCMD, "LAG", 4))
 	{
-		if(!settings.lag) {
-			Log("Started lagging :-)");
-			settings.lag=true;
+		if(!settings.bLag) {
+			Log("Started lagging.. :-)");
+			settings.bLag=true;
 		}else{
-			settings.lag=false;
-			Log("Stopped lagging...");
+			settings.bLag=false;
+			Log("Stopped lagging.");
 		}
 		return 1;
 	}
@@ -271,22 +271,38 @@ int RunCommand(char *szCMD, int iFromAutorun)
 	// SPAM :-)
 	if(!strncmp(szCMD, "spam", 4) || !strncmp(szCMD, "SPAM", 4))
 	{
-		if (settings.ispam) {
-			Log("Stopped spamming...");
-			settings.ispam = false;
+		if (settings.bSpam) {
+			Log("Stopped spamming.");
+			settings.bSpam = false;
 		}else{
-			Log("Started spamming...");
-			settings.ispam = true;
+			Log("Started spamming..");
+			settings.bSpam = true;
 		}
+		return 1;
+	}
+
+	// REQUEST CLASS
+	if(!strncmp(szCMD, "class", 5) || !strncmp(szCMD, "CLASS", 5))
+	{
+		sampRequestClass(atoi(&szCMD[6]));
 		return 1;
 	}
 
 	// SPAWNS THE FAKE PLAYER
 	if(!strncmp(szCMD, "spawn", 5) || !strncmp(szCMD, "SPAWN", 5))
 	{
-		sampRequestClass(settings.iClassID);
 		sampSpawn();
 		iSpawned = 1;
+		return 1;
+	}
+
+	// SEND WE PICKED UP A PICKUP :-)
+	if(!strncmp(szCMD, "pickup", 6) || !strncmp(szCMD, "PICKUP", 6))
+	{
+		int iPickupID = atoi(&szCMD[7]);
+
+		sendPickUp(iPickupID);
+		Log("Picked up ID %d pickup.", iPickupID);
 		return 1;
 	}
 
@@ -388,39 +404,40 @@ int RunCommand(char *szCMD, int iFromAutorun)
 	{
 		char *szNewPlayerName = &szCMD[11];
 
-		sprintf_s(g_szNickName, 32, szNewPlayerName);
+		if(strlen(szCMD) > 11 && strcmp(g_szNickName, szNewPlayerName) != 0)
+		{
+			sprintf_s(g_szNickName, 32, szNewPlayerName);
 
-		int iVersion = NETGAME_VERSION;
-		BYTE byteMod = 1;
+			int iVersion = NETGAME_VERSION;
+			unsigned int uiClientChallengeResponse = settings.uiChallange ^ iVersion;
+			BYTE byteMod = 1;
 
-		char auth_bs[4*16] = {0};
-		pSamp->getSerial(auth_bs);
+			char auth_bs[4*16] = {0};
+			gen_gpci(auth_bs, 0x3e9);
 
-		BYTE byteAuthBSLen;
-		byteAuthBSLen = (BYTE)strlen(auth_bs);
-		BYTE byteNameLen = (BYTE)strlen(g_szNickName);
+			BYTE byteAuthBSLen;
+			byteAuthBSLen = (BYTE)strlen(auth_bs);
+			BYTE byteNameLen = (BYTE)strlen(g_szNickName);
+			BYTE iClientVerLen = (BYTE)strlen(settings.szClientVersion);
 
-		unsigned int uiClientChallengeResponse = settings.uiChallange ^ iVersion;
+			RakNet::BitStream bsSend;
+			bsSend.Write(iVersion);
+			bsSend.Write(byteMod);
+			bsSend.Write(byteNameLen);
+			bsSend.Write(g_szNickName, byteNameLen);
+			
+			bsSend.Write(uiClientChallengeResponse);
+			bsSend.Write(byteAuthBSLen);
+			bsSend.Write(auth_bs, byteAuthBSLen);
+			bsSend.Write(iClientVerLen);
+			bsSend.Write(settings.szClientVersion, iClientVerLen);
 
-		RakNet::BitStream bsSend;
-		bsSend.Write(iVersion);
-		bsSend.Write(byteMod);
-		bsSend.Write(byteNameLen);
-		bsSend.Write(g_szNickName, byteNameLen);
-		
-		bsSend.Write(uiClientChallengeResponse);
-		bsSend.Write(byteAuthBSLen);
-		bsSend.Write(auth_bs, byteAuthBSLen);
-		char szClientVer[] = "0.3z";
-		const BYTE iClientVerLen = (sizeof(szClientVer)-1);
-		bsSend.Write(iClientVerLen);
-		bsSend.Write(szClientVer, iClientVerLen);
+			pRakClient->RPC(&RPC_ClientJoin, &bsSend, HIGH_PRIORITY, RELIABLE, 0, FALSE, UNASSIGNED_NETWORK_ID, NULL);
 
-		pRakClient->RPC(&RPC_ClientJoin, &bsSend, HIGH_PRIORITY, RELIABLE, 0, FALSE, UNASSIGNED_NETWORK_ID, NULL);
+			iAreWeConnected = 1;
 
-		iAreWeConnected = 1;
-
-		Log("Changed name to %s and rejoined to the game.", g_szNickName);
+			Log("Changed name to %s and rejoined to the game.", g_szNickName);
+		}
 		return 1;
 	}
 
@@ -458,6 +475,23 @@ int RunCommand(char *szCMD, int iFromAutorun)
 	if(!strncmp(szCMD, "pos_z", 5) || !strncmp(szCMD, "pos_Z", 5) || !strncmp(szCMD, "POS_Z", 5))
 	{
 		settings.fNormalModePos[2] = (float)atof(&szCMD[6]);
+		return 1;
+	}
+
+	// SEND DIALOG RESPONSE :-)
+	if(!strncmp(szCMD, "dialogresponse", 14) || !strncmp(szCMD, "DIALOGRESPONSE", 14))
+	{
+		char szDialogID[10], szButtonID[10], szListBoxItem[10], szInputResp[128];
+
+		if(sscanf(&szCMD[15], "%s%s%s%s", szDialogID, szButtonID, szListBoxItem, szInputResp) < 4)
+		{
+			Log("USAGE: !dialogresponse <Dialog ID> <Button ID> <Listbox item> <Input response>");
+			return 1;
+		}
+
+		sendDialogResponse(atoi(szDialogID), atoi(szButtonID), atoi(szListBoxItem), szInputResp);
+
+		Log("Dialog response sent.");
 		return 1;
 	}
 

@@ -14,6 +14,7 @@
 #include "RakServerInterface.h"
 #include "NetworkTypes.h"
 #include "BitStream.h"
+#include "StringCompressor.h"
 
 #include "../../tinyxml/tinyxml.h"
 #include "samp_netencr.h"

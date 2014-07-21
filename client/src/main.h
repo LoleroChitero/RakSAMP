@@ -7,6 +7,7 @@
 #include <conio.h> // need sum co�os and vaginas
 #include <windows.h>
 #include <time.h>
+#include <iostream>
 #include "../../common/common.h"
 
 // window stuff
@@ -75,6 +76,3 @@ void handleQueries(char *s, int len);
 void Log ( char *fmt, ... );
 void gen_random(char *s, const int len);
 extern RakClientInterface *pRakClient;
-
-#include "samp.h"
-extern SAMP* pSamp;

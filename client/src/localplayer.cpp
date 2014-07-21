@@ -206,11 +206,8 @@ void SendPassengerFullSyncData(VEHICLEID vehicleID)
 }
 
 DWORD dwLastAimDataSentTick = GetTickCount();
-void SendAimSyncData(AIM_SYNC_DATA *paimSync, DWORD dwAmmoInClip, int iReloading, PLAYERID copyFromPlayer)
+void SendAimSyncData(DWORD dwAmmoInClip, int iReloading, PLAYERID copyFromPlayer)
 {
-	if(paimSync == NULL)
-		return;
-
 	if(dwLastAimDataSentTick && dwLastAimDataSentTick < (GetTickCount() - iNetModeFiringSendRate))
 	{
 		RakNet::BitStream bsAimSync;
@@ -223,8 +220,14 @@ void SendAimSyncData(AIM_SYNC_DATA *paimSync, DWORD dwAmmoInClip, int iReloading
 
 			memcpy((void *)&aimSync, (void *)&playerInfo[copyFromPlayer].aimData, sizeof(AIM_SYNC_DATA));
 
+			if(aimSync.vecAimPos[0] == 0.0f && aimSync.vecAimPos[1] == 0.0f && aimSync.vecAimPos[2] == 0.0f)
+			{
+				aimSync.vecAimPos[0] = 0.25f;
+			}
+
 			bsAimSync.Write((BYTE)ID_AIM_SYNC);
 			bsAimSync.Write((PCHAR)&aimSync, sizeof(AIM_SYNC_DATA));
+
 			pRakClient->Send(&bsAimSync, HIGH_PRIORITY, UNRELIABLE_SEQUENCED, 0);
 
 			dwLastAimDataSentTick = GetTickCount();
@@ -232,14 +235,17 @@ void SendAimSyncData(AIM_SYNC_DATA *paimSync, DWORD dwAmmoInClip, int iReloading
 		else
 		{
 			if(iReloading)
-				paimSync->byteWeaponState = WS_RELOADING;
+				playerInfo[g_myPlayerID].aimData.byteWeaponState = WS_RELOADING;
 			else
-				paimSync->byteWeaponState = (dwAmmoInClip > 1) ? WS_MORE_BULLETS : dwAmmoInClip;
+				playerInfo[g_myPlayerID].aimData.byteWeaponState = (dwAmmoInClip > 1) ? WS_MORE_BULLETS : dwAmmoInClip;
 
-			paimSync->bUnk = 0x55;
+			playerInfo[g_myPlayerID].aimData.bUnk = 0x55;
+
+			memcpy((void *)&aimSync, (void *)&playerInfo[g_myPlayerID].aimData, sizeof(AIM_SYNC_DATA));
 
 			bsAimSync.Write((BYTE)ID_AIM_SYNC);
 			bsAimSync.Write((PCHAR)&aimSync, sizeof(AIM_SYNC_DATA));
+
 			pRakClient->Send(&bsAimSync, HIGH_PRIORITY, UNRELIABLE_SEQUENCED, 0);
 
 			dwLastAimDataSentTick = GetTickCount();

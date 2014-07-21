@@ -47,3 +47,5 @@ void MakeOrthMatrix(float fInW, float fInX, float fInY, float fInZ,
 					float *m00, float *m01, float *m02,
 					float *m10, float *m11, float *m12,
 					float *m20, float *m21, float *m22);
+
+void BIG_NUM_MUL(unsigned long in[5], unsigned long out[6], unsigned long factor);

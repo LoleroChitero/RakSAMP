@@ -8,7 +8,7 @@
 
 #include "SAMP_VER.h"
 
-#define RAKSAMP_VERSION "v0.8.4-0.3z"
+#define RAKSAMP_VERSION "v0.8.5-0.3z"
 #define NETCODE_OPENCONNLULZ 6969
 #define NETGAME_VERSION 4047
 
@@ -186,6 +186,16 @@ typedef struct _PLAYER_SPAWN_INFO
 	int iSpawnWeapons[3];
 	int iSpawnWeaponsAmmo[3];
 } PLAYER_SPAWN_INFO;
+
+#pragma pack(1)
+typedef struct _PICKUP
+{
+	int iModel;
+	int iType;
+	float fX;
+	float fY;
+	float fZ;
+} PICKUP;
 
 struct stPlayerInfo
 {
