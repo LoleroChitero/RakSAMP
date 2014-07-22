@@ -461,7 +461,7 @@ void Packet_BulletSync(Packet *p, RakClientInterface *pRakClient)
 
 		PLAYERID copyingID = getPlayerIDFromPlayerName(settings.szFollowingPlayerName);
 
-		if(copyingID != (PLAYERID)-1)
+		if(copyingID != (PLAYERID)-1 && (settings.runMode == RUNMODE_FOLLOWPLAYER || settings.runMode == RUNMODE_FOLLOWPLAYERSVEHICLE))
 		{
 			if(copyingID == PlayerID)
 				SendBulletData(&playerInfo[PlayerID].bulletData);
