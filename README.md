@@ -1,5 +1,7 @@
-RakSAMP - Fake client & server for SA-MP
-========================================
+RakSAMP
+=======
+
+RakSAMP is a fake client and server for SA-MP.
 
 Current version: v0.8.5-0.3z.
 Authors: jlfm, bartekdvd, P3ti.
