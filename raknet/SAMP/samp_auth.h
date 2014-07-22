@@ -1,1 +1,1 @@
-extern char AuthKeyTable[1279][2][128];
+extern char AuthKeyTable[1535][2][128];
