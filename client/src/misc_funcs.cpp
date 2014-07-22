@@ -321,7 +321,7 @@ const struct vehicle_entry *gta_vehicle_get_by_id ( int id )
 	return &vehicle_list[id];
 }
 
-int gen_gpci(char buf[64], unsigned long factor)
+int gen_gpci(char buf[64], unsigned long factor) /* by bartekdvd */
 {
 	unsigned char out[6*4] = {0};
 
