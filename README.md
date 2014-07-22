@@ -57,12 +57,12 @@ The client supports 0.3z-R3 servers too.
 
 --
 ### Server
+You can create LUA scripts for the server.
+  
 **Limits in the server:**
 * Max players: 1000.
 * Max vehicles: 2000.
 * Max scripts: 32.
-  
-You can create LUA scripts for the server.  
   
 **Available scripting events in the server:**
 * onScriptStart
