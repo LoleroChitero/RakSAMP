@@ -57,6 +57,7 @@ Avalable runmodes:
 		!bulletflood: flood the server with bullet sync packets to the players' positions.
 		!pulsehealth: pulse health & armor.
 		!changename: change the fake player's name and rejoin the game.
+		!dialogresponse: send a dialog response.
 	-->
 
 	<!-- These get called when we successfully connected to a server. -->
