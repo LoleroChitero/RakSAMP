@@ -365,10 +365,7 @@ void MakeOrthMatrix(float fInW, float fInX, float fInY, float fInZ,
 void BIG_NUM_MUL(unsigned long in[5], unsigned long out[6], unsigned long factor)
 {
 	/*
-		It's from TTMath library.
-		Author: Tomasz Sowa.
-
-		http://www.ttmath.org/
+		Based on TTMath library by Tomasz Sowa.
 	*/
 
 	unsigned long src[5] = {0};
