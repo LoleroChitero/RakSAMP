@@ -22,3 +22,5 @@ void ScriptEvent_OnPlayerEnterCheckpoint(lua_State *L, int iPlayerID);
 void ScriptEvent_OnPlayerLeaveCheckpoint(lua_State *L, int iPlayerID);
 void ScriptEvent_OnPlayerClickMap(lua_State *L, int iPlayerID, float fX, float fY, float fZ);
 void ScriptEvent_OnDialogResponse(lua_State *L, int iPlayerID, int iDialogID, int iButtonID, int iListBoxItem, char* szInputResp);
+void ScriptEvent_OnPlayerInteriorChange(lua_State *L, int iPlayerID, BYTE byteInteriorId);
+void ScriptEvent_OnScmEvent(lua_State *L, int iPlayerID, int iEventID, DWORD dwParams1, DWORD dwParams2, DWORD dwParams3);

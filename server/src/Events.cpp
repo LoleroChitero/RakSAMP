@@ -312,3 +312,38 @@ void ScriptEvent_OnDialogResponse(lua_State *L, int iPlayerID, int iDialogID, in
 	if(lua_pcall(L, 5, 0, 0) != 0)
 		Log("WARNING: Error calling onDialogResponse:\n%s", lua_tostring(L, -1));
 }
+
+void ScriptEvent_OnPlayerInteriorChange(lua_State *L, int iPlayerID, BYTE byteInteriorId)
+{
+	lua_getglobal(L, "onPlayerInteriorChange");
+	if(!lua_isfunction(L, -1))
+	{
+		lua_pop(L, 1);
+		return;
+	}
+
+	lua_pushinteger(L, iPlayerID);
+	lua_pushinteger(L, byteInteriorId);
+
+	if(lua_pcall(L, 2, 0, 0) != 0)
+		Log("WARNING: Error calling onPlayerInteriorChange:\n%s", lua_tostring(L, -1));
+}
+
+void ScriptEvent_OnScmEvent(lua_State *L, int iPlayerID, int iEventID, DWORD dwParams1, DWORD dwParams2, DWORD dwParams3)
+{
+	lua_getglobal(L, "onScmEvent");
+	if(!lua_isfunction(L, -1))
+	{
+		lua_pop(L, 1);
+		return;
+	}
+
+	lua_pushinteger(L, iPlayerID);
+	lua_pushinteger(L, iEventID);
+	lua_pushinteger(L, dwParams1);
+	lua_pushinteger(L, dwParams2);
+	lua_pushinteger(L, dwParams3);
+
+	if(lua_pcall(L, 5, 0, 0) != 0)
+		Log("WARNING: Error calling onScmEvent:\n%s", lua_tostring(L, -1));
+}

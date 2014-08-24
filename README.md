@@ -2,7 +2,7 @@ RakSAMP
 =======
 RakSAMP is a fake client and server for SA-MP.  
   
-Current version: v0.8.5-0.3z.  
+Current version: v0.8.6-0.3z RC1.  
 Authors: jlfm, bartekdvd, P3ti.  
 Special thanks to balika011 and .silent.  
 
@@ -44,12 +44,8 @@ The client supports 0.3z-R3 servers too.
 * !weapon: sets the current weapon in the fake player's hand.
 * !selplayer: sets the followed player's name.
 * !selveh: sets the fake player's vehicle.
-* !pos_x: sets the fake player's position (X).
-* !pos_y: sets the fake player's position (Y).
-* !pos_z: sets the fake player's position (Z).
-* !follow_x: sets the following offset (X).
-* !follow_y: sets the following offset (Y).
-* !follow_z: sets the following offset (Z).
+* !pos: sets the fake player's position.
+* !follow: sets the following offset.
 * !bulletflood: flood the server with bullet sync packets to the players' positions.
 * !pulsehealth: pulse health & armor.
 * !changename: change the fake player's name and rejoin the game.
@@ -57,6 +53,7 @@ The client supports 0.3z-R3 servers too.
 * !logstatus: show log status.
 * !log: toggle logging objects/pickups/textlabels.
 * !teleport: show the teleport menu.
+* !scmevent: send SCM event.
 
 --
 ### Server
@@ -87,6 +84,8 @@ You can create LUA scripts for the server.
 * onPlayerLeaveCheckpoint
 * onPlayerClickMap
 * onDialogResponse
+* onPlayerInteriorChange
+* onScmEvent
   
 **Available scripting functions in the server:**
 * outputConsole
@@ -98,6 +97,8 @@ You can create LUA scripts for the server.
 * getPlayerPos
 * setPlayerPos
 * setPlayerPosFindZ
+* getPlayerInterior
+* setPlayerInterior
 * getPlayerScore
 * setPlayerScore
 * getPlayerIP
@@ -106,9 +107,7 @@ You can create LUA scripts for the server.
 * sendPlayerMessage
 * sendPlayerChatMessage
 * sendPlayerChatMessageToAll
-* setPlayerPos
 * setPlayerRotation
-* setPlayerInterior
 * setPlayerCameraPos
 * setPlayerCameraLookAt
 * setCameraBehindPlayer
@@ -135,3 +134,4 @@ You can create LUA scripts for the server.
 * gameTextForAll
 * gameTextForPlayer
 * showPlayerDialog
+* broadcastScmEvent

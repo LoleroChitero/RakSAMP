@@ -234,7 +234,7 @@ function onPlayerCommand(playerID, command)
 end
 
 function onPlayerWeaponShot(playerID, weaponID, hitType, hitID, X, Y, Z)
-	--outputConsole("[" .. playerID ..":WEAPONSHOOT] " .. getPlayerName(playerID) .. ": " .. weaponID .." " .. hitType .. " " .. hitID .. " " .. X .. " " .. Y .. " ".. Z .. "")
+	--outputConsole("[" .. playerID ..":WEAPONSHOT] " .. getPlayerName(playerID) .. ": " .. weaponID .." " .. hitType .. " " .. hitID .. " " .. X .. " " .. Y .. " ".. Z .. "")
 end
 
 function onPlayerEnterCheckpoint(playerID)
@@ -251,6 +251,16 @@ end
 
 function onDialogResponse(playerID, dialogID, response, listitem, inputtext)
 	outputConsole("[" .. playerID ..":DIALOGRESPONSE] " .. getPlayerName(playerID) .. " (" .. dialogID .. " " .. response .. " " .. listitem .. " " .. inputtext ..")")
+end
+
+function onPlayerInteriorChange(playerID, interiorID)
+	outputConsole("[" .. playerID ..":INTERIOR_CHANGE] " .. getPlayerName(playerID) .. " (" .. interiorID ..")")
+end
+
+function onScmEvent(playerID, eventID, param1, param2, param3)
+	outputConsole("[" .. playerID ..":SCM_EVENT] " .. getPlayerName(playerID) .. " (" .. eventID .. " " .. param1 .. " " .. param2 .. " " .. param3 .. ")")
+
+	broadcastScmEvent(playerID, eventID, param1, param2, param3)
 end
 
 function setupPlayerForClassSelection(playerID)

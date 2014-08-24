@@ -8,7 +8,7 @@
 
 #include "SAMP_VER.h"
 
-#define RAKSAMP_VERSION "v0.8.5-0.3z"
+#define RAKSAMP_VERSION "v0.8.6-0.3z RC1"
 #define NETCODE_OPENCONNLULZ 6969
 #define NETGAME_VERSION 4047
 
@@ -39,37 +39,37 @@ typedef unsigned long long	uint64_t;
 #define vsnprintf	_vsnprintf
 #define isfinite	_finite
 
-#define EVENT_TYPE_PAINTJOB			1
+#define EVENT_TYPE_PAINTJOB				1
 #define EVENT_TYPE_CARCOMPONENT			2
-#define EVENT_TYPE_CARCOLOR			3
+#define EVENT_TYPE_CARCOLOR				3
 #define EVENT_ENTEREXIT_MODSHOP			4
 
-#define BULLET_HIT_TYPE_NONE            	0
-#define BULLET_HIT_TYPE_PLAYER          	1
-#define BULLET_HIT_TYPE_VEHICLE         	2
-#define BULLET_HIT_TYPE_OBJECT          	3
-#define BULLET_HIT_TYPE_PLAYER_OBJECT   	4
+#define BULLET_HIT_TYPE_NONE			0
+#define BULLET_HIT_TYPE_PLAYER			1
+#define BULLET_HIT_TYPE_VEHICLE			2
+#define BULLET_HIT_TYPE_OBJECT			3
+#define BULLET_HIT_TYPE_PLAYER_OBJECT   4
 
-#define KEY_UP					-128
-#define KEY_DOWN				128
-#define KEY_LEFT				-128
-#define KEY_RIGHT				128
-#define KEY_ACTION				1
-#define KEY_CROUCH				2
-#define KEY_FIRE				4
-#define KEY_SPRINT				8
+#define KEY_UP							-128
+#define KEY_DOWN						128
+#define KEY_LEFT						-128
+#define KEY_RIGHT						128
+#define KEY_ACTION						1
+#define KEY_CROUCH						2
+#define KEY_FIRE						4
+#define KEY_SPRINT						8
 #define KEY_SECONDARY_ATTACK			16
-#define KEY_JUMP				32
-#define KEY_LOOK_RIGHT				64
-#define KEY_HANDBRAKE				128
-#define KEY_LOOK_LEFT				256
-#define KEY_SUBMISSION				512
-#define KEY_LOOK_BEHIND				512
-#define KEY_WALK				1024
-#define KEY_ANALOG_UP				2048
-#define KEY_ANALOG_DOWN				4096
-#define KEY_ANALOG_LEFT				8192
-#define KEY_ANALOG_RIGHT			16384
+#define KEY_JUMP						32
+#define KEY_LOOK_RIGHT					64
+#define KEY_HANDBRAKE					128
+#define KEY_LOOK_LEFT					256
+#define KEY_SUBMISSION					512
+#define KEY_LOOK_BEHIND					512
+#define KEY_WALK						1024
+#define KEY_ANALOG_UP					2048
+#define KEY_ANALOG_DOWN					4096
+#define KEY_ANALOG_LEFT					8192
+#define KEY_ANALOG_RIGHT				16384
 
 #pragma pack(1)
 typedef struct _ONFOOT_SYNC_DATA
@@ -206,6 +206,7 @@ struct stPlayerInfo
 	int iScore;
 	DWORD dwPing;
 	int iAreWeInAVehicle;
+	BYTE byteInteriorId;
 
 	// STORED INFO
 	ONFOOT_SYNC_DATA onfootData;
@@ -221,18 +222,18 @@ struct stPlayerInfo
 ///////////////////////////////////////////
 
 #define VEHICLE_LIST_ID_START			400
-#define VEHICLE_LIST_SIZE			212
+#define VEHICLE_LIST_SIZE				212
 
-#define VEHICLE_CLASS_CAR			0
+#define VEHICLE_CLASS_CAR				0
 #define VEHICLE_CLASS_CAR_FAST			1
-#define VEHICLE_CLASS_HEAVY			2
-#define VEHICLE_CLASS_HELI			3
+#define VEHICLE_CLASS_HEAVY				2
+#define VEHICLE_CLASS_HELI				3
 #define VEHICLE_CLASS_AIRPLANE			4
-#define VEHICLE_CLASS_BIKE			5
-#define VEHICLE_CLASS_BOAT			6
-#define VEHICLE_CLASS_MINI			7
+#define VEHICLE_CLASS_BIKE				5
+#define VEHICLE_CLASS_BOAT				6
+#define VEHICLE_CLASS_MINI				7
 #define VEHICLE_CLASS_TRAILER			8
-#define VEHICLE_CLASS_COUNT			9	/* # of classes */
+#define VEHICLE_CLASS_COUNT				9	/* # of classes */
 
 struct vehicle_entry
 {

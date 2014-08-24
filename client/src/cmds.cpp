@@ -362,24 +362,27 @@ int RunCommand(char *szCMD, int iFromAutorun)
 		return 1;
 	}
 	
-	// CHANGE FOLLOWING OFFSET (X)
-	if(!strncmp(szCMD, "follow_x", 8) || !strncmp(szCMD, "follow_X", 8) || !strncmp(szCMD, "FOLLOW_X", 8))
+	// CHANGE FOLLOWING OFFSET
+	if(!strncmp(szCMD, "follow", 6) || !strncmp(szCMD, "FOLLOW", 6))
 	{
-		settings.fFollowXOffset = (float)atof(&szCMD[9]);
-		return 1;
-	}
+		char szType[32];
+		float fValue;
 
-	// CHANGE FOLLOWING OFFSET (Y)
-	if(!strncmp(szCMD, "follow_y", 8) || !strncmp(szCMD, "follow_Y", 8) || !strncmp(szCMD, "FOLLOW_Y", 8))
-	{
-		settings.fFollowYOffset = (float)atof(&szCMD[9]);
-		return 1;
-	}
+		if(sscanf(&szCMD[4], "%s%f", szType, &fValue) < 2)
+		{
+			Log("USAGE: !follow <x/y/z> <value>");
+			return 1;
+		}
 
-	// CHANGE FOLLOWING OFFSET (Z)
-	if(!strncmp(szCMD, "follow_z", 8) || !strncmp(szCMD, "follow_Z", 8) || !strncmp(szCMD, "FOLLOW_Z", 8))
-	{
-		settings.fFollowZOffset = (float)atof(&szCMD[9]);
+		if(szType[0] == 'x')
+			settings.fFollowXOffset = fValue;
+
+		else if(szType[0] == 'y')
+			settings.fFollowYOffset = fValue;
+
+		else if(szType[0] == 'z')
+			settings.fFollowZOffset = fValue;
+
 		return 1;
 	}
 
@@ -457,24 +460,27 @@ int RunCommand(char *szCMD, int iFromAutorun)
 		return 1;
 	}
 
-	// CHANGE POSITION (X)
-	if(!strncmp(szCMD, "pos_x", 5) || !strncmp(szCMD, "pos_X", 5) || !strncmp(szCMD, "POS_X", 5))
+	// CHANGE POSITION
+	if(!strncmp(szCMD, "pos", 3) || !strncmp(szCMD, "POS", 3))
 	{
-		settings.fNormalModePos[0] = (float)atof(&szCMD[6]);
-		return 1;
-	}
+		char szType[32];
+		float fValue;
 
-	// CHANGE POSITION (Y)
-	if(!strncmp(szCMD, "pos_y", 5) || !strncmp(szCMD, "pos_Y", 5) || !strncmp(szCMD, "POS_Y", 5))
-	{
-		settings.fNormalModePos[1] = (float)atof(&szCMD[6]);
-		return 1;
-	}
+		if(sscanf(&szCMD[4], "%s%f", szType, &fValue) < 2)
+		{
+			Log("USAGE: !pos <x/y/z> <value>");
+			return 1;
+		}
 
-	// CHANGE POSITION (Z)
-	if(!strncmp(szCMD, "pos_z", 5) || !strncmp(szCMD, "pos_Z", 5) || !strncmp(szCMD, "POS_Z", 5))
-	{
-		settings.fNormalModePos[2] = (float)atof(&szCMD[6]);
+		if(szType[0] == 'x')
+			settings.fNormalModePos[0] = fValue;
+
+		else if(szType[0] == 'y')
+			settings.fNormalModePos[1] = fValue;
+
+		else if(szType[0] == 'z')
+			settings.fNormalModePos[2] = fValue;
+
 		return 1;
 	}
 
@@ -570,6 +576,21 @@ int RunCommand(char *szCMD, int iFromAutorun)
 		else
 			useTeleport(iTeleportID);
 
+		return 1;
+	}
+
+	// SEND SCM EVENT
+	if(!strncmp(szCMD, "scmevent", 8) || !strncmp(szCMD, "SCMEVENT", 8))
+	{
+		int iEvent, iParam1, iParam2, iParam3;
+		
+		if(sscanf(&szCMD[9], "%d%d%d%d", &iEvent, &iParam1, &iParam2, &iParam3) < 4)
+		{
+			Log("USAGE: !scmevent <type> <param1> <param2> <param3>");
+			return 1;
+		}
+
+		SendScmEvent(iEvent, iParam1, iParam2, iParam3);
 		return 1;
 	}
 

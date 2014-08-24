@@ -113,7 +113,7 @@ void SpawnAllVehiclesForPlayer(PLAYERID playerID)
 	}
 }
 
-void RPC_ClientJoins(RPCParameters *rpcParams)
+void ClientJoin(RPCParameters *rpcParams)
 {
 	PCHAR Data = reinterpret_cast<PCHAR>(rpcParams->input);
 	int iBitLength = rpcParams->numberOfBitsOfData;
@@ -183,7 +183,7 @@ void RPC_ClientJoins(RPCParameters *rpcParams)
 	}
 }
 
-void RPC_ClientRequestsClass(RPCParameters *rpcParams)
+void RequestClass(RPCParameters *rpcParams)
 {
 	PCHAR Data = reinterpret_cast<PCHAR>(rpcParams->input);
 	int iBitLength = rpcParams->numberOfBitsOfData;
@@ -217,7 +217,7 @@ void RPC_ClientRequestsClass(RPCParameters *rpcParams)
 		0, rpcParams->sender, FALSE, FALSE, UNASSIGNED_NETWORK_ID, NULL);
 }
 
-void RPC_ClientRequestsSpawn(RPCParameters *rpcParams)
+void RequestSpawn(RPCParameters *rpcParams)
 {
 	RakNet::BitStream bsReply;
 
@@ -226,7 +226,7 @@ void RPC_ClientRequestsSpawn(RPCParameters *rpcParams)
 		0, rpcParams->sender, FALSE, FALSE, UNASSIGNED_NETWORK_ID, NULL);
 }
 
-void RPC_ClientSpawns(RPCParameters *rpcParams)
+void Spawn(RPCParameters *rpcParams)
 {
 	PLAYERID playerId = (PLAYERID)pRakServer->GetIndexFromPlayerID(rpcParams->sender);
 	BYTE byteFightingStyle=4;
@@ -256,7 +256,7 @@ void RPC_ClientSpawns(RPCParameters *rpcParams)
 		0, pRakServer->GetPlayerIDFromIndex(playerId), TRUE, FALSE, UNASSIGNED_NETWORK_ID, NULL);
 }
 
-void RPC_ClientChat(RPCParameters *rpcParams)
+void Chat(RPCParameters *rpcParams)
 {
 	PCHAR Data = reinterpret_cast<PCHAR>(rpcParams->input);
 	int iBitLength = rpcParams->numberOfBitsOfData;
@@ -279,7 +279,7 @@ void RPC_ClientChat(RPCParameters *rpcParams)
 	}
 }
 
-void RPC_ClientUpdateScoresPingsIPs(RPCParameters *rpcParams)
+void UpdateScoresPingsIPs(RPCParameters *rpcParams)
 {
 	RakNet::BitStream bsUpdate;
 
@@ -299,7 +299,7 @@ void RPC_ClientUpdateScoresPingsIPs(RPCParameters *rpcParams)
 		rpcParams->sender, FALSE, FALSE, UNASSIGNED_NETWORK_ID, NULL);
 }
 
-void RPC_ClientDamageVehicle(RPCParameters *rpcParams)
+void DamageVehicle(RPCParameters *rpcParams)
 {
 	PCHAR Data = reinterpret_cast<PCHAR>(rpcParams->input);
 	int iBitLength = rpcParams->numberOfBitsOfData;
@@ -346,7 +346,7 @@ void RPC_ClientDamageVehicle(RPCParameters *rpcParams)
 	pRakServer->RPC(&RPC_DamageVehicle, &bsDamage, HIGH_PRIORITY, RELIABLE_ORDERED, 0, sender, TRUE, FALSE, UNASSIGNED_NETWORK_ID, NULL);
 }
 
-void RPC_ClientEnterVehicle(RPCParameters *rpcParams)
+void EnterVehicle(RPCParameters *rpcParams)
 {
 	PCHAR Data = reinterpret_cast<PCHAR>(rpcParams->input);
 	int iBitLength = rpcParams->numberOfBitsOfData;
@@ -387,7 +387,7 @@ void RPC_ClientEnterVehicle(RPCParameters *rpcParams)
 }
 
 
-void RPC_ClientExitVehicle(RPCParameters *rpcParams)
+void ExitVehicle(RPCParameters *rpcParams)
 {
 	PCHAR Data = reinterpret_cast<PCHAR>(rpcParams->input);
 	int iBitLength = rpcParams->numberOfBitsOfData;
@@ -423,7 +423,7 @@ void RPC_ClientExitVehicle(RPCParameters *rpcParams)
 		0, sender, TRUE, FALSE, UNASSIGNED_NETWORK_ID, NULL);
 }
 
-void RPC_ClientCommandText(RPCParameters *rpcParams)
+void ServerCommand(RPCParameters *rpcParams)
 {
 	PCHAR Data = reinterpret_cast<PCHAR>(rpcParams->input);
 	int iBitLength = rpcParams->numberOfBitsOfData;
@@ -449,7 +449,7 @@ void RPC_ClientCommandText(RPCParameters *rpcParams)
 	}
 }
 
-void RPC_ClientDeath(RPCParameters *rpcParams)
+void Death(RPCParameters *rpcParams)
 {
 	PCHAR Data = reinterpret_cast<PCHAR>(rpcParams->input);
 	int iBitLength = rpcParams->numberOfBitsOfData;
@@ -488,7 +488,7 @@ void RPC_ClientDeath(RPCParameters *rpcParams)
 	}
 }
 
-void RPC_ClientMapMarker(RPCParameters *rpcParams)
+void MapMarker(RPCParameters *rpcParams)
 {
 	PCHAR Data = reinterpret_cast<PCHAR>(rpcParams->input);
 	int iBitLength = rpcParams->numberOfBitsOfData;
@@ -512,7 +512,7 @@ void RPC_ClientMapMarker(RPCParameters *rpcParams)
 	}
 }
 
-void RPC_ClientDialogResponse(RPCParameters *rpcParams)
+void DialogResponse(RPCParameters *rpcParams)
 {
 	PCHAR Data = reinterpret_cast<PCHAR>(rpcParams->input);
 	int iBitLength = rpcParams->numberOfBitsOfData;
@@ -544,22 +544,79 @@ void RPC_ClientDialogResponse(RPCParameters *rpcParams)
 	}
 }
 
+void SetInteriorId(RPCParameters *rpcParams)
+{
+	PCHAR Data = reinterpret_cast<PCHAR>(rpcParams->input);
+	int iBitLength = rpcParams->numberOfBitsOfData;
+	PlayerID sender = rpcParams->sender;
+
+	RakNet::BitStream bsData((unsigned char *)Data,(iBitLength/8)+1,false);
+	PLAYERID playerID = pRakServer->GetIndexFromPlayerID(sender);
+
+	if(!playerPool[playerID].iIsConnected)
+		return;
+
+	BYTE byteInteriorId;
+	bsData.Read(byteInteriorId);
+
+	playerInfo[playerID].byteInteriorId = byteInteriorId;
+
+	for(int i = 0; i < iScriptsRunning; i++)
+	{
+		if(script.scriptVM[i] != NULL && script.szScriptName[i][0] != 0x00)
+			ScriptEvent_OnPlayerInteriorChange(script.scriptVM[i], playerID, byteInteriorId);
+	}
+}
+
+void ScmEvent(RPCParameters *rpcParams)
+{
+	PCHAR Data = reinterpret_cast<PCHAR>(rpcParams->input);
+	int iBitLength = rpcParams->numberOfBitsOfData;
+	PlayerID sender = rpcParams->sender;
+
+	RakNet::BitStream bsData((unsigned char *)Data,(iBitLength/8)+1,false);
+	PLAYERID playerID = pRakServer->GetIndexFromPlayerID(sender);
+
+	if(!playerPool[playerID].iIsConnected)
+		return;
+
+	int iEvent;
+
+	DWORD dwParams1;
+	DWORD dwParams2;
+	DWORD dwParams3;
+
+	bsData.Read(iEvent);
+
+	bsData.Read(dwParams1);
+	bsData.Read(dwParams2);
+	bsData.Read(dwParams3);
+
+	for(int i = 0; i < iScriptsRunning; i++)
+	{
+		if(script.scriptVM[i] != NULL && script.szScriptName[i][0] != 0x00)
+			ScriptEvent_OnScmEvent(script.scriptVM[i], playerID, iEvent, dwParams1, dwParams2, dwParams3);
+	}
+}
+
 void RegisterServerRPCs(RakServerInterface *pRakServer)
 {
 	// Core RPCs
-	pRakServer->RegisterAsRemoteProcedureCall(&RPC_ClientJoin, RPC_ClientJoins);
-	pRakServer->RegisterAsRemoteProcedureCall(&RPC_RequestClass, RPC_ClientRequestsClass);
-	pRakServer->RegisterAsRemoteProcedureCall(&RPC_RequestSpawn, RPC_ClientRequestsSpawn);
-	pRakServer->RegisterAsRemoteProcedureCall(&RPC_Spawn, RPC_ClientSpawns);
-	pRakServer->RegisterAsRemoteProcedureCall(&RPC_Chat, RPC_ClientChat);
-	pRakServer->RegisterAsRemoteProcedureCall(&RPC_UpdateScoresPingsIPs, RPC_ClientUpdateScoresPingsIPs);
-	pRakServer->RegisterAsRemoteProcedureCall(&RPC_DamageVehicle, RPC_ClientDamageVehicle);
-	pRakServer->RegisterAsRemoteProcedureCall(&RPC_EnterVehicle, RPC_ClientEnterVehicle);
-	pRakServer->RegisterAsRemoteProcedureCall(&RPC_ExitVehicle, RPC_ClientExitVehicle);
-	pRakServer->RegisterAsRemoteProcedureCall(&RPC_ServerCommand, RPC_ClientCommandText);
-	pRakServer->RegisterAsRemoteProcedureCall(&RPC_Death, RPC_ClientDeath);
-	pRakServer->RegisterAsRemoteProcedureCall(&RPC_MapMarker, RPC_ClientMapMarker);
-	pRakServer->RegisterAsRemoteProcedureCall(&RPC_DialogResponse, RPC_ClientDialogResponse);
+	pRakServer->RegisterAsRemoteProcedureCall(&RPC_ClientJoin, ClientJoin);
+	pRakServer->RegisterAsRemoteProcedureCall(&RPC_RequestClass, RequestClass);
+	pRakServer->RegisterAsRemoteProcedureCall(&RPC_RequestSpawn, RequestSpawn);
+	pRakServer->RegisterAsRemoteProcedureCall(&RPC_Spawn, Spawn);
+	pRakServer->RegisterAsRemoteProcedureCall(&RPC_Chat, Chat);
+	pRakServer->RegisterAsRemoteProcedureCall(&RPC_UpdateScoresPingsIPs, UpdateScoresPingsIPs);
+	pRakServer->RegisterAsRemoteProcedureCall(&RPC_DamageVehicle, DamageVehicle);
+	pRakServer->RegisterAsRemoteProcedureCall(&RPC_EnterVehicle, EnterVehicle);
+	pRakServer->RegisterAsRemoteProcedureCall(&RPC_ExitVehicle, ExitVehicle);
+	pRakServer->RegisterAsRemoteProcedureCall(&RPC_ServerCommand, ServerCommand);
+	pRakServer->RegisterAsRemoteProcedureCall(&RPC_Death, Death);
+	pRakServer->RegisterAsRemoteProcedureCall(&RPC_MapMarker, MapMarker);
+	pRakServer->RegisterAsRemoteProcedureCall(&RPC_DialogResponse, DialogResponse);
+	pRakServer->RegisterAsRemoteProcedureCall(&RPC_SetInteriorId, SetInteriorId);
+	pRakServer->RegisterAsRemoteProcedureCall(&RPC_ScmEvent, ScmEvent);
 }
 
 void UnRegisterServerRPCs(RakServerInterface * pRakServer)
@@ -577,4 +634,6 @@ void UnRegisterServerRPCs(RakServerInterface * pRakServer)
 	pRakServer->UnregisterAsRemoteProcedureCall(&RPC_ServerCommand);
 	pRakServer->UnregisterAsRemoteProcedureCall(&RPC_MapMarker);
 	pRakServer->UnregisterAsRemoteProcedureCall(&RPC_DialogResponse);
+	pRakServer->UnregisterAsRemoteProcedureCall(&RPC_SetInteriorId);
+	pRakServer->UnregisterAsRemoteProcedureCall(&RPC_ScmEvent);
 }

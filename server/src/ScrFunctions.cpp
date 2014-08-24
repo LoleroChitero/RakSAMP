@@ -90,16 +90,26 @@ int GetPlayerPos(lua_State *L)
 	return 0;
 }
 
+int GetPlayerInterior(lua_State *L)
+{
+	PLAYERID playerID = lua_tointeger(L, 1);
+
+	if(isPlayerConnected(playerID))
+	{
+		lua_pushnumber(L, playerInfo[playerID].byteInteriorId);
+		return 1;
+	}
+
+	return 0;
+}
+
 int GetPlayerScore(lua_State *L)
 {
 	PLAYERID playerID = lua_tointeger(L, 1);
 
 	if(isPlayerConnected(playerID))
 	{
-		int iScore = playerPool[playerID].iPlayerScore;
-
-		lua_pushnumber(L, (int)iScore);
-
+		lua_pushnumber(L, playerPool[playerID].iPlayerScore);
 		return 1;
 	}
 
@@ -337,6 +347,8 @@ int SetPlayerInterior(lua_State *L)
 	BitStream bs;
 	PLAYERID playerID = lua_tointeger(L, 1);
 	lua_Number interiorID = lua_tointeger(L, 2);
+
+	playerInfo[playerID].byteInteriorId = (BYTE)interiorID;
 
 	bs.Write((BYTE)interiorID);
 
@@ -673,6 +685,28 @@ int ShowPlayerDialog(lua_State *L)
 	return 1;
 }
 
+int BroadcastScmEvent(lua_State *L)
+{
+	BitStream bs;
+
+	PLAYERID iPlayerIndex = lua_tointeger(L, 1);
+
+	int iEvent = lua_tointeger(L, 2);
+
+	DWORD dwParams1 = lua_tointeger(L, 3);
+	DWORD dwParams2 = lua_tointeger(L, 4);
+	DWORD dwParams3 = lua_tointeger(L, 5);
+	
+	bs.Write(iPlayerIndex);
+	bs.Write(iEvent);
+	bs.Write(dwParams1);
+	bs.Write(dwParams2);
+	bs.Write(dwParams3);
+
+	pRakServer->RPC(&RPC_ScmEvent, &bs, HIGH_PRIORITY, RELIABLE, 0, pRakServer->GetPlayerIDFromIndex(iPlayerIndex), TRUE, FALSE, UNASSIGNED_NETWORK_ID, NULL);
+	return 1;
+}
+
 void RegisterScriptingFunctions(lua_State *L)
 {
 	generateAndLoadInternalScript(L);
@@ -687,6 +721,7 @@ void RegisterScriptingFunctions(lua_State *L)
 	lua_register(L, "getPlayerName", GetPlayerName);
 
 	lua_register(L, "getPlayerPos", GetPlayerPos);
+	lua_register(L, "getPlayerInterior", GetPlayerInterior);
 	lua_register(L, "setPlayerPos", SetPlayerPos);
 	lua_register(L, "setPlayerPosFindZ", SetPlayerPosFindZ);
 
@@ -742,6 +777,8 @@ void RegisterScriptingFunctions(lua_State *L)
 	lua_register(L, "gameTextForPlayer", GameTextForPlayer);
 
 	lua_register(L, "showPlayerDialog", ShowPlayerDialog);
+
+	lua_register(L, "broadcastScmEvent", BroadcastScmEvent);
 }
 
 // ---------------------------------------------------------------------------------------------------------
