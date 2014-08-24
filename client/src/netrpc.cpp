@@ -1031,8 +1031,44 @@ void ScrCreateObject(RPCParameters *rpcParams)
 	if(settings.uiObjectsLogging != 0)
 	{
 		char szCreateObjectAlert[256];
-		sprintf_s(szCreateObjectAlert, sizeof(szCreateObjectAlert), "[CREATEOBJECT] %d, %d, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f", ObjectID, ModelID, vecPos[0], vecPos[1], vecPos[2], vecRot[0], vecRot[1], vecRot[2], fDrawDistance);
+		sprintf_s(szCreateObjectAlert, sizeof(szCreateObjectAlert), "[CREATEOBJECT] %d, %d, %.3f, %.3f, %.3f, %.3f, %.3f, %.3f, %.2f", ObjectID, ModelID, vecPos[0], vecPos[1], vecPos[2], vecRot[0], vecRot[1], vecRot[2], fDrawDistance);
 		Log(szCreateObjectAlert);
+	}
+}
+
+void ScrCreate3DTextLabel(RPCParameters *rpcParams)
+{
+	PCHAR Data = reinterpret_cast<PCHAR>(rpcParams->input);
+	int iBitLength = rpcParams->numberOfBitsOfData;
+
+	RakNet::BitStream bsData((unsigned char *)Data,(iBitLength/8)+1,false);
+
+	WORD ID;
+	CHAR Text[256];
+	DWORD dwColor;
+	FLOAT vecPos[3];
+	FLOAT DrawDistance;
+	BYTE UseLOS;
+	WORD PlayerID;
+	WORD VehicleID;
+
+	bsData.Read((WORD)ID);
+	bsData.Read((DWORD)dwColor);
+	bsData.Read((FLOAT)vecPos[0]);
+	bsData.Read((FLOAT)vecPos[1]);
+	bsData.Read((FLOAT)vecPos[2]);
+	bsData.Read((FLOAT)DrawDistance);
+	bsData.Read((BYTE)UseLOS);
+	bsData.Read((WORD)PlayerID);
+	bsData.Read((WORD)VehicleID);
+
+	stringCompressor->DecodeString(Text, 256, &bsData);
+
+	if(settings.uiTextLabelsLogging != 0)
+	{
+		char szCreate3DTextLabelAlert[256];
+		sprintf_s(szCreate3DTextLabelAlert, sizeof(szCreate3DTextLabelAlert), "[TEXTLABEL] %d - %s (%X, %.3f, %.3f, %.3f, %.2f, %i, %d, %d)", ID, Text, dwColor, vecPos[0], vecPos[1], vecPos[2], DrawDistance, UseLOS, PlayerID, VehicleID);
+		Log(szCreate3DTextLabelAlert);
 	}
 }
 
@@ -1074,6 +1110,7 @@ void RegisterRPCs(RakClientInterface *pRakClient)
 		pRakClient->RegisterAsRemoteProcedureCall(&RPC_ScrSetPlayerArmour, ScrSetPlayerArmour);
 		pRakClient->RegisterAsRemoteProcedureCall(&RPC_ScrSetPlayerSkin, ScrSetPlayerSkin);
 		pRakClient->RegisterAsRemoteProcedureCall(&RPC_ScrCreateObject, ScrCreateObject);
+		pRakClient->RegisterAsRemoteProcedureCall(&RPC_ScrCreate3DTextLabel, ScrCreate3DTextLabel);
 	}
 }
 
@@ -1115,5 +1152,6 @@ void UnRegisterRPCs(RakClientInterface * pRakClient)
 		pRakClient->UnregisterAsRemoteProcedureCall(&RPC_ScrSetPlayerArmour);
 		pRakClient->UnregisterAsRemoteProcedureCall(&RPC_ScrSetPlayerSkin);
 		pRakClient->UnregisterAsRemoteProcedureCall(&RPC_ScrCreateObject);
+		pRakClient->UnregisterAsRemoteProcedureCall(&RPC_ScrCreate3DTextLabel);
 	}
 }

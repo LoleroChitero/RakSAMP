@@ -17,6 +17,11 @@ HINSTANCE g_hInst;
 HFONT g_hfText;
 HFONT g_hfInfo;
 
+BOOL bTeleportMenuActive = NULL;
+HFONT hTeleportMenuFont = NULL;
+HANDLE hTeleportMenuThread = NULL;
+HWND hwndTeleportMenu = NULL;
+
 // Prototypes
 LRESULT CALLBACK MainWindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 BOOL CalcWindowTextSize(HWND hWnd, LPRECT rcFit);
@@ -435,4 +440,139 @@ void SetUpWindow(HINSTANCE hInstance)
 {
 	g_hInst = hInstance;
 	CreateThread(NULL, 0, windowThread, NULL, 0, NULL);
+}
+
+LRESULT CALLBACK TeleportMenuProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+	HWND hwndEditBox = GetDlgItem(hwnd, IDE_INPUTEDIT);
+	HWND hwndListBox = GetDlgItem(hwnd, IDL_LISTBOX);
+	WORD wSelection;
+	char szResponse[257];
+
+	switch(msg)
+	{
+	case WM_CREATE:
+		{
+			HINSTANCE hInst = GetModuleHandle(NULL);
+			
+			hwndListBox = CreateWindowEx(NULL, "LISTBOX", "",
+				WS_CHILD | WS_VISIBLE | LBS_NOTIFY | WS_VSCROLL | WS_BORDER | LBS_HASSTRINGS,
+				10, 10, 375, 225, hwnd, (HMENU)IDL_LISTBOX, hInst, NULL);
+
+			for(int i = 0; i < MAX_TELEPORT_ITEMS; i++)
+			{
+				if(settings.TeleportLocations[i].bCreated)
+				{
+					int id = SendMessage(hwndListBox, LB_ADDSTRING, 0, (LPARAM)settings.TeleportLocations[i].szName);
+					SendMessage(hwndListBox, LB_SETITEMDATA, id, (LPARAM)id);
+				}
+			}
+						
+			CreateWindowEx(NULL, "BUTTON", "Teleport", WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,
+				100, 230, 100, 24, hwnd, (HMENU)IDB_BUTTON1, hInst, NULL);
+
+			CreateWindowEx(NULL, "BUTTON", "Cancel", WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,
+				210, 230, 100, 24, hwnd, (HMENU)IDB_BUTTON2, hInst, NULL);
+		}
+		break;
+
+	case WM_COMMAND:
+		{
+			switch(LOWORD(wParam))
+			{
+				case IDB_BUTTON1:
+					wSelection = (WORD)SendMessage(hwndListBox, LB_GETCURSEL, 0, 0);
+					if(wSelection != (WORD)-1)
+					{
+						SendMessage(hwndListBox, LB_GETTEXT, wSelection, (LPARAM)szResponse);
+						useTeleport(wSelection);
+						PostQuitMessage(0);
+					}
+					break;
+
+				case IDB_BUTTON2:
+					GetWindowText(hwndEditBox, szResponse, 257);
+					PostQuitMessage(0);
+					break;
+			}
+		}
+
+		break;
+
+	case WM_PAINT:
+		{
+			RECT rect;
+			GetClientRect(hwnd, &rect);
+			PAINTSTRUCT ps;
+			HDC hdc = BeginPaint(hwnd, &ps);
+			HDC hdcMem = CreateCompatibleDC(hdc);
+			DeleteDC(hdcMem);
+			EndPaint(hwnd, &ps);
+		}
+		break;
+
+	case WM_DESTROY:
+		PostQuitMessage(0);
+		break;
+
+	default:
+		return DefWindowProc(hwnd, msg, wParam, lParam);
+	}
+
+	return 0;
+}
+
+DWORD WINAPI TeleportMenuThread(PVOID)
+{
+	WNDCLASSEX wc;
+	MSG Msg;
+	HINSTANCE hInstance = GetModuleHandle(NULL);
+	RECT conRect;
+	if(settings.iConsole)
+		GetWindowRect(GetConsoleWindow(), &conRect);
+	else
+		GetWindowRect(hwnd, &conRect);
+
+	wc.cbSize        = sizeof(WNDCLASSEX);
+	wc.style         = 0;
+	wc.lpfnWndProc   = TeleportMenuProc;
+	wc.cbClsExtra    = 0;
+	wc.cbWndExtra    = 0;
+	wc.hInstance     = hInstance;
+	wc.hIcon         = LoadIcon(NULL, IDI_APPLICATION);
+	wc.hCursor       = LoadCursor(NULL, IDC_ARROW);
+	wc.hbrBackground = (HBRUSH)(COLOR_WINDOW+1);
+	wc.lpszMenuName  = NULL;
+	wc.lpszClassName = "teleportMenuWndClass";
+	wc.hIconSm       = LoadIcon(NULL, IDI_APPLICATION);
+
+	if(!RegisterClassEx(&wc))
+		return 0;
+
+	hTeleportMenuFont = CreateFont(18, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tahoma");
+
+	hwndTeleportMenu = CreateWindowEx(NULL, "teleportMenuWndClass", "Teleports", NULL,
+		conRect.right, conRect.top, 400, 300, NULL, NULL, hInstance, NULL);
+
+	if(hwndTeleportMenu == NULL)
+		return 0;
+
+	ShowWindow(hwndTeleportMenu, 1);
+	UpdateWindow(hwndTeleportMenu);
+	SetForegroundWindow(hwndTeleportMenu);
+
+	while(GetMessage(&Msg, NULL, 0, 0) > 0)
+	{
+		TranslateMessage(&Msg);
+		DispatchMessage(&Msg);
+	}
+
+	bTeleportMenuActive = 0;
+	SendMessage(hwndTeleportMenu, WM_DESTROY, 0, 0);
+	DestroyWindow(hwndTeleportMenu);
+	UnregisterClass("teleportMenuWndClass", GetModuleHandle(NULL));
+	hTeleportMenuFont = NULL;
+	TerminateThread(hTeleportMenuThread, 0);
+
+	return 0;
 }

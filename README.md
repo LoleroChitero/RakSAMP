@@ -45,8 +45,8 @@ The client supports 0.3z-R3 servers too.
 * !selplayer: sets the followed player's name.
 * !selveh: sets the fake player's vehicle.
 * !pos_x: sets the fake player's position (X).
-* !pos_y: sets the fake player's position (X).
-* !pos_z: sets the fake player's position (X).
+* !pos_y: sets the fake player's position (Y).
+* !pos_z: sets the fake player's position (Z).
 * !follow_x: sets the following offset (X).
 * !follow_y: sets the following offset (Y).
 * !follow_z: sets the following offset (Z).
@@ -54,6 +54,9 @@ The client supports 0.3z-R3 servers too.
 * !pulsehealth: pulse health & armor.
 * !changename: change the fake player's name and rejoin the game.
 * !dialogresponse: send a dialog response.
+* !logstatus: show log status.
+* !log: toggle logging objects/pickups/textlabels.
+* !teleport: show the teleport menu.
 
 --
 ### Server

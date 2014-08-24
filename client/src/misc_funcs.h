@@ -33,3 +33,9 @@ const struct vehicle_entry *gta_vehicle_get_by_id ( int id );
 int gen_gpci(char buf[64], unsigned long factor);
 
 void SetStringFromCommandLine(char *szCmdLine, char *szString);
+
+void processPulsator();
+void processBulletflood();
+
+void showTeleportMenu();
+void useTeleport(int iTeleportID);

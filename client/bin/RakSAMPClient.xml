@@ -11,16 +11,30 @@ Avalable runmodes:
 <RakSAMPClient console="0" runmode="3" autorun="0" find="1" select_classid="0" manual_spawn="1"
 			   print_timestamps="0" chatcolor_rgb="0 0 130" clientmsg_rgb="0 130 0" cpalert_rgb="170 0 0"
 			   followplayer="P3ti" followplayerwithvehicleid="295" followXOffset="3.0" followYOffset="0.0" followZOffset="0.0"
-			   imitatechat="" updatestats="1" minfps="20" maxfps="90" clientversion="0.3z">
+			   updatestats="1" minfps="20" maxfps="90" clientversion="0.3z">
 
 	<server nickname="root" password="">127.0.0.1:7777</server>
 
 	<intervals spam="150" fakekill="50" lag="20" />
-	<log objects="0" pickups="0" />
+	<log objects="0" pickups="0" textlabels="0" />
 
 	<!-- In normal mode this will be your default position, but if you don't set 'force' to 1, then the server can move you with SetPlayerPos, SetPlayerFacingAngle or SetSpawnInfo. -->
 	<normal_pos position="325.35 2512.09 16.56" rotation="0.0" force="0" />
 
+	<!-- These get called when we successfully connected to a server. -->
+	<!-- <autorun>!selveh 4</autorun> -->
+	
+	<!-- Finds text from the chatbox and says something. -->
+	<!-- <find text="PM from" say="" bk_color="255 255 255" text_color="255 0 0" /> -->
+	
+	<!-- You can add custom teleport locations. These are accessible with !teleport command. (Limit: 200) -->
+	<teleport name="Grove Street" position="2536.08 -1632.98 13.79" />
+	<teleport name="4D casino" position="1992.93 1047.31 10.82" />
+	<teleport name="LS Hospital" position="2033.00 -1416.02 16.99" />
+	<teleport name="SF Hospital" position="-2653.11 634.78 14.45" />
+	<teleport name="LV Hospital" position="1580.22 1768.93 10.82" />
+	<teleport name="SF Export" position="-1550.73 99.29 17.33" />
+	
 	<!--
 	Available commands:
 		!exit or !quit: exits client.
@@ -49,8 +63,8 @@ Avalable runmodes:
 		!selplayer: sets the followed player's name.
 		!selveh: sets the fake player's vehicle.
 		!pos_x: sets the fake player's position (X).
-		!pos_y: sets the fake player's position (X).
-		!pos_z: sets the fake player's position (X).
+		!pos_y: sets the fake player's position (Y).
+		!pos_z: sets the fake player's position (Z).
 		!follow_x: sets the following offset (X).
 		!follow_y: sets the following offset (Y).
 		!follow_z: sets the following offset (Z).
@@ -58,12 +72,9 @@ Avalable runmodes:
 		!pulsehealth: pulse health & armor.
 		!changename: change the fake player's name and rejoin the game.
 		!dialogresponse: send a dialog response.
+		!logstatus: show log status.
+		!log: toggle logging objects/pickups/textlabels.
+		!teleport: show the teleport menu.
 	-->
-
-	<!-- These get called when we successfully connected to a server. -->
-	<!-- <autorun>!selveh 4</autorun> -->
-	
-	<!-- Finds text from the chatbox and says something. -->
-	<!-- <find text="PM from" say="" bk_color="255 255 255" text_color="255 0 0" /> -->
 
 </RakSAMPClient>

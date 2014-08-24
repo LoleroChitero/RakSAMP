@@ -129,3 +129,4 @@ extern int RPC_ScrSetVehicleTireStatus;
 extern int RPC_ScrSetPlayerDrunkLevel;
 extern int RPC_ScrDialogBox;
 extern int RPC_PlayerUpdate;
+extern int RPC_ScrCreate3DTextLabel;

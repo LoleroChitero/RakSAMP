@@ -85,10 +85,6 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	int iLastDrunkLevel = iDrunkLevel;
 
 	int iLastStatsUpdate = GetTickCount();
-
-	// false - down | true - up
-	bool bHealthPulseDirection = false;
-	bool bArmourPulseDirection = true;
 	
 	while(1)
 	{
@@ -103,65 +99,8 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 		if (settings.bLag)
 			sampLag();
 
-		if (settings.pulseHealth)
-		{
-			if(!bHealthPulseDirection && settings.fPlayerHealth <= 3)
-				bHealthPulseDirection = true;
-
-			if(bHealthPulseDirection && settings.fPlayerHealth >= 100)
-				bHealthPulseDirection = false;
-
-			if(!bArmourPulseDirection && settings.fPlayerArmour <= 0)
-				bArmourPulseDirection = true;
-
-			if(bArmourPulseDirection && settings.fPlayerArmour >= 100)
-				bArmourPulseDirection = false;
-
-			if(bHealthPulseDirection)
-				settings.fPlayerHealth += 12.5f;
-			else
-				settings.fPlayerHealth -= 12.5f;
-
-			if(settings.fPlayerHealth < 3.0f)
-				settings.fPlayerHealth = 3.0f;
-
-			if(bArmourPulseDirection)
-				settings.fPlayerArmour += 12.5f;
-			else
-				settings.fPlayerArmour -= 12.5f;
-
-			if(settings.fPlayerArmour < 0.0f)
-				settings.fPlayerArmour = 0.0f;
-		}
-
-		if (settings.bulletFlood)
-		{
-			for(int p = 0; p < MAX_PLAYERS; p++)
-			{
-				if(playerInfo[p].iIsConnected && p != g_myPlayerID)
-				{
-					BULLET_SYNC_DATA BulletSyncData;
-
-					BulletSyncData.bHitType = (BYTE)BULLET_HIT_TYPE_PLAYER;
-					BulletSyncData.iHitID = (unsigned short)p;
-
-					BulletSyncData.fHitOrigin[0] = settings.fCurrentPosition[0];
-					BulletSyncData.fHitOrigin[1] = settings.fCurrentPosition[1];
-					BulletSyncData.fHitOrigin[2] = settings.fCurrentPosition[2];
-								
-					BulletSyncData.fHitTarget[0] = playerInfo[p].onfootData.vecPos[0];
-					BulletSyncData.fHitTarget[1] = playerInfo[p].onfootData.vecPos[1];
-					BulletSyncData.fHitTarget[2] = playerInfo[p].onfootData.vecPos[2];
-
-					// It's just random stuff.
-					BulletSyncData.fCenterOfHit[0] = -0.098f;
-					BulletSyncData.fCenterOfHit[1] = 0.08f;
-					BulletSyncData.fCenterOfHit[2] = 0.4f;
-
-					SendBulletData(&BulletSyncData);
-				}
-			}
-		}
+		processPulsator();
+		processBulletflood();
 
 		if (!iConnectionRequested)
 		{

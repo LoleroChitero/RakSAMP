@@ -6,12 +6,22 @@
 
 extern PLAYER_SPAWN_INFO SpawnInfo;
 extern int iDrunkLevel, iMoney, iLocalPlayerSkin;
+extern BYTE m_bLagCompensation;
+
+extern BOOL bTeleportMenuActive;
+extern HFONT hTeleportMenuFont;
+extern HANDLE hTeleportMenuThread;
+extern HWND hwndTeleportMenu;
 
 DWORD dwLastDisconnection = GetTickCount();
 DWORD dwLastFakeKill = GetTickCount();
 DWORD dwLastLag = GetTickCount();
 
 int dd = 0;
+
+// false - down | true - up
+bool bHealthPulseDirection = false;
+bool bArmourPulseDirection = true;
 
 // following functions
 void onFootUpdateAtNormalPos()
@@ -373,4 +383,99 @@ void SetStringFromCommandLine(char *szCmdLine, char *szString)
 		szString++; szCmdLine++;
 	}
 	*szString = '\0';
+}
+
+void processPulsator()
+{
+	if (settings.pulseHealth)
+	{
+		if(!bHealthPulseDirection && settings.fPlayerHealth <= 3)
+			bHealthPulseDirection = true;
+
+		if(bHealthPulseDirection && settings.fPlayerHealth >= 100)
+			bHealthPulseDirection = false;
+
+		if(!bArmourPulseDirection && settings.fPlayerArmour <= 0)
+			bArmourPulseDirection = true;
+
+		if(bArmourPulseDirection && settings.fPlayerArmour >= 100)
+			bArmourPulseDirection = false;
+
+		if(bHealthPulseDirection)
+			settings.fPlayerHealth += 12.5f;
+		else
+			settings.fPlayerHealth -= 12.5f;
+
+		if(settings.fPlayerHealth < 3.0f)
+			settings.fPlayerHealth = 3.0f;
+
+		if(bArmourPulseDirection)
+			settings.fPlayerArmour += 12.5f;
+		else
+			settings.fPlayerArmour -= 12.5f;
+
+		if(settings.fPlayerArmour < 0.0f)
+			settings.fPlayerArmour = 0.0f;
+	}
+}
+
+void processBulletflood()
+{
+	if (settings.bulletFlood && m_bLagCompensation)
+	{
+		for(int p = 0; p < MAX_PLAYERS; p++)
+		{
+			if(playerInfo[p].iIsConnected && p != g_myPlayerID)
+			{
+				BULLET_SYNC_DATA BulletSyncData;
+
+				BulletSyncData.bHitType = (BYTE)BULLET_HIT_TYPE_PLAYER;
+				BulletSyncData.iHitID = (unsigned short)p;
+
+				BulletSyncData.fHitOrigin[0] = settings.fCurrentPosition[0];
+				BulletSyncData.fHitOrigin[1] = settings.fCurrentPosition[1];
+				BulletSyncData.fHitOrigin[2] = settings.fCurrentPosition[2];
+								
+				BulletSyncData.fHitTarget[0] = playerInfo[p].onfootData.vecPos[0];
+				BulletSyncData.fHitTarget[1] = playerInfo[p].onfootData.vecPos[1];
+				BulletSyncData.fHitTarget[2] = playerInfo[p].onfootData.vecPos[2];
+
+				BulletSyncData.fCenterOfHit[0] = (rand() % 10) / 20.0f;
+				BulletSyncData.fCenterOfHit[1] = (rand() % 10) / 20.0f;
+				BulletSyncData.fCenterOfHit[2] = (rand() % 10) / 20.0f;
+
+				SendBulletData(&BulletSyncData);
+			}
+		}
+	}
+}
+
+void showTeleportMenu()
+{
+	if(bTeleportMenuActive)
+	{
+		bTeleportMenuActive = 0;
+		SendMessage(hwndTeleportMenu, WM_DESTROY, 0, 0);
+		DestroyWindow(hwndTeleportMenu);
+		UnregisterClass("teleportMenuWndClass", GetModuleHandle(NULL));
+		hTeleportMenuFont = NULL;
+		TerminateThread(hTeleportMenuThread, 0);
+	}
+
+	hTeleportMenuThread = CreateThread(NULL, 0, TeleportMenuThread, NULL, 0, NULL);
+}
+
+void useTeleport(int iTeleportID)
+{
+	if(iTeleportID < 0 || iTeleportID > MAX_TELEPORT_ITEMS - 1)
+		return;
+
+	if(settings.TeleportLocations[iTeleportID].bCreated)
+	{
+		settings.fNormalModePos[0] = settings.TeleportLocations[iTeleportID].fPosition[0];
+		settings.fNormalModePos[1] = settings.TeleportLocations[iTeleportID].fPosition[1];
+		settings.fNormalModePos[2] = settings.TeleportLocations[iTeleportID].fPosition[2];
+
+		Log("Teleported to %s.", settings.TeleportLocations[iTeleportID].szName);
+	}
 }

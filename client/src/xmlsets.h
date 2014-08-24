@@ -3,7 +3,8 @@
 */
 
 #define MAX_AUTORUN_CMDS 32
-#define MAX_FIND_ITEMS	 128
+#define MAX_FIND_ITEMS 128
+#define MAX_TELEPORT_ITEMS 200
 
 struct stServer
 {
@@ -39,6 +40,13 @@ struct stCheckpointData
 	float fSize;
 };
 
+struct stTeleport
+{
+	bool bCreated;
+	char szName[64];
+	float fPosition[3];
+};
+
 struct stSettings
 {
 	struct stServer server;
@@ -71,6 +79,7 @@ struct stSettings
 
 	unsigned int uiObjectsLogging;
 	unsigned int uiPickupsLogging;
+	unsigned int uiTextLabelsLogging;
 
 	unsigned char bChatColorRed;
 	unsigned char bChatColorGreen;
@@ -89,7 +98,6 @@ struct stSettings
 	float fFollowXOffset;
 	float fFollowYOffset;
 	float fFollowZOffset;
-	char szImitateChatPlayerName[20];
 
 	float fNormalModePos[3];
 	float fNormalModeRot;
@@ -117,6 +125,8 @@ struct stSettings
 	struct stCheckpointData CurrentCheckpoint;
 
 	bool AutoGotoCP;
+
+	stTeleport TeleportLocations[MAX_TELEPORT_ITEMS];
 };
 extern struct stSettings settings;
 

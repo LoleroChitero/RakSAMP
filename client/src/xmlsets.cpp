@@ -71,10 +71,6 @@ int LoadSettings()
 		rakSAMPElement->QueryFloatAttribute("followYOffset", &settings.fFollowYOffset);
 		rakSAMPElement->QueryFloatAttribute("followZOffset", &settings.fFollowZOffset);
 
-		// imitate chat
-		strcpy(settings.szImitateChatPlayerName, (char *)rakSAMPElement->Attribute("imitatechat"));
-		imitateID = getPlayerIDFromPlayerName(settings.szImitateChatPlayerName);
-
 		// get the first server
 		TiXmlElement* serverElement = rakSAMPElement->FirstChildElement("server");
 		if(serverElement)
@@ -118,6 +114,7 @@ int LoadSettings()
 		{
 			logElement->QueryIntAttribute("objects", (int *)&settings.uiObjectsLogging);
 			logElement->QueryIntAttribute("pickups", (int *)&settings.uiPickupsLogging);
+			logElement->QueryIntAttribute("textlabels", (int *)&settings.uiTextLabelsLogging);
 		}
 
 		// get normal mode pos
@@ -166,6 +163,26 @@ int LoadSettings()
 						(unsigned char *)&settings.findItems[i].bTextBlue);
 
 					findElement = findElement->NextSiblingElement("find");
+				}
+				else
+					break;
+			}
+		}
+
+		// get teleport locations
+		TiXmlElement* teleportElement = rakSAMPElement->FirstChildElement("teleport");
+		if(teleportElement)
+		{
+			for(int i = 0; i < MAX_TELEPORT_ITEMS; i++)
+			{
+				if(teleportElement)
+				{
+					settings.TeleportLocations[i].bCreated = 1;
+
+					strcpy(settings.TeleportLocations[i].szName, (char *)teleportElement->Attribute("name"));
+					teleportElement->QueryVectorAttribute("position", (float *)&settings.TeleportLocations[i].fPosition);
+
+					teleportElement = teleportElement->NextSiblingElement("teleport");
 				}
 				else
 					break;

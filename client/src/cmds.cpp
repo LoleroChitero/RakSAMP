@@ -481,17 +481,95 @@ int RunCommand(char *szCMD, int iFromAutorun)
 	// SEND DIALOG RESPONSE :-)
 	if(!strncmp(szCMD, "dialogresponse", 14) || !strncmp(szCMD, "DIALOGRESPONSE", 14))
 	{
-		char szDialogID[10], szButtonID[10], szListBoxItem[10], szInputResp[128];
+		int szDialogID, szButtonID, szListBoxItem;
+		char szInputResp[128];
 
-		if(sscanf(&szCMD[15], "%s%s%s%s", szDialogID, szButtonID, szListBoxItem, szInputResp) < 4)
+		if(sscanf(&szCMD[15], "%d%d%d%s", &szDialogID, &szButtonID, &szListBoxItem, szInputResp) < 4)
 		{
 			Log("USAGE: !dialogresponse <Dialog ID> <Button ID> <Listbox item> <Input response>");
 			return 1;
 		}
 
-		sendDialogResponse(atoi(szDialogID), atoi(szButtonID), atoi(szListBoxItem), szInputResp);
+		sendDialogResponse(szDialogID, szButtonID, szListBoxItem, szInputResp);
 
 		Log("Dialog response sent.");
+		return 1;
+	}
+
+	// SHOW LOG STATUS
+	if(!strncmp(szCMD, "logstatus", 9) || !strncmp(szCMD, "LOGSTATUS", 9))
+	{
+		Log("[LOG] objects: %i, pickups: %i, textlabels: %i", settings.uiObjectsLogging, settings.uiPickupsLogging, settings.uiTextLabelsLogging);
+		return 1;
+	}
+
+	// SET LOG STATUS
+	if(!strncmp(szCMD, "log", 3) || !strncmp(szCMD, "LOG", 3))
+	{
+		char szLogType[32];
+		int iToggle;
+
+		if(sscanf(&szCMD[4], "%s%d", szLogType, &iToggle) < 2)
+		{
+			Log("USAGE: !log <type> <toggle (0/1)>");
+			return 1;
+		}
+
+		int iLogType = 0;
+
+		if(!strncmp(szLogType, "objects", 7) || !strncmp(szLogType, "OBJECTS", 7))
+			iLogType = 1;
+
+		if(!strncmp(szLogType, "pickups", 7) || !strncmp(szLogType, "PICKUPS", 7))
+			iLogType = 2;
+
+
+		if(!strncmp(szLogType, "textlabels", 10) || !strncmp(szLogType, "TEXTLABELS", 10))
+			iLogType = 3;
+		
+		switch(iLogType)
+		{
+			case 1:
+			{
+				settings.uiObjectsLogging = iToggle;
+				break;
+			}
+
+			case 2:
+			{
+				settings.uiPickupsLogging = iToggle;
+				break;
+			}
+
+			case 3:
+			{
+				settings.uiTextLabelsLogging = iToggle;
+				break;
+			}
+
+			default:
+			{
+				Log("Invalid type.");
+				break;
+			}
+		}
+
+		if(iLogType != 0)
+			Log("[LOG] objects: %i, pickups: %i, textlabels: %i", settings.uiObjectsLogging, settings.uiPickupsLogging, settings.uiTextLabelsLogging);
+
+		return 1;
+	}
+
+	// SHOW TELEPORT MENU
+	if(!strncmp(szCMD, "teleport", 8) || !strncmp(szCMD, "TELEPORT", 8))
+	{
+		int iTeleportID;
+
+		if(sscanf(&szCMD[9], "%d", &iTeleportID) < 1)
+			showTeleportMenu();
+		else
+			useTeleport(iTeleportID);
+
 		return 1;
 	}
 
