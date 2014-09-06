@@ -19,6 +19,7 @@ void sendRconCommand(char *szRCONCmd, int iIsLogin);
 void SendScmEvent(int iEventType, DWORD dwParam1, DWORD dwParam2, DWORD dwParam3);
 void sendDialogResponse(WORD wDialogID, BYTE bButtonID, WORD wListBoxItem, char *szInputResp);
 void sendPickUp(int iPickupID);
+void selectTextDraw(int iTextDrawID);
 
 int isPlayerConnected(PLAYERID iPlayerID);
 int getPlayerID(char *szPlayerName);

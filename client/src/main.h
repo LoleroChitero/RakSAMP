@@ -74,5 +74,6 @@ extern PLAYERID imitateID;
 
 void handleQueries(char *s, int len);
 void Log ( char *fmt, ... );
+void SaveTextDrawData ( WORD wTextID, TEXT_DRAW_TRANSMIT *pData, CHAR* cText );
 void gen_random(char *s, const int len);
 extern RakClientInterface *pRakClient;

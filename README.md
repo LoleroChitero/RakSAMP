@@ -2,7 +2,7 @@ RakSAMP
 =======
 RakSAMP is a fake client and server for SA-MP.  
   
-Current version: v0.8.6-0.3z RC1.  
+Current version: v0.8.6-0.3z RC2.  
 Authors: jlfm, bartekdvd, P3ti.  
 Special thanks to balika011 and .silent.  
 
@@ -54,6 +54,9 @@ The client supports 0.3z-R3 servers too.
 * !log: toggle logging objects/pickups/textlabels.
 * !teleport: show the teleport menu.
 * !scmevent: send SCM event.
+* !fakekick: send vehicle enter notification with invalid vehicle id to get kicked.
+* !seltd: select a textdraw.
+* !sendrates: show sendrates.
 
 --
 ### Server

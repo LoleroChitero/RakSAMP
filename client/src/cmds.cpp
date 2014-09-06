@@ -103,12 +103,40 @@ int RunCommand(char *szCMD, int iFromAutorun)
 			if(!playerInfo[i].iIsConnected)
 				continue;
 
+			if(playerInfo[i].byteIsNPC != 0)
+				continue;
+
 			Log("(ID: %d) %s - score: %d, ping: %d", i, playerInfo[i].szPlayerName, playerInfo[i].iScore, playerInfo[i].dwPing);
 			iPlayerCount++;
 		}
 		Log(" ");
 		Log("Count: %d.", iPlayerCount);
 		Log("=================================");
+		Log(" ");
+
+		return 1;
+	}
+
+	// NPC LIST
+	if(!strncmp(szCMD, "npcs", 7) || !strncmp(szCMD, "NPCS", 7))
+	{
+		int iPlayerCount = 0;
+		Log(" ");
+		Log("============ NPC LIST ============");
+		for(int i = 0; i < MAX_PLAYERS; i++)
+		{
+			if(!playerInfo[i].iIsConnected)
+				continue;
+
+			if(!playerInfo[i].byteIsNPC)
+				continue;
+
+			Log("(ID: %d) %s - score: %d, ping: %d", i, playerInfo[i].szPlayerName, playerInfo[i].iScore, playerInfo[i].dwPing);
+			iPlayerCount++;
+		}
+		Log(" ");
+		Log("Count: %d.", iPlayerCount);
+		Log("===============================");
 		Log(" ");
 
 		return 1;
@@ -505,7 +533,7 @@ int RunCommand(char *szCMD, int iFromAutorun)
 	// SHOW LOG STATUS
 	if(!strncmp(szCMD, "logstatus", 9) || !strncmp(szCMD, "LOGSTATUS", 9))
 	{
-		Log("[LOG] objects: %i, pickups: %i, textlabels: %i", settings.uiObjectsLogging, settings.uiPickupsLogging, settings.uiTextLabelsLogging);
+		Log("[LOG] objects: %i, pickups: %i, textlabels: %i, textdraws: %i", settings.uiObjectsLogging, settings.uiPickupsLogging, settings.uiTextLabelsLogging, settings.uiTextDrawsLogging);
 		return 1;
 	}
 
@@ -529,9 +557,11 @@ int RunCommand(char *szCMD, int iFromAutorun)
 		if(!strncmp(szLogType, "pickups", 7) || !strncmp(szLogType, "PICKUPS", 7))
 			iLogType = 2;
 
-
 		if(!strncmp(szLogType, "textlabels", 10) || !strncmp(szLogType, "TEXTLABELS", 10))
 			iLogType = 3;
+
+		if(!strncmp(szLogType, "textdraws", 9) || !strncmp(szLogType, "TEXTDRAWS", 9))
+			iLogType = 4;
 		
 		switch(iLogType)
 		{
@@ -553,6 +583,12 @@ int RunCommand(char *szCMD, int iFromAutorun)
 				break;
 			}
 
+			case 4:
+			{
+				settings.uiTextDrawsLogging = iToggle;
+				break;
+			}
+
 			default:
 			{
 				Log("Invalid type.");
@@ -561,7 +597,7 @@ int RunCommand(char *szCMD, int iFromAutorun)
 		}
 
 		if(iLogType != 0)
-			Log("[LOG] objects: %i, pickups: %i, textlabels: %i", settings.uiObjectsLogging, settings.uiPickupsLogging, settings.uiTextLabelsLogging);
+			Log("[LOG] objects: %i, pickups: %i, textlabels: %i, textdraws: %i", settings.uiObjectsLogging, settings.uiPickupsLogging, settings.uiTextLabelsLogging, settings.uiTextDrawsLogging);
 
 		return 1;
 	}
@@ -591,6 +627,35 @@ int RunCommand(char *szCMD, int iFromAutorun)
 		}
 
 		SendScmEvent(iEvent, iParam1, iParam2, iParam3);
+		return 1;
+	}
+
+	// FAKEKICK
+	if(!strncmp(szCMD, "fakekick", 8) || !strncmp(szCMD, "FAKEKICK", 8))
+	{
+		SendEnterVehicleNotification(0xFFFF, 0);
+		return 1;
+	}
+
+	// SELECT TEXTDRAW
+	if(!strncmp(szCMD, "seltd", 5) || !strncmp(szCMD, "SELTD", 5))
+	{
+		int iSelectableTextDrawID;
+
+		if(sscanf(&szCMD[6], "%d", &iSelectableTextDrawID) < 1)
+		{
+			Log("USAGE: !seltd <TextDrawID>");
+			return 1;
+		}
+
+		selectTextDraw(iSelectableTextDrawID);
+		return 1;
+	}
+
+	// SHOW SENDRATES
+	if(!strncmp(szCMD, "sendrates", 9) || !strncmp(szCMD, "SENDRATES", 9))
+	{
+		Log("[SENDRATES] force: %d, onfoot: %d, incar: %d, firing %d, multiplier %d.", settings.uiForceCustomSendRates, iNetModeNormalOnfootSendRate, iNetModeNormalIncarSendRate, iNetModeFiringSendRate, iNetModeSendMultiplier);
 		return 1;
 	}
 

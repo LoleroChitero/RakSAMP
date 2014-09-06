@@ -8,7 +8,7 @@
 
 #include "SAMP_VER.h"
 
-#define RAKSAMP_VERSION "v0.8.6-0.3z RC1"
+#define RAKSAMP_VERSION "v0.8.6-0.3z RC2"
 #define NETCODE_OPENCONNLULZ 6969
 #define NETGAME_VERSION 4047
 
@@ -197,6 +197,44 @@ typedef struct _PICKUP
 	float fZ;
 } PICKUP;
 
+#pragma pack(1)
+typedef struct _TEXT_DRAW_TRANSMIT
+{
+	union
+	{
+		BYTE byteFlags;
+		struct
+		{
+			BYTE byteBox : 1;
+			BYTE byteLeft : 1;
+			BYTE byteRight : 1;
+			BYTE byteCenter : 1;
+			BYTE byteProportional : 1;
+			BYTE bytePadding : 3;
+		};
+	};
+	float fLetterWidth;
+	float fLetterHeight;
+	DWORD dwLetterColor;
+	float fLineWidth;
+	float fLineHeight;
+	DWORD dwBoxColor;
+	BYTE byteShadow;
+	BYTE byteOutline;
+	DWORD dwBackgroundColor;
+	BYTE byteStyle;
+	BYTE byteSelectable;
+	float fX;
+	float fY;
+	WORD wModelID;
+	float fRotX;
+	float fRotY;
+	float fRotZ;
+	float fZoom;
+	WORD wColor1;
+	WORD wColor2;
+} TEXT_DRAW_TRANSMIT;
+
 struct stPlayerInfo
 {
 	int iIsConnected;
@@ -207,6 +245,7 @@ struct stPlayerInfo
 	DWORD dwPing;
 	int iAreWeInAVehicle;
 	BYTE byteInteriorId;
+	BYTE byteIsNPC;
 
 	// STORED INFO
 	ONFOOT_SYNC_DATA onfootData;

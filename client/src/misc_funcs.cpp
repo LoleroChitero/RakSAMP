@@ -255,6 +255,13 @@ void sendPickUp(int iPickupID)
 	pRakClient->RPC(&RPC_PickedUpPickup, &bsSend, HIGH_PRIORITY, RELIABLE_ORDERED, 0, FALSE, UNASSIGNED_NETWORK_ID, NULL);
 }
 
+void selectTextDraw(int iTextDrawID)
+{
+	RakNet::BitStream bsSend;
+	bsSend.Write(iTextDrawID);
+	pRakClient->RPC(&RPC_ClickTextDraw, &bsSend, HIGH_PRIORITY, RELIABLE_ORDERED, 0, FALSE, UNASSIGNED_NETWORK_ID, NULL);
+}
+
 int isPlayerConnected(PLAYERID iPlayerID)
 {
 	if(playerInfo[iPlayerID].iIsConnected && iPlayerID >= 0 && iPlayerID <= MAX_PLAYERS)

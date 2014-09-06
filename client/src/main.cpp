@@ -14,7 +14,7 @@ char g_szNickName[32];
 struct stPlayerInfo playerInfo[MAX_PLAYERS];
 struct stVehiclePool vehiclePool[MAX_VEHICLES];
 
-FILE *flLog = NULL;
+FILE *flLog = NULL, *flTextDrawsLog = NULL;
 
 DWORD dwAutoRunTick = GetTickCount();
 
@@ -255,6 +255,12 @@ bare:;
 		flLog = NULL;
 	}
 
+	if(flTextDrawsLog != NULL)
+	{
+		fclose(flTextDrawsLog);
+		flTextDrawsLog = NULL;
+	}
+
 	return 0;
 }
 
@@ -298,6 +304,27 @@ void Log ( char *fmt, ... )
 	if(settings.iConsole)
 		printf("\n");
 	fflush( flLog );
+}
+
+void SaveTextDrawData ( WORD wTextID, TEXT_DRAW_TRANSMIT *pData, CHAR* cText )
+{
+	if ( flTextDrawsLog == NULL )
+	{
+		flTextDrawsLog = fopen( "TextDraws.log", "a" );
+
+		if ( flTextDrawsLog == NULL )
+			return;
+	}
+
+	fprintf( flTextDrawsLog, "TextDraw ID: %d, Text: %s\n", wTextID, cText );
+	fprintf( flTextDrawsLog, "Flags: box(%i), left(%i), right(%i), center(%i), proportional(%i), padding(%i)\n", pData->byteBox, pData->byteLeft, pData->byteRight, pData->byteCenter, pData->byteProportional, pData->bytePadding );
+	fprintf( flTextDrawsLog, "LetterWidth: %.3f, LetterHeight: %.3f, LetterColor: %X, LineWidth: %.3f, LineHeight: %.3f\n", pData->fLetterWidth, pData->fLetterHeight, pData->dwLetterColor, pData->fLineWidth, pData->fLineHeight );
+	fprintf( flTextDrawsLog, "BoxColor: %X, Shadow: %i, Outline: %i, BackgroundColor: %X, Style: %i, Selectable: %i\n", pData->dwBoxColor, pData->byteShadow, pData->byteOutline, pData->dwBackgroundColor, pData->byteStyle, pData->byteSelectable );
+	fprintf( flTextDrawsLog, "X: %.3f, Y: %.3f, ModelID: %d, RotX: %.3f, RotY: %.3f, RotZ: %.3f, Zoom: %.3f, Colors: %d, %d", pData->fX, pData->fY, pData->wModelID, pData->fRotX, pData->fRotY, pData->fRotZ, pData->fZoom, pData->wColor1, pData->wColor2 );
+
+	fprintf( flTextDrawsLog, "\n\n" );
+
+	fflush( flTextDrawsLog );
 }
 
 void gen_random(char *s, const int len)

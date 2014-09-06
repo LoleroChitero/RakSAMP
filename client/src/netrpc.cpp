@@ -39,8 +39,8 @@ void ServerJoin(RPCParameters *rpcParams)
 	bsData.Read(playerId);
 	int iUnk = 0;
 	bsData.Read(iUnk);
-	BYTE bUnk = 0;
-	bsData.Read(bUnk);
+	BYTE bIsNPC = 0;
+	bsData.Read(bIsNPC);
 	bsData.Read(byteNameLen);
 	if(byteNameLen > 20) return;
 	bsData.Read(szPlayerName,byteNameLen);
@@ -49,6 +49,7 @@ void ServerJoin(RPCParameters *rpcParams)
 	if(playerId < 0 || playerId > MAX_PLAYERS) return;
 
 	playerInfo[playerId].iIsConnected = 1;
+	playerInfo[playerId].byteIsNPC = bIsNPC;
 	strcpy((char *)playerInfo[playerId].szPlayerName, szPlayerName);
 
 	//Log("***[JOIN] (%d) %s", playerId, szPlayerName);
@@ -71,6 +72,7 @@ void ServerQuit(RPCParameters *rpcParams)
 	if(playerId < 0 || playerId > MAX_PLAYERS) return;
 
 	playerInfo[playerId].iIsConnected = 0;
+	playerInfo[playerId].byteIsNPC = 0;
 	//Log("***[QUIT:%d] (%d) %s", byteReason, playerId, playerInfo[playerId].szPlayerName);
 	memset(playerInfo[playerId].szPlayerName, 0, 20);	
 }
@@ -119,10 +121,15 @@ void InitGame(RPCParameters *rpcParams)
 	bsInitGame.ReadCompressed(m_bInstagib);
 
 	// Server's send rate restrictions
-	bsInitGame.Read(iNetModeNormalOnfootSendRate);
-	bsInitGame.Read(iNetModeNormalIncarSendRate);
-	bsInitGame.Read(iNetModeFiringSendRate);
-	bsInitGame.Read(iNetModeSendMultiplier);
+	if(!settings.uiForceCustomSendRates)
+	{
+		bsInitGame.Read(iNetModeNormalOnfootSendRate);
+		bsInitGame.Read(iNetModeNormalIncarSendRate);
+		bsInitGame.Read(iNetModeFiringSendRate);
+		bsInitGame.Read(iNetModeSendMultiplier);
+	}
+	else
+		bsInitGame.SetReadOffset(bsInitGame.GetReadOffset() + 4*32);
 
 	bsInitGame.Read(m_bLagCompensation);
 
@@ -1072,6 +1079,66 @@ void ScrCreate3DTextLabel(RPCParameters *rpcParams)
 	}
 }
 
+void ScrShowTextDraw(RPCParameters *rpcParams)
+{
+	PCHAR Data = reinterpret_cast<PCHAR>(rpcParams->input);
+	int iBitLength = rpcParams->numberOfBitsOfData;
+
+	RakNet::BitStream bsData((unsigned char *)Data,(iBitLength/8)+1,false);
+
+	WORD wTextID;
+	TEXT_DRAW_TRANSMIT TextDrawTransmit;
+
+	CHAR cText[1024];
+	unsigned short cTextLen = 0;
+
+	bsData.Read(wTextID);
+	bsData.Read((PCHAR)&TextDrawTransmit, sizeof(TEXT_DRAW_TRANSMIT));
+	bsData.Read(cTextLen);
+	bsData.Read(cText, cTextLen);
+	cText[cTextLen] = '\0';
+
+	if(settings.uiTextDrawsLogging != 0)
+		SaveTextDrawData(wTextID, &TextDrawTransmit, cText);
+	
+	if(TextDrawTransmit.byteSelectable)
+		Log("[SELECTABLE-TEXTDRAW] ID: %d, Text: %s.", wTextID, cText);
+}
+
+void ScrHideTextDraw(RPCParameters *rpcParams)
+{
+	PCHAR Data = reinterpret_cast<PCHAR>(rpcParams->input);
+	int iBitLength = rpcParams->numberOfBitsOfData;
+
+	RakNet::BitStream bsData((unsigned char *)Data,(iBitLength/8)+1,false);
+
+	WORD wTextID;
+	bsData.Read(wTextID);
+
+	if(settings.uiTextDrawsLogging != 0)
+		Log("[TEXTDRAW - HIDE] ID: %d.", wTextID);
+}
+
+void ScrEditTextDraw(RPCParameters *rpcParams)
+{
+	PCHAR Data = reinterpret_cast<PCHAR>(rpcParams->input);
+	int iBitLength = rpcParams->numberOfBitsOfData;
+
+	RakNet::BitStream bsData((unsigned char *)Data,(iBitLength/8)+1,false);
+
+	WORD wTextID;
+	CHAR cText[1024];
+	unsigned short cTextLen = 0;
+
+	bsData.Read(wTextID);
+	bsData.Read(cTextLen);
+	bsData.Read(cText, cTextLen);
+	cText[cTextLen] = '\0';
+
+	if(settings.uiTextDrawsLogging != 0)
+		Log("[TEXTDRAW - EDIT] ID: %d, Text: %s.", wTextID, cText);
+}
+
 void RegisterRPCs(RakClientInterface *pRakClient)
 {
 	if (pRakClient == ::pRakClient)
@@ -1111,6 +1178,9 @@ void RegisterRPCs(RakClientInterface *pRakClient)
 		pRakClient->RegisterAsRemoteProcedureCall(&RPC_ScrSetPlayerSkin, ScrSetPlayerSkin);
 		pRakClient->RegisterAsRemoteProcedureCall(&RPC_ScrCreateObject, ScrCreateObject);
 		pRakClient->RegisterAsRemoteProcedureCall(&RPC_ScrCreate3DTextLabel, ScrCreate3DTextLabel);
+		pRakClient->RegisterAsRemoteProcedureCall(&RPC_ScrShowTextDraw, ScrShowTextDraw);
+		pRakClient->RegisterAsRemoteProcedureCall(&RPC_ScrHideTextDraw, ScrHideTextDraw);
+		pRakClient->RegisterAsRemoteProcedureCall(&RPC_ScrEditTextDraw, ScrEditTextDraw);
 	}
 }
 
@@ -1153,5 +1223,8 @@ void UnRegisterRPCs(RakClientInterface * pRakClient)
 		pRakClient->UnregisterAsRemoteProcedureCall(&RPC_ScrSetPlayerSkin);
 		pRakClient->UnregisterAsRemoteProcedureCall(&RPC_ScrCreateObject);
 		pRakClient->UnregisterAsRemoteProcedureCall(&RPC_ScrCreate3DTextLabel);
+		pRakClient->UnregisterAsRemoteProcedureCall(&RPC_ScrShowTextDraw);
+		pRakClient->UnregisterAsRemoteProcedureCall(&RPC_ScrHideTextDraw);
+		pRakClient->UnregisterAsRemoteProcedureCall(&RPC_ScrEditTextDraw);
 	}
 }

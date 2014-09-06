@@ -115,6 +115,18 @@ int LoadSettings()
 			logElement->QueryIntAttribute("objects", (int *)&settings.uiObjectsLogging);
 			logElement->QueryIntAttribute("pickups", (int *)&settings.uiPickupsLogging);
 			logElement->QueryIntAttribute("textlabels", (int *)&settings.uiTextLabelsLogging);
+			logElement->QueryIntAttribute("textdraws", (int *)&settings.uiTextDrawsLogging);
+		}
+
+		// get sendrates settings
+		TiXmlElement* sendratesElement = rakSAMPElement->FirstChildElement("sendrates");
+		if(sendratesElement)
+		{
+			sendratesElement->QueryIntAttribute("force", (int *)&settings.uiForceCustomSendRates);
+			sendratesElement->QueryIntAttribute("onfoot", (int *)&iNetModeNormalOnfootSendRate);
+			sendratesElement->QueryIntAttribute("incar", (int *)&iNetModeNormalIncarSendRate);
+			sendratesElement->QueryIntAttribute("firing", (int *)&iNetModeFiringSendRate);
+			sendratesElement->QueryIntAttribute("multiplier", (int *)&iNetModeSendMultiplier);
 		}
 
 		// get normal mode pos

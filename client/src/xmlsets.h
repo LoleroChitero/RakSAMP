@@ -80,6 +80,7 @@ struct stSettings
 	unsigned int uiObjectsLogging;
 	unsigned int uiPickupsLogging;
 	unsigned int uiTextLabelsLogging;
+	unsigned int uiTextDrawsLogging;
 
 	unsigned char bChatColorRed;
 	unsigned char bChatColorGreen;
@@ -127,6 +128,8 @@ struct stSettings
 	bool AutoGotoCP;
 
 	stTeleport TeleportLocations[MAX_TELEPORT_ITEMS];
+
+	unsigned int uiForceCustomSendRates;
 };
 extern struct stSettings settings;
 

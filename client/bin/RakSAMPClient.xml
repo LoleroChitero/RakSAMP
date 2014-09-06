@@ -16,7 +16,8 @@ Avalable runmodes:
 	<server nickname="root" password="">127.0.0.1:7777</server>
 
 	<intervals spam="150" fakekill="50" lag="20" />
-	<log objects="0" pickups="0" textlabels="0" />
+	<log objects="0" pickups="0" textlabels="0" textdraws="0" />
+	<sendrates force="0" onfoot="40" incar="40" firing="40" multiplier="1" />
 
 	<!-- In normal mode this will be your default position, but if you don't set 'force' to 1, then the server can move you with SetPlayerPos, SetPlayerFacingAngle or SetSpawnInfo. -->
 	<normal_pos position="325.35 2512.09 16.56" rotation="0.0" force="0" />
@@ -43,6 +44,7 @@ Avalable runmodes:
 		!runmode: sets current runmode.
 		!stats: shows raknet statistics.
 		!players: shows list of players.
+		!npcs: show list of NPCs.
 		!login: login to RCON.
 		!rcon: send an RCON command.
 		!goto: go to players position.
@@ -69,9 +71,12 @@ Avalable runmodes:
 		!changename: change the fake player's name and rejoin the game.
 		!dialogresponse: send a dialog response.
 		!logstatus: show log status.
-		!log: toggle logging objects/pickups/textlabels.
+		!log: toggle logging objects/pickups/textlabels/textdraws.
 		!teleport: show the teleport menu.
 		!scmevent: send SCM event.
+		!fakekick: send vehicle enter notification with invalid vehicle id to get kicked.
+		!seltd: select a textdraw.
+		!sendrates: show sendrates.
 	-->
 
 </RakSAMPClient>
