@@ -16,6 +16,9 @@ extern HWND hwndTeleportMenu;
 DWORD dwLastDisconnection = GetTickCount();
 DWORD dwLastFakeKill = GetTickCount();
 DWORD dwLastLag = GetTickCount();
+DWORD dwLastJoinFlood = GetTickCount();
+DWORD dwLastChatFlood = GetTickCount();
+DWORD dwLastClassFlood = GetTickCount();
 
 int dd = 0;
 
@@ -115,7 +118,6 @@ void sampDisconnect(int iTimeout)
 void sampRequestClass(int iClass)
 {
 	if(pRakClient == NULL) return;
-	//Log("Requesting class %d...", iClass);
 
 	RakNet::BitStream bsSpawnRequest;
 	bsSpawnRequest.Write(iClass);
@@ -176,7 +178,7 @@ void sampFakeKill()
 
 void sampLag()
 {
-	if(GetTickCount() - dwLastLag >= settings.uiFakeKillInterval)
+	if(GetTickCount() - dwLastLag >= settings.uiLagInterval)
 	{
 		RakNet::BitStream bsDeath;
 		bsDeath.Write(dd++);
@@ -188,6 +190,72 @@ void sampLag()
 		sendDialogResponse(sampDialog.wDialogID, 1, 1, "");
 
 		dwLastLag = GetTickCount();
+	}
+}
+
+void sampJoinFlood()
+{
+	if(GetTickCount() - dwLastJoinFlood >= settings.uiJoinFloodInterval)
+	{
+		gen_random(g_szNickName, 16);
+
+		int iVersion = NETGAME_VERSION;
+		unsigned int uiClientChallengeResponse = settings.uiChallange ^ iVersion;
+		BYTE byteMod = 1;
+
+		char auth_bs[4*16] = {0};
+		gen_gpci(auth_bs, 0x3e9);
+
+		BYTE byteAuthBSLen;
+		byteAuthBSLen = (BYTE)strlen(auth_bs);
+		BYTE byteNameLen = (BYTE)strlen(g_szNickName);
+		BYTE iClientVerLen = (BYTE)strlen(settings.szClientVersion);
+
+		RakNet::BitStream bsSend;
+		bsSend.Write(iVersion);
+		bsSend.Write(byteMod);
+		bsSend.Write(byteNameLen);
+		bsSend.Write(g_szNickName, byteNameLen);
+			
+		bsSend.Write(uiClientChallengeResponse);
+		bsSend.Write(byteAuthBSLen);
+		bsSend.Write(auth_bs, byteAuthBSLen);
+		bsSend.Write(iClientVerLen);
+		bsSend.Write(settings.szClientVersion, iClientVerLen);
+
+		pRakClient->RPC(&RPC_ClientJoin, &bsSend, HIGH_PRIORITY, RELIABLE, 0, FALSE, UNASSIGNED_NETWORK_ID, NULL);
+
+		dwLastJoinFlood = GetTickCount();
+	}
+}
+
+void sampChatFlood()
+{
+	if(GetTickCount() - dwLastChatFlood >= settings.uiChatFloodInterval)
+	{
+		char szRandomMessage[60 + 1];
+		gen_random(szRandomMessage, 60);
+
+		sendChat(szRandomMessage);
+
+		dwLastChatFlood = GetTickCount();
+	}
+}
+
+void sampClassFlood()
+{
+	static int iClassID;
+
+	if(iAreWeConnected && iGameInited && GetTickCount() - dwLastClassFlood >= settings.uiClassFloodInterval)
+	{
+		sampRequestClass(iClassID);
+
+		iClassID++;
+	
+		if(iClassID >= iSpawnsAvailable)
+			iClassID = 0;
+
+		dwLastClassFlood = GetTickCount();
 	}
 }
 
@@ -426,7 +494,7 @@ void processPulsator()
 	}
 }
 
-void processBulletflood()
+void processBulletFlood()
 {
 	if (settings.bulletFlood && m_bLagCompensation)
 	{

@@ -106,6 +106,9 @@ int LoadSettings()
 			intervalsElement->QueryIntAttribute("spam", (int *)&settings.uiSpamInterval);
 			intervalsElement->QueryIntAttribute("fakekill", (int *)&settings.uiFakeKillInterval);
 			intervalsElement->QueryIntAttribute("lag", (int *)&settings.uiLagInterval);
+			intervalsElement->QueryIntAttribute("joinflood", (int *)&settings.uiJoinFloodInterval);
+			intervalsElement->QueryIntAttribute("chatflood", (int *)&settings.uiChatFloodInterval);
+			intervalsElement->QueryIntAttribute("classflood", (int *)&settings.uiClassFloodInterval);
 		}
 
 		// get logging settings

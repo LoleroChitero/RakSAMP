@@ -91,7 +91,6 @@ void InitGame(RPCParameters *rpcParams)
 	bool m_bZoneNames, m_bUseCJWalk, m_bAllowWeapons, m_bLimitGlobalChatRadius;
 	float m_fGlobalChatRadius, m_fNameTagDrawDistance;
 	bool m_bDisableEnterExits, m_bNameTagLOS, m_bManualVehicleEngineAndLight;
-	int m_iSpawnsAvailable;
 	bool m_bShowPlayerTags;
 	int m_iShowPlayerMarkers;
 	BYTE m_byteWorldTime, m_byteWeather;
@@ -109,7 +108,7 @@ void InitGame(RPCParameters *rpcParams)
 	bsInitGame.ReadCompressed(m_bDisableEnterExits);
 	bsInitGame.ReadCompressed(m_bNameTagLOS);
 	bsInitGame.ReadCompressed(m_bManualVehicleEngineAndLight); // 
-	bsInitGame.Read(m_iSpawnsAvailable);
+	bsInitGame.Read(iSpawnsAvailable);
 	bsInitGame.Read(MyPlayerID);
 	bsInitGame.ReadCompressed(m_bShowPlayerTags);
 	bsInitGame.Read(m_iShowPlayerMarkers);

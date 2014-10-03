@@ -72,10 +72,16 @@ struct stSettings
 	bool bSpam;
 	bool bFakeKill;
 	bool bLag;
+	bool bJoinFlood;
+	bool bChatFlood;
+	bool bClassFlood;
 
 	unsigned int uiSpamInterval;
 	unsigned int uiFakeKillInterval;
 	unsigned int uiLagInterval;
+	unsigned int uiJoinFloodInterval;
+	unsigned int uiChatFloodInterval;
+	unsigned int uiClassFloodInterval;
 
 	unsigned int uiObjectsLogging;
 	unsigned int uiPickupsLogging;

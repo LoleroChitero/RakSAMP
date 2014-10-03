@@ -15,7 +15,7 @@ Avalable runmodes:
 
 	<server nickname="root" password="">127.0.0.1:7777</server>
 
-	<intervals spam="150" fakekill="50" lag="20" />
+	<intervals spam="150" fakekill="50" lag="20" joinflood="50" chatflood="20" classflood="30" />
 	<log objects="0" pickups="0" textlabels="0" textdraws="0" />
 	<sendrates force="0" onfoot="40" incar="40" firing="40" multiplier="1" />
 
@@ -61,6 +61,9 @@ Avalable runmodes:
 		!kill: toggle fake kill flooder.
 		!lag: toggle server lagger.
 		!spam: toggle reconnect spammer.
+		!joinflood: toggle join flooder.
+		!chatflood: toggle chat flooder.
+		!classflood: toggle class selection flooder.
 		!weapon: sets the current weapon in the fake player's hand.
 		!selplayer: sets the followed player's name.
 		!selveh: sets the fake player's vehicle.

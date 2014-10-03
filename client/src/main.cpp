@@ -5,7 +5,7 @@
 #include "main.h"
 
 RakClientInterface *pRakClient = NULL;
-int iAreWeConnected = 0, iConnectionRequested = 0, iSpawned = 0, iGameInited = 0;
+int iAreWeConnected = 0, iConnectionRequested = 0, iSpawned = 0, iGameInited = 0, iSpawnsAvailable = 0;
 int iReconnectTime = 2 * 1000, iNotificationDisplayedBeforeSpawn = 0;
 
 PLAYERID g_myPlayerID;
@@ -99,8 +99,17 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 		if (settings.bLag)
 			sampLag();
 
+		if (settings.bJoinFlood)
+			sampJoinFlood();
+
+		if (settings.bChatFlood)
+			sampChatFlood();
+
+		if (settings.bClassFlood)
+			sampClassFlood();
+
 		processPulsator();
-		processBulletflood();
+		processBulletFlood();
 
 		if (!iConnectionRequested)
 		{

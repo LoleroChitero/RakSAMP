@@ -273,39 +273,78 @@ int RunCommand(char *szCMD, int iFromAutorun)
 	// FAKE KILL :-)
 	if(!strncmp(szCMD, "kill", 4) || !strncmp(szCMD, "KILL", 4))
 	{
-		if(!settings.bFakeKill) {
+		settings.bFakeKill ^= 1;
+
+		if(settings.bFakeKill)
 			Log("Started flooding.. :-)");
-			settings.bFakeKill = true;
-		}else{
-			settings.bFakeKill = false;
+		else
 			Log("Stopped flooding.");
-		}
+
 		return 1;
 	}
 
 	// LAG :-)
 	if(!strncmp(szCMD, "lag", 4) || !strncmp(szCMD, "LAG", 4))
 	{
-		if(!settings.bLag) {
+		settings.bLag ^= 1;
+
+		if(settings.bLag)
 			Log("Started lagging.. :-)");
-			settings.bLag=true;
-		}else{
-			settings.bLag=false;
+		else
 			Log("Stopped lagging.");
-		}
+
+		return 1;
+	}
+
+	// JOINFLOOD :-)
+	if(!strncmp(szCMD, "joinflood", 9) || !strncmp(szCMD, "JOINFLOOD", 9))
+	{
+		settings.bJoinFlood ^= 1;
+
+		if(settings.bJoinFlood)
+			Log("Started joinflood.. :-)");
+		else
+			Log("Stopped joinflood.");
+
 		return 1;
 	}
 
 	// SPAM :-)
 	if(!strncmp(szCMD, "spam", 4) || !strncmp(szCMD, "SPAM", 4))
 	{
-		if (settings.bSpam) {
+		settings.bSpam ^= 1;
+
+		if(settings.bSpam)
+			Log("Started spamming.. :-)");
+		else
 			Log("Stopped spamming.");
-			settings.bSpam = false;
-		}else{
-			Log("Started spamming..");
-			settings.bSpam = true;
-		}
+
+		return 1;
+	}
+
+	// CHATFLOOD :-)
+	if(!strncmp(szCMD, "chatflood", 9) || !strncmp(szCMD, "CHATFLOOD", 9))
+	{
+		settings.bChatFlood ^= 1;
+
+		if(settings.bChatFlood)
+			Log("Started chatflood.. :-)");
+		else
+			Log("Stopped chatflood.");
+
+		return 1;
+	}
+
+	// CLASSFLOOD :-)
+	if(!strncmp(szCMD, "classflood", 10) || !strncmp(szCMD, "CLASSFLOOD", 10))
+	{
+		settings.bClassFlood ^= 1;
+
+		if(settings.bClassFlood)
+			Log("Started classflood.. :-)");
+		else
+			Log("Stopped classflood.");
+
 		return 1;
 	}
 

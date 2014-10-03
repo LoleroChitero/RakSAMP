@@ -13,6 +13,9 @@ void sampSpawn();
 void sampSpam();
 void sampFakeKill();
 void sampLag();
+void sampJoinFlood();
+void sampChatFlood();
+void sampClassFlood();
 void sendServerCommand(char *szCommand);
 void sendChat(char *szMessage);
 void sendRconCommand(char *szRCONCmd, int iIsLogin);
@@ -36,7 +39,7 @@ int gen_gpci(char buf[64], unsigned long factor);
 void SetStringFromCommandLine(char *szCmdLine, char *szString);
 
 void processPulsator();
-void processBulletflood();
+void processBulletFlood();
 
 void showTeleportMenu();
 void useTeleport(int iTeleportID);

@@ -62,7 +62,7 @@ struct stVehiclePool
 	int iModelID;
 };
 
-extern int iAreWeConnected, iConnectionRequested, iSpawned, iGameInited;
+extern int iAreWeConnected, iConnectionRequested, iSpawned, iGameInited, iSpawnsAvailable;
 extern int iReconnectTime;
 extern PLAYERID g_myPlayerID;
 extern char g_szNickName[32];
