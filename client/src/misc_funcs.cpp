@@ -249,6 +249,7 @@ void sampClassFlood()
 	if(iAreWeConnected && iGameInited && GetTickCount() - dwLastClassFlood >= settings.uiClassFloodInterval)
 	{
 		sampRequestClass(iClassID);
+		sampSpawn();
 
 		iClassID++;
 	
