@@ -472,11 +472,34 @@ int RunCommand(char *szCMD, int iFromAutorun)
 	// CHANGE NAME AND REJOIN GAME :-)
 	if(!strncmp(szCMD, "changename", 10) || !strncmp(szCMD, "CHANGENAME", 10))
 	{
-		char *szNewPlayerName = &szCMD[11];
+		char szChangeNameType[32], szNewPlayerName[24];
 
-		if(strlen(szCMD) > 11 && strcmp(g_szNickName, szNewPlayerName) != 0)
+		if(sscanf(&szCMD[11], "%s%s", szChangeNameType, szNewPlayerName) < 2)
+		{
+			Log("USAGE: !changename <reconnect/rejoin> <new name>");
+			return 1;
+		}
+
+		if(!strcmp(g_szNickName, szNewPlayerName))
+		{
+			Log("You are already using this name!");
+			return 1;
+		}
+
+		if(!strncmp(szChangeNameType, "reconnect", 9) || !strncmp(szChangeNameType, "RECONNECT", 9))
 		{
 			sprintf_s(g_szNickName, 32, szNewPlayerName);
+
+			iGettingNewName = true;
+			sampDisconnect(0);
+			resetPools(1, 1);
+
+			Log("Changed name to %s and reconnecting to the server..", g_szNickName);
+		}
+		else if(!strncmp(szChangeNameType, "rejoin", 6) || !strncmp(szChangeNameType, "REJOIN", 6))
+		{
+			sprintf_s(g_szNickName, 32, szNewPlayerName);
+			strcpy(playerInfo[g_myPlayerID].szPlayerName, g_szNickName);
 
 			int iVersion = NETGAME_VERSION;
 			unsigned int uiClientChallengeResponse = settings.uiChallange ^ iVersion;
@@ -508,6 +531,9 @@ int RunCommand(char *szCMD, int iFromAutorun)
 
 			Log("Changed name to %s and rejoined to the game.", g_szNickName);
 		}
+		else
+			Log("Invalid changename type!");
+
 		return 1;
 	}
 

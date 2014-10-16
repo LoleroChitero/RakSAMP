@@ -163,14 +163,22 @@ void sampFakeKill()
 {
 	if(GetTickCount() - dwLastFakeKill >= settings.uiFakeKillInterval)
 	{
-		for(int a = 0; a < 46; a++)
+		int randkillerid = 0xFFFF + 1;
+		int randreason = rand() % 46;
+
+		while(!(randkillerid > 0 && randkillerid < MAX_PLAYERS && randkillerid != g_myPlayerID && playerInfo[randkillerid].iIsConnected))
 		{
-			for(int b = 0; b < getPlayerCount(); b++)
+			if(getPlayerCount() < 2)
 			{
-				if(playerInfo[b].iIsConnected && b != g_myPlayerID)
-					SendWastedNotification(a, b);
+				randkillerid = 0xFFFF;
+				break;
 			}
+
+			randkillerid = rand() % MAX_PLAYERS;
 		}
+
+		if(randkillerid != 0xFFFF + 1)
+			SendWastedNotification(randreason, randkillerid);
 
 		dwLastFakeKill = GetTickCount();
 	}
@@ -198,6 +206,7 @@ void sampJoinFlood()
 	if(GetTickCount() - dwLastJoinFlood >= settings.uiJoinFloodInterval)
 	{
 		gen_random(g_szNickName, 16);
+		strcpy(playerInfo[g_myPlayerID].szPlayerName, g_szNickName);
 
 		int iVersion = NETGAME_VERSION;
 		unsigned int uiClientChallengeResponse = settings.uiChallange ^ iVersion;
@@ -333,10 +342,13 @@ void selectTextDraw(int iTextDrawID)
 
 int isPlayerConnected(PLAYERID iPlayerID)
 {
-	if(playerInfo[iPlayerID].iIsConnected && iPlayerID >= 0 && iPlayerID <= MAX_PLAYERS)
-		return 1;
+	if(iPlayerID < 0 || iPlayerID >= MAX_PLAYERS)
+		return 0;
 
-	return 0;
+	if(!playerInfo[iPlayerID].iIsConnected)
+		return 0;
+
+	return 1;
 }
 
 int getPlayerID(char *szPlayerName)
