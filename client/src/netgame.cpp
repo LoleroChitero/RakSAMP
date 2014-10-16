@@ -111,6 +111,8 @@ void Packet_PlayerSync(Packet *p, RakClientInterface *pRakClient)
 	bsPlayerSync.IgnoreBits(8);
 	bsPlayerSync.Read(playerId);
 
+	if(playerId < 0 || playerId >= MAX_PLAYERS) return;
+
 	// Followed passenger exit
 	if(settings.runMode == RUNMODE_FOLLOWPLAYER && playerId == getPlayerIDFromPlayerName(settings.szFollowingPlayerName))
 	{
@@ -220,6 +222,8 @@ void Packet_UnoccupiedSync(Packet *p, RakClientInterface *pRakClient)
 	bsUnocSync.IgnoreBits(8);
 	bsUnocSync.Read(playerId);
 
+	if(playerId < 0 || playerId >= MAX_PLAYERS) return;
+
 	memset(&playerInfo[playerId].unocData, 0, sizeof(UNOCCUPIED_SYNC_DATA));
 
 	bsUnocSync.Read((char *)&playerInfo[playerId].unocData, sizeof(UNOCCUPIED_SYNC_DATA));
@@ -234,6 +238,8 @@ void Packet_AimSync(Packet *p, RakClientInterface *pRakClient)
 
 	bsAimSync.IgnoreBits(8);
 	bsAimSync.Read(playerId);
+
+	if(playerId < 0 || playerId >= MAX_PLAYERS) return;
 
 	memset(&playerInfo[playerId].aimData, 0, sizeof(AIM_SYNC_DATA));
 
@@ -255,6 +261,9 @@ void Packet_VehicleSync(Packet *p, RakClientInterface *pRakClient)
 	bsSync.IgnoreBits(8);
 	bsSync.Read(playerId);
 	bsSync.Read(VehicleID);
+
+	if(playerId < 0 || playerId >= MAX_PLAYERS) return;
+	if(VehicleID < 0 || VehicleID >= MAX_VEHICLES) return;
 
 	// Follower passenger enter
 	playerInfo[playerId].incarData.VehicleID = VehicleID;
@@ -367,6 +376,9 @@ void Packet_PassengerSync(Packet *p, RakClientInterface *pRakClient)
 
 	bsPassengerSync.IgnoreBits(8);
 	bsPassengerSync.Read(playerId);
+
+	if(playerId < 0 || playerId >= MAX_PLAYERS) return;
+
 	bsPassengerSync.Read((PCHAR)&psSync,sizeof(PASSENGER_SYNC_DATA));
 
 	// Followed wants to drive the vehicle
@@ -422,7 +434,7 @@ void Packet_MarkersSync(Packet *p, RakClientInterface *pRakClient)
 	{
 		bsMarkersSync.Read(playerID);
 
-		if(playerID < 0 || playerID > MAX_PLAYERS) return;
+		if(playerID < 0 || playerID >= MAX_PLAYERS) return;
 
 		bsMarkersSync.ReadCompressed(bIsPlayerActive);
 		if(bIsPlayerActive == 0)
@@ -454,6 +466,8 @@ void Packet_BulletSync(Packet *p, RakClientInterface *pRakClient)
 
 		bsBulletSync.IgnoreBits(8);
 		bsBulletSync.Read(PlayerID);
+
+		if(PlayerID < 0 || PlayerID >= MAX_PLAYERS) return;
 
 		memset(&playerInfo[PlayerID].bulletData, 0, sizeof(BULLET_SYNC_DATA));
 
