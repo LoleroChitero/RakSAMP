@@ -8,7 +8,7 @@
 
 #include "SAMP_VER.h"
 
-#define RAKSAMP_VERSION "v0.8.6-0.3z RC3"
+#define RAKSAMP_VERSION "v0.8.6-0.3z"
 #define NETCODE_OPENCONNLULZ 6969
 #define NETGAME_VERSION 4047
 
@@ -21,7 +21,7 @@
 
 #define BP _asm int 3
 
-#define MAX_PLAYERS 1000 //due to limit in samp's servers browser (samp.exe)
+#define MAX_PLAYERS 1004
 #define MAX_VEHICLES 2000
 #define MAX_SCRIPTS 32
 typedef unsigned short PLAYERID;
