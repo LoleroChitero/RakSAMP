@@ -395,7 +395,7 @@ int SocketLayer::RecvFrom( const SOCKET s, RakPeer *rakPeer, int *errorCode )
 
 	len = recvfrom( s, data, MAXIMUM_MTU_SIZE, COMPATIBILITY_2_RECV_FROM_FLAGS, ( sockaddr* ) & sa, ( socklen_t* ) & len2 );
 
-	if(len < 1) // thanks to n3ptun0
+	if(len < 1 && len != -1) // thanks to n3ptun0
 		return 1;
 
 	// if (len>0)
