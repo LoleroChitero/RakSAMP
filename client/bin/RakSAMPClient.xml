@@ -1,10 +1,10 @@
 <!--
 Avalable runmodes:
-	0 = RCON mode,
-	1 = Bare mode (doesn't spawn),
-	2 = Still mode (stays still at spawn position),
-	3 = Normal mode (stays still at a position),
-	4 = Follows a player,
+	0 = RCON mode
+	1 = Bare mode (doesn't spawn)
+	2 = Still mode (stays still at spawn position)
+	3 = Normal mode (stays still at a position)
+	4 = Follows a player
 	5 = Follows a player with a vehicle
 -->
 
@@ -15,7 +15,7 @@ Avalable runmodes:
 
 	<server nickname="root" password="">127.0.0.1:7777</server>
 
-	<intervals spam="150" fakekill="35" lag="20" joinflood="50" chatflood="20" classflood="30" />
+	<intervals spam="150" fakekill="35" lag="20" joinflood="50" chatflood="20" classflood="30" bulletflood="25" />
 	<log objects="0" pickups="0" textlabels="0" textdraws="0" />
 	<sendrates force="0" onfoot="40" incar="40" firing="40" multiplier="1" />
 
@@ -64,14 +64,15 @@ Avalable runmodes:
 		!joinflood: toggle join flooder.
 		!chatflood: toggle chat flooder.
 		!classflood: toggle class selection flooder.
+		!bulletflood: flood the server with bullet sync packets to the players' positions.
 		!weapon: sets the current weapon in the fake player's hand.
 		!selplayer: sets the followed player's name.
 		!selveh: sets the fake player's vehicle.
 		!pos: sets the fake player's position.
 		!follow: sets the following offset.
-		!bulletflood: flood the server with bullet sync packets to the players' positions.
-		!pulsehealth: pulse health & armor.
-		!changename: change the fake player's name and rejoin the game.
+		!pulsator: pulse health & armor.
+		!change_server: connect to another server without restarting RakSAMPClient.
+		!change_name: change the fake player's name and reconnect/rejoin the game.
 		!dialogresponse: send a dialog response.
 		!logstatus: show log status.
 		!log: toggle logging objects/pickups/textlabels/textdraws.

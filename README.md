@@ -2,9 +2,9 @@ RakSAMP
 =======
 RakSAMP is a fake client and server for SA-MP.  
   
-Current version: v0.8.6-0.3z RC2.  
+Current version: v0.8.6-0.3z.  
 Authors: jlfm, bartekdvd, P3ti.  
-Special thanks to balika011 and .silent.  
+Special thanks to balika011, .silent, n3ptun0.  
 
 --
 ### Client
@@ -25,6 +25,7 @@ The client supports 0.3z-R3 servers too.
 * !runmode: sets current runmode.
 * !stats: shows raknet statistics.
 * !players: shows list of players.
+* !npcs: show list of NPCs.
 * !login: login to RCON.
 * !rcon: send an RCON command.
 * !goto: go to players position.
@@ -41,17 +42,21 @@ The client supports 0.3z-R3 servers too.
 * !kill: toggle fake kill flooder.
 * !lag: toggle server lagger.
 * !spam: toggle reconnect spammer.
+* !joinflood: toggle join flooder.
+* !chatflood: toggle chat flooder.
+* !classflood: toggle class selection flooder.
+* !bulletflood: flood the server with bullet sync packets to the players' positions.
 * !weapon: sets the current weapon in the fake player's hand.
 * !selplayer: sets the followed player's name.
 * !selveh: sets the fake player's vehicle.
 * !pos: sets the fake player's position.
 * !follow: sets the following offset.
-* !bulletflood: flood the server with bullet sync packets to the players' positions.
-* !pulsehealth: pulse health & armor.
-* !changename: change the fake player's name and rejoin the game.
+* !pulsator: pulse health & armor.
+* !change_server: connect to another server without restarting RakSAMPClient.
+* !change_name: change the fake player's name and reconnect/rejoin the game.
 * !dialogresponse: send a dialog response.
 * !logstatus: show log status.
-* !log: toggle logging objects/pickups/textlabels.
+* !log: toggle logging objects/pickups/textlabels/textdraws.
 * !teleport: show the teleport menu.
 * !scmevent: send SCM event.
 * !fakekick: send vehicle enter notification with invalid vehicle id to get kicked.

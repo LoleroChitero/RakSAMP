@@ -109,6 +109,7 @@ int LoadSettings()
 			intervalsElement->QueryIntAttribute("joinflood", (int *)&settings.uiJoinFloodInterval);
 			intervalsElement->QueryIntAttribute("chatflood", (int *)&settings.uiChatFloodInterval);
 			intervalsElement->QueryIntAttribute("classflood", (int *)&settings.uiClassFloodInterval);
+			intervalsElement->QueryIntAttribute("bulletflood", (int *)&settings.uiBulletFloodInterval);
 		}
 
 		// get logging settings

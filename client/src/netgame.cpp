@@ -497,7 +497,7 @@ void resetPools(int iRestart, DWORD dwTimeReconnect)
 		iDrunkLevel = 0;
 		iLocalPlayerSkin = 0;
 
-		settings.pulseHealth = false;
+		settings.bPulsator = false;
 
 		settings.fPlayerHealth = 100.0f;
 		settings.fPlayerArmour = 0.0f;

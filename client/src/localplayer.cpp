@@ -35,7 +35,7 @@ void SendOnFootFullSyncData(ONFOOT_SYNC_DATA *pofSync, int sendDeathNoti, PLAYER
 			pofSync->fQuaternion[2] = playerInfo[followPlayerID].onfootData.fQuaternion[2];
 			pofSync->fQuaternion[3] = playerInfo[followPlayerID].onfootData.fQuaternion[3];
 
-			if(!settings.pulseHealth)
+			if(!settings.bPulsator)
 			{
 				pofSync->byteHealth = playerInfo[followPlayerID].onfootData.byteHealth;
 				pofSync->byteArmour = playerInfo[followPlayerID].onfootData.byteArmour;
@@ -123,7 +123,7 @@ void SendInCarFullSyncData(INCAR_SYNC_DATA *picSync, int iUseCarPos, PLAYERID fo
 
 			picSync->fCarHealth = playerInfo[followPlayerID].incarData.fCarHealth;
 
-			if(!settings.pulseHealth)
+			if(!settings.bPulsator)
 			{
 				picSync->bytePlayerHealth = playerInfo[followPlayerID].incarData.bytePlayerHealth;
 				picSync->bytePlayerArmour = playerInfo[followPlayerID].incarData.bytePlayerArmour;

@@ -19,6 +19,7 @@ DWORD dwLastLag = GetTickCount();
 DWORD dwLastJoinFlood = GetTickCount();
 DWORD dwLastChatFlood = GetTickCount();
 DWORD dwLastClassFlood = GetTickCount();
+DWORD dwLastBulletFlood = GetTickCount();
 
 int dd = 0;
 
@@ -94,7 +95,7 @@ void inCarUpdateFollow(PLAYERID followID, VEHICLEID withVehicleID)
 
 int sampConnect(char *szHostname, int iPort, char *szNickname, char *szPassword, RakClientInterface *pRakClient)
 {
-	if (!iAreWeConnected) Log("Connecting to %s:%d", szHostname, iPort);
+	if (!iAreWeConnected) Log("Connecting to %s:%d..", szHostname, iPort);
 
 	strcpy(g_szNickName, szNickname);
 	if(pRakClient == NULL) return 0;
@@ -107,7 +108,7 @@ void sampDisconnect(int iTimeout)
 {
 	if(pRakClient == NULL) return;
 
-	Log("Disconnected");
+	Log("Disconnected.");
 
 	if(iTimeout)
 		pRakClient->Disconnect(0);
@@ -166,7 +167,7 @@ void sampFakeKill()
 		int randkillerid = 0xFFFF + 1;
 		int randreason = rand() % 46;
 
-		while(!(randkillerid > 0 && randkillerid < MAX_PLAYERS && randkillerid != g_myPlayerID && playerInfo[randkillerid].iIsConnected))
+		while(!(randkillerid >= 0 && randkillerid < MAX_PLAYERS && randkillerid != g_myPlayerID && playerInfo[randkillerid].iIsConnected))
 		{
 			if(getPlayerCount() < 2)
 			{
@@ -304,7 +305,7 @@ void sendChat(char *szMessage)
 	pRakClient->RPC(&RPC_Chat, &bsSend, HIGH_PRIORITY, RELIABLE, 0, FALSE, UNASSIGNED_NETWORK_ID, NULL);
 }
 
-void SendScmEvent(int iEventType, DWORD dwParam1, DWORD dwParam2, DWORD dwParam3)
+void sendScmEvent(int iEventType, DWORD dwParam1, DWORD dwParam2, DWORD dwParam3)
 {
 	RakNet::BitStream bsSend;
 	bsSend.Write(iEventType);
@@ -475,7 +476,7 @@ void SetStringFromCommandLine(char *szCmdLine, char *szString)
 
 void processPulsator()
 {
-	if (settings.pulseHealth)
+	if (settings.bPulsator)
 	{
 		if(!bHealthPulseDirection && settings.fPlayerHealth <= 3)
 			bHealthPulseDirection = true;
@@ -509,32 +510,50 @@ void processPulsator()
 
 void processBulletFlood()
 {
+	static PLAYERID targetid;
+
 	if (settings.bulletFlood && m_bLagCompensation)
 	{
-		for(int p = 0; p < MAX_PLAYERS; p++)
+		if(GetTickCount() - dwLastBulletFlood >= settings.uiBulletFloodInterval)
 		{
-			if(playerInfo[p].iIsConnected && p != g_myPlayerID)
-			{
-				BULLET_SYNC_DATA BulletSyncData;
+			if ( !(targetid >= 0 && targetid < MAX_PLAYERS && targetid != g_myPlayerID && playerInfo[targetid].iIsConnected && (playerInfo[targetid].iIsStreamedIn || playerInfo[targetid].iGotMarkersPos)) )
+				goto find_another_target;
 
-				BulletSyncData.bHitType = (BYTE)BULLET_HIT_TYPE_PLAYER;
-				BulletSyncData.iHitID = (unsigned short)p;
+			BULLET_SYNC_DATA BulletSyncData;
 
-				BulletSyncData.fHitOrigin[0] = settings.fCurrentPosition[0];
-				BulletSyncData.fHitOrigin[1] = settings.fCurrentPosition[1];
-				BulletSyncData.fHitOrigin[2] = settings.fCurrentPosition[2];
+			BulletSyncData.bHitType = (BYTE)BULLET_HIT_TYPE_PLAYER;
+			BulletSyncData.iHitID = (unsigned short)targetid;
+
+			BulletSyncData.fHitOrigin[0] = settings.fCurrentPosition[0];
+			BulletSyncData.fHitOrigin[1] = settings.fCurrentPosition[1];
+			BulletSyncData.fHitOrigin[2] = settings.fCurrentPosition[2];
 								
-				BulletSyncData.fHitTarget[0] = playerInfo[p].onfootData.vecPos[0];
-				BulletSyncData.fHitTarget[1] = playerInfo[p].onfootData.vecPos[1];
-				BulletSyncData.fHitTarget[2] = playerInfo[p].onfootData.vecPos[2];
+			BulletSyncData.fHitTarget[0] = playerInfo[targetid].onfootData.vecPos[0];
+			BulletSyncData.fHitTarget[1] = playerInfo[targetid].onfootData.vecPos[1];
+			BulletSyncData.fHitTarget[2] = playerInfo[targetid].onfootData.vecPos[2];
 
-				BulletSyncData.fCenterOfHit[0] = (rand() % 10) / 20.0f;
-				BulletSyncData.fCenterOfHit[1] = (rand() % 10) / 20.0f;
-				BulletSyncData.fCenterOfHit[2] = (rand() % 10) / 20.0f;
+			BulletSyncData.fCenterOfHit[0] = (rand() % 10) / 20.0f;
+			BulletSyncData.fCenterOfHit[1] = (rand() % 10) / 20.0f;
+			BulletSyncData.fCenterOfHit[2] = (rand() % 10) / 20.0f;
 
-				SendBulletData(&BulletSyncData);
-			}
+			SendBulletData(&BulletSyncData);
+
+			targetid++;
+
+			dwLastBulletFlood = GetTickCount();
 		}
+	}
+
+	find_another_target:
+	{
+		for ( targetid; targetid < MAX_PLAYERS; targetid++ )
+		{
+			if ( targetid >= 0 && targetid < MAX_PLAYERS && targetid != g_myPlayerID && playerInfo[targetid].iIsConnected && (playerInfo[targetid].iIsStreamedIn || playerInfo[targetid].iGotMarkersPos) )
+				break;
+		}
+
+		if ( targetid >= MAX_PLAYERS )
+			targetid = 0;
 	}
 }
 

@@ -82,6 +82,7 @@ struct stSettings
 	unsigned int uiJoinFloodInterval;
 	unsigned int uiChatFloodInterval;
 	unsigned int uiClassFloodInterval;
+	unsigned int uiBulletFloodInterval;
 
 	unsigned int uiObjectsLogging;
 	unsigned int uiPickupsLogging;
@@ -110,7 +111,7 @@ struct stSettings
 	float fNormalModeRot;
 	int iNormalModePosForce;
 
-	bool pulseHealth;
+	bool bPulsator;
 
 	float fHealthBeforePulse;
 	float fArmourBeforePulse;

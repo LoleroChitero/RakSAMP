@@ -374,12 +374,12 @@ int RunCommand(char *szCMD, int iFromAutorun)
 	}
 
 	// PULSE HEALTH & ARMOR
-	if(!strncmp(szCMD, "pulsehealth", 11) || !strncmp(szCMD, "PULSEHEALTH", 11))
+	if(!strncmp(szCMD, "pulsator", 8) || !strncmp(szCMD, "PULSATOR", 8))
 	{
-		if (settings.pulseHealth)
+		if (settings.bPulsator)
 		{
-			Log("Stopped health pulser.");
-			settings.pulseHealth = false;
+			Log("Stopped pulsator.");
+			settings.bPulsator = false;
 
 			settings.fPlayerHealth = settings.fHealthBeforePulse;
 			settings.fPlayerArmour = settings.fArmourBeforePulse;
@@ -389,8 +389,8 @@ int RunCommand(char *szCMD, int iFromAutorun)
 			settings.fHealthBeforePulse = settings.fPlayerHealth;
 			settings.fArmourBeforePulse = settings.fPlayerArmour;
 
-			Log("Started health pulser...");
-			settings.pulseHealth = true;
+			Log("Started pulsator...");
+			settings.bPulsator = true;
 		}
 		return 1;
 	}
@@ -469,14 +469,44 @@ int RunCommand(char *szCMD, int iFromAutorun)
 		return 1;
 	}
 
+	// CHANGE SERVER
+	if(!strncmp(szCMD, "change_server", 13) || !strncmp(szCMD, "CHANGE_SERVER", 13))
+	{
+		char szIP[128], szPort[64], szName[24], szPassword[128];
+
+		int iParamsCount = sscanf(&szCMD[14], "%s%s%s%s", szIP, szPort, szName, szPassword);
+
+		if(iParamsCount < 2)
+		{
+			Log("USAGE: !change_server <ip> <port> <name (optional)> <password (optional)>");
+			return 1;
+		}
+
+		sprintf_s(settings.server.szAddr, sizeof(settings.server.szAddr), szIP);
+		settings.server.iPort = atoi(szPort);
+
+		if(iParamsCount > 2)
+			sprintf_s(g_szNickName, sizeof(g_szNickName), szName);
+
+		if(iParamsCount > 3)
+			sprintf_s(settings.server.szPassword, sizeof(settings.server.szPassword), szPassword);
+
+		iGettingNewName = true;
+		sampDisconnect(0);
+		resetPools(1, 1);
+
+		Log("Changing server to %s:%d..", settings.server.szAddr, settings.server.iPort);
+		return 1;
+	}
+
 	// CHANGE NAME AND REJOIN GAME :-)
-	if(!strncmp(szCMD, "changename", 10) || !strncmp(szCMD, "CHANGENAME", 10))
+	if(!strncmp(szCMD, "change_name", 11) || !strncmp(szCMD, "CHANGE_NAME", 11))
 	{
 		char szChangeNameType[32], szNewPlayerName[24];
 
-		if(sscanf(&szCMD[11], "%s%s", szChangeNameType, szNewPlayerName) < 2)
+		if(sscanf(&szCMD[12], "%s%s", szChangeNameType, szNewPlayerName) < 2)
 		{
-			Log("USAGE: !changename <reconnect/rejoin> <new name>");
+			Log("USAGE: !change_name <reconnect/rejoin> <new name>");
 			return 1;
 		}
 
@@ -691,7 +721,7 @@ int RunCommand(char *szCMD, int iFromAutorun)
 			return 1;
 		}
 
-		SendScmEvent(iEvent, iParam1, iParam2, iParam3);
+		sendScmEvent(iEvent, iParam1, iParam2, iParam3);
 		return 1;
 	}
 
