@@ -58,7 +58,6 @@ VEHICLEID addVehicle(int iVehModelID, float fPosX, float fPosY, float fPosZ, flo
 	newVeh.fRotation = fRot;
 	newVeh.fHealth = 1000.00f;
 	newVeh.byteInterior = 0;
-	newVeh.byteDoorsLocked = 0;
 	newVeh.dwDoorDamageStatus = 0;
 	newVeh.dwPanelDamageStatus = 0;
 	newVeh.byteLightDamageStatus = 0;

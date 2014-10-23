@@ -99,7 +99,6 @@ void SpawnAllVehiclesForPlayer(PLAYERID playerID)
 		newVeh.fRotation = vehiclePool[v].fRotation;
 		newVeh.fHealth = 1000.00f;
 		newVeh.byteInterior = 0;
-		newVeh.byteDoorsLocked = 0;
 		newVeh.dwDoorDamageStatus = 0;
 		newVeh.dwPanelDamageStatus = 0;
 		newVeh.byteLightDamageStatus = 0;
@@ -469,6 +468,9 @@ void Death(RPCParameters *rpcParams)
 
 	if(KillerID != 0xFFFF)
 	{
+		if(KillerID < 0 || KillerID >= MAX_PLAYERS)
+			return;
+
 		if(!playerPool[KillerID].iIsConnected)
 			return;
 

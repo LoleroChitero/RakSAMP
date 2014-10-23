@@ -852,7 +852,6 @@ bool LoadScript(char *szScriptName, bool bFirstLoad)
 						veh.aColor2 = vehiclePool[i].bColor2;
 						veh.fHealth = vehiclePool[i].fHealth;
 						veh.byteInterior = 0;
-						veh.byteDoorsLocked = 0;
 						veh.dwDoorDamageStatus = 0;
 						veh.dwPanelDamageStatus = 0;
 						veh.byteLightDamageStatus = 0;

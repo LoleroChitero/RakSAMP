@@ -435,7 +435,7 @@ int RunCommand(char *szCMD, int iFromAutorun)
 		char szType[32];
 		float fValue;
 
-		if(sscanf(&szCMD[4], "%s%f", szType, &fValue) < 2)
+		if(sscanf(&szCMD[7], "%s%f", szType, &fValue) < 2)
 		{
 			Log("USAGE: !follow <x/y/z> <value>");
 			return 1;

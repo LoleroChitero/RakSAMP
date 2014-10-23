@@ -519,6 +519,17 @@ void processBulletFlood()
 			if ( !(targetid >= 0 && targetid < MAX_PLAYERS && targetid != g_myPlayerID && playerInfo[targetid].iIsConnected && (playerInfo[targetid].iIsStreamedIn || playerInfo[targetid].iGotMarkersPos)) )
 				goto find_another_target;
 
+			if(settings.runMode == RUNMODE_FOLLOWPLAYER)
+			{
+				PLAYERID copyingID = getPlayerIDFromPlayerName(settings.szFollowingPlayerName);
+
+				if(copyingID != (PLAYERID)-1 && copyingID == targetid)
+				{
+					targetid++;
+					goto find_another_target;
+				}
+			}
+
 			BULLET_SYNC_DATA BulletSyncData;
 
 			BulletSyncData.bHitType = (BYTE)BULLET_HIT_TYPE_PLAYER;

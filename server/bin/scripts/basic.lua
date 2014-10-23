@@ -94,7 +94,7 @@ function onPlayerDeath(playerID, killerID, reasonID)
 end
 
 function onPlayerDamageVehicle(playerID, vehicleID)
-	outputConsole("[" .. playerID ..":VDAMAGE] " .. getPlayerName(playerID) .. " <- " .. vehicleID .. "")
+	--outputConsole("[" .. playerID ..":VDAMAGE] " .. getPlayerName(playerID) .. " <- " .. vehicleID .. "")
 end
 
 function onPlayerWantsEnterVehicle(playerID, vehicleID, passenger)

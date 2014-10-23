@@ -12,18 +12,22 @@ extern char g_szHostName[256];
 
 #pragma pack(1)
 typedef struct _NEW_VEHICLE {
-	VEHICLEID VehicleId;
+    VEHICLEID VehicleId;
 	int		  iVehicleType;
 	float	  vecPos[3];
 	float	  fRotation;
-	char	  aColor1;
-	char	  aColor2;
+	BYTE	  aColor1;
+	BYTE	  aColor2;
 	float	  fHealth;
 	BYTE	  byteInterior;
-	BYTE	  byteDoorsLocked;
 	DWORD	  dwDoorDamageStatus;
 	DWORD	  dwPanelDamageStatus;
 	BYTE	  byteLightDamageStatus;
+	BYTE	  byteTireDamageStatus;
+	BYTE      byteModSlots[14];
+	BYTE	  bytePaintjob;
+	DWORD	  cColor1;
+	DWORD	  cColor2;
 } NEW_VEHICLE;
 
 #define MAX_MENU_ITEMS 12

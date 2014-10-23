@@ -46,7 +46,7 @@ void ServerJoin(RPCParameters *rpcParams)
 	bsData.Read(szPlayerName,byteNameLen);
 	szPlayerName[byteNameLen] = '\0';
 	
-	if(playerId < 0 || playerId > MAX_PLAYERS) return;
+	if(playerId < 0 || playerId >= MAX_PLAYERS) return;
 
 	playerInfo[playerId].iIsConnected = 1;
 	playerInfo[playerId].byteIsNPC = bIsNPC;
@@ -69,7 +69,7 @@ void ServerQuit(RPCParameters *rpcParams)
 	bsData.Read(playerId);
 	bsData.Read(byteReason);
 
-	if(playerId < 0 || playerId > MAX_PLAYERS) return;
+	if(playerId < 0 || playerId >= MAX_PLAYERS) return;
 
 	playerInfo[playerId].iIsConnected = 0;
 	playerInfo[playerId].byteIsNPC = 0;
@@ -194,7 +194,7 @@ void WorldPlayerAdd(RPCParameters *rpcParams)
 	bsData.Read(dwColor);
 	bsData.Read(byteFightingStyle);
 
-	if(playerId < 0 || playerId > MAX_PLAYERS) return;
+	if(playerId < 0 || playerId >= MAX_PLAYERS) return;
 
 	playerInfo[playerId].iIsStreamedIn = 1;
 	playerInfo[playerId].onfootData.vecPos[0] = 
@@ -219,7 +219,7 @@ void WorldPlayerDeath(RPCParameters *rpcParams)
 	PLAYERID playerId;
 	bsData.Read(playerId);
 
-	if(playerId < 0 || playerId > MAX_PLAYERS) return;
+	if(playerId < 0 || playerId >= MAX_PLAYERS) return;
 
 	//Log("[PLAYER_DEATH] %d", playerId);
 }
@@ -236,7 +236,7 @@ void WorldPlayerRemove(RPCParameters *rpcParams)
 	PLAYERID playerId=0;
 	bsData.Read(playerId);
 
-	if(playerId < 0 || playerId > MAX_PLAYERS) return;
+	if(playerId < 0 || playerId >= MAX_PLAYERS) return;
 
 	playerInfo[playerId].iIsStreamedIn = 0;
 	playerInfo[playerId].incarData.vecPos[0] = 0.0f;
@@ -259,7 +259,7 @@ void WorldVehicleAdd(RPCParameters *rpcParams)
 
 	bsData.Read((char *)&NewVehicle,sizeof(NEW_VEHICLE));
 
-	if(NewVehicle.VehicleId < 0 || NewVehicle.VehicleId > MAX_VEHICLES) return;
+	if(NewVehicle.VehicleId < 0 || NewVehicle.VehicleId >= MAX_VEHICLES) return;
 
 	vehiclePool[NewVehicle.VehicleId].iDoesExist = 1;
 	vehiclePool[NewVehicle.VehicleId].fPos[0] = NewVehicle.vecPos[0];
@@ -284,7 +284,7 @@ void WorldVehicleRemove(RPCParameters *rpcParams)
 
 	bsData.Read(VehicleID);
 
-	if(VehicleID < 0 || VehicleID > MAX_VEHICLES) return;
+	if(VehicleID < 0 || VehicleID >= MAX_VEHICLES) return;
 
 	vehiclePool[VehicleID].iDoesExist = 0;
 	vehiclePool[VehicleID].fPos[0] = 0.0f;
@@ -412,6 +412,9 @@ void Chat(RPCParameters *rpcParams)
 	bsData.Read((char*)szText, byteTextLen);
 	szText[byteTextLen] = 0;
 
+	if(playerId < 0 || playerId >= MAX_PLAYERS)
+		return;
+
 	if(imitateID == playerId)
 		sendChat((char *)szText);
 
@@ -451,6 +454,9 @@ void UpdateScoresPingsIPs(RPCParameters *rpcParams)
 		bsData.Read(playerId);
 		bsData.Read(iPlayerScore);
 		bsData.Read(dwPlayerPing);
+
+		if(playerId < 0 || playerId >= MAX_PLAYERS)
+			continue;
 
 		playerInfo[playerId].iScore = iPlayerScore;
 		playerInfo[playerId].dwPing = dwPlayerPing;
@@ -1005,7 +1011,11 @@ void ScrSetPlayerSkin(RPCParameters *rpcParams)
 	bsData.Read(iPlayerID);
 	bsData.Read(uiSkin);
 
-	iLocalPlayerSkin = uiSkin;
+	if(iPlayerID < 0 || iPlayerID >= MAX_PLAYERS)
+		return;
+
+	if(iGameInited && g_myPlayerID == iPlayerID)
+		iLocalPlayerSkin = uiSkin;
 }
 
 void ScrCreateObject(RPCParameters *rpcParams)
@@ -1037,7 +1047,7 @@ void ScrCreateObject(RPCParameters *rpcParams)
 	if(settings.uiObjectsLogging != 0)
 	{
 		char szCreateObjectAlert[256];
-		sprintf_s(szCreateObjectAlert, sizeof(szCreateObjectAlert), "[CREATEOBJECT] %d, %d, %.3f, %.3f, %.3f, %.3f, %.3f, %.3f, %.2f", ObjectID, ModelID, vecPos[0], vecPos[1], vecPos[2], vecRot[0], vecRot[1], vecRot[2], fDrawDistance);
+		sprintf_s(szCreateObjectAlert, sizeof(szCreateObjectAlert), "[OBJECT] %d, %d, %.3f, %.3f, %.3f, %.3f, %.3f, %.3f, %.2f", ObjectID, ModelID, vecPos[0], vecPos[1], vecPos[2], vecRot[0], vecRot[1], vecRot[2], fDrawDistance);
 		Log(szCreateObjectAlert);
 	}
 }
@@ -1115,7 +1125,7 @@ void ScrHideTextDraw(RPCParameters *rpcParams)
 	bsData.Read(wTextID);
 
 	if(settings.uiTextDrawsLogging != 0)
-		Log("[TEXTDRAW - HIDE] ID: %d.", wTextID);
+		Log("[TEXTDRAW:HIDE] ID: %d.", wTextID);
 }
 
 void ScrEditTextDraw(RPCParameters *rpcParams)
@@ -1135,7 +1145,7 @@ void ScrEditTextDraw(RPCParameters *rpcParams)
 	cText[cTextLen] = '\0';
 
 	if(settings.uiTextDrawsLogging != 0)
-		Log("[TEXTDRAW - EDIT] ID: %d, Text: %s.", wTextID, cText);
+		Log("[TEXTDRAW:EDIT] ID: %d, Text: %s.", wTextID, cText);
 }
 
 void RegisterRPCs(RakClientInterface *pRakClient)
