@@ -27,21 +27,26 @@ int dd = 0;
 bool bHealthPulseDirection = false;
 bool bArmourPulseDirection = true;
 
+extern BOOL bIsSpectating;
+
 // following functions
 void onFootUpdateAtNormalPos()
 {
 	ONFOOT_SYNC_DATA ofSync;
 	memset(&ofSync, 0, sizeof(ONFOOT_SYNC_DATA));
+
 	ofSync.byteHealth = (BYTE)settings.fPlayerHealth;
 	ofSync.byteArmour = (BYTE)settings.fPlayerArmour;
 	ofSync.fQuaternion[3] = settings.fNormalModeRot;
 	ofSync.vecPos[0] = settings.fNormalModePos[0];
 	ofSync.vecPos[1] = settings.fNormalModePos[1];
 	ofSync.vecPos[2] = settings.fNormalModePos[2];
+
 	SendOnFootFullSyncData(&ofSync, 0, -1);
 
 	AIM_SYNC_DATA aimSync;
 	memset(&aimSync, 0, sizeof(AIM_SYNC_DATA));
+
 	playerInfo[g_myPlayerID].aimData.byteCamMode = 4;
 	playerInfo[g_myPlayerID].aimData.vecAimf1[0] = 0.1f;
 	playerInfo[g_myPlayerID].aimData.vecAimf1[1] = 0.1f;
@@ -49,6 +54,7 @@ void onFootUpdateAtNormalPos()
 	playerInfo[g_myPlayerID].aimData.vecAimPos[0] = settings.fNormalModePos[0];
 	playerInfo[g_myPlayerID].aimData.vecAimPos[1] = settings.fNormalModePos[1];
 	playerInfo[g_myPlayerID].aimData.vecAimPos[2] = settings.fNormalModePos[2];
+
 	SendAimSyncData(0, 0, -1);
 }
 
@@ -91,6 +97,31 @@ void inCarUpdateFollow(PLAYERID followID, VEHICLEID withVehicleID)
 		if(!playerInfo[g_myPlayerID].iAreWeInAVehicle)
 			onFootUpdateFollow(followID);
 	}
+}
+
+void spectatorUpdate()
+{
+	SPECTATOR_SYNC_DATA spSync;
+	memset(&spSync, 0, sizeof(SPECTATOR_SYNC_DATA));
+
+	spSync.vecPos[0] = settings.fNormalModePos[0];
+	spSync.vecPos[1] = settings.fNormalModePos[1];
+	spSync.vecPos[2] = settings.fNormalModePos[2];
+
+	SendSpectatorData(&spSync);
+
+	AIM_SYNC_DATA aimSync;
+	memset(&aimSync, 0, sizeof(AIM_SYNC_DATA));
+
+	playerInfo[g_myPlayerID].aimData.byteCamMode = 4;
+	playerInfo[g_myPlayerID].aimData.vecAimf1[0] = 0.1f;
+	playerInfo[g_myPlayerID].aimData.vecAimf1[1] = 0.1f;
+	playerInfo[g_myPlayerID].aimData.vecAimf1[2] = 0.1f;
+	playerInfo[g_myPlayerID].aimData.vecAimPos[0] = settings.fNormalModePos[0];
+	playerInfo[g_myPlayerID].aimData.vecAimPos[1] = settings.fNormalModePos[1];
+	playerInfo[g_myPlayerID].aimData.vecAimPos[2] = settings.fNormalModePos[2];
+
+	SendAimSyncData(0, 0, -1);
 }
 
 int sampConnect(char *szHostname, int iPort, char *szNickname, char *szPassword, RakClientInterface *pRakClient)
@@ -144,6 +175,8 @@ void sampSpawn()
 	RakNet::BitStream bsSendSpawn;
 	pRakClient->RPC(&RPC_Spawn, &bsSendSpawn, HIGH_PRIORITY, RELIABLE, 0, FALSE, UNASSIGNED_NETWORK_ID, NULL);
 	
+	bIsSpectating = 0;
+
 	Log("You have been spawned!");
 }
 

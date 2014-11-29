@@ -5,6 +5,7 @@
 void onFootUpdateAtNormalPos();
 void onFootUpdateFollow(PLAYERID followID);
 void inCarUpdateFollow(PLAYERID followID, VEHICLEID withVehicleID);
+void spectatorUpdate();
 
 int sampConnect(char *szHostname, int iPort, char *szNickname, char *szPassword, RakClientInterface *pRakClient);
 void sampDisconnect(int iTimeout);

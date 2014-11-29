@@ -23,6 +23,8 @@ HWND hwndSAMPDlg = NULL;
 
 PLAYER_SPAWN_INFO SpawnInfo;
 
+BOOL bIsSpectating = 0;
+
 void ServerJoin(RPCParameters *rpcParams)
 {
 	if(!iGameInited) return;
@@ -1148,6 +1150,26 @@ void ScrEditTextDraw(RPCParameters *rpcParams)
 		Log("[TEXTDRAW:EDIT] ID: %d, Text: %s.", wTextID, cText);
 }
 
+void ScrTogglePlayerSpectating(RPCParameters *rpcParams)
+{
+	PCHAR Data = reinterpret_cast<PCHAR>(rpcParams->input);
+	int iBitLength = rpcParams->numberOfBitsOfData;
+
+	RakNet::BitStream bsData((unsigned char *)Data,(iBitLength/8)+1,false);
+
+	BOOL bToggle;
+
+	bsData.Read(bToggle);
+
+	if(bIsSpectating && !bToggle && !iSpawned)
+	{
+		sampSpawn();
+		iSpawned = 1;
+	}
+
+	bIsSpectating = bToggle;
+}
+
 void RegisterRPCs(RakClientInterface *pRakClient)
 {
 	if (pRakClient == ::pRakClient)
@@ -1190,6 +1212,7 @@ void RegisterRPCs(RakClientInterface *pRakClient)
 		pRakClient->RegisterAsRemoteProcedureCall(&RPC_ScrShowTextDraw, ScrShowTextDraw);
 		pRakClient->RegisterAsRemoteProcedureCall(&RPC_ScrHideTextDraw, ScrHideTextDraw);
 		pRakClient->RegisterAsRemoteProcedureCall(&RPC_ScrEditTextDraw, ScrEditTextDraw);
+		pRakClient->RegisterAsRemoteProcedureCall(&RPC_ScrTogglePlayerSpectating, ScrTogglePlayerSpectating);
 	}
 }
 
@@ -1235,5 +1258,6 @@ void UnRegisterRPCs(RakClientInterface * pRakClient)
 		pRakClient->UnregisterAsRemoteProcedureCall(&RPC_ScrShowTextDraw);
 		pRakClient->UnregisterAsRemoteProcedureCall(&RPC_ScrHideTextDraw);
 		pRakClient->UnregisterAsRemoteProcedureCall(&RPC_ScrEditTextDraw);
+		pRakClient->UnregisterAsRemoteProcedureCall(&RPC_ScrTogglePlayerSpectating);
 	}
 }

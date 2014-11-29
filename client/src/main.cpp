@@ -19,6 +19,7 @@ FILE *flLog = NULL, *flTextDrawsLog = NULL;
 DWORD dwAutoRunTick = GetTickCount();
 
 extern int iMoney, iDrunkLevel, iLocalPlayerSkin;
+extern BOOL bIsSpectating;
 
 int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd)
 {
@@ -207,14 +208,19 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 
 				if(settings.runMode == RUNMODE_NORMAL)
 				{
-					if(settings.AutoGotoCP && settings.CurrentCheckpoint.bActive)
+					if(!bIsSpectating)
 					{
-						settings.fNormalModePos[0] = settings.CurrentCheckpoint.fPosition[0];
-						settings.fNormalModePos[1] = settings.CurrentCheckpoint.fPosition[1];
-						settings.fNormalModePos[2] = settings.CurrentCheckpoint.fPosition[2];
-					}
+						if(settings.AutoGotoCP && settings.CurrentCheckpoint.bActive)
+						{
+							settings.fNormalModePos[0] = settings.CurrentCheckpoint.fPosition[0];
+							settings.fNormalModePos[1] = settings.CurrentCheckpoint.fPosition[1];
+							settings.fNormalModePos[2] = settings.CurrentCheckpoint.fPosition[2];
+						}
 
-					onFootUpdateAtNormalPos();
+						onFootUpdateAtNormalPos();
+					}
+					else
+						spectatorUpdate();
 				}
 
 				// Run autorun commands
