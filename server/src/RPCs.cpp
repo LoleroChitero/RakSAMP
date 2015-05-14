@@ -138,8 +138,6 @@ void ClientJoin(RPCParameters *rpcParams)
 	bsData.Read(pszAuthBullshit, byteAuthBSLen);
 	pszAuthBullshit[byteAuthBSLen] = 0;
 
-	Log("iVersion = %i", iVersion);
-
 	PlayerID MyPlayerID = pRakServer->GetPlayerIDFromIndex(playerID);
 	in_addr in;
 	if(UNASSIGNED_PLAYER_ID == MyPlayerID)
@@ -147,7 +145,7 @@ void ClientJoin(RPCParameters *rpcParams)
 		in.s_addr = sender.binaryAddress;
 		Log("Detected possible bot from (%s)", inet_ntoa(in));
 		pRakServer->Kick(MyPlayerID);
-		//return;
+		return;
 	}
 
 	if(!pRakServer->IsActivePlayerID(sender) || playerID > MAX_PLAYERS)
