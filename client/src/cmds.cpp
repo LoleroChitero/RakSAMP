@@ -1,5 +1,5 @@
 /*
-	Updated to 0.3z by P3ti
+	Updated to 0.3.7 by P3ti
 */
 
 #include "main.h"
@@ -96,24 +96,27 @@ int RunCommand(char *szCMD, int iFromAutorun)
 	if(!strncmp(szCMD, "players", 7) || !strncmp(szCMD, "PLAYERS", 7))
 	{
 		int iPlayerCount = 0;
-		Log(" ");
 		Log("============ PLAYER LIST ============");
+		Log("(ID: %d) %s - score: %d, ping: %d", g_myPlayerID, playerInfo[g_myPlayerID].szPlayerName, playerInfo[g_myPlayerID].iScore, playerInfo[g_myPlayerID].dwPing);
 		for(int i = 0; i < MAX_PLAYERS; i++)
 		{
+			if(g_myPlayerID == i)
+				continue;
+
 			if(!playerInfo[i].iIsConnected)
 				continue;
 
 			if(playerInfo[i].byteIsNPC != 0)
 				continue;
 
-			Log("(ID: %d) %s - score: %d, ping: %d", i, playerInfo[i].szPlayerName, playerInfo[i].iScore, playerInfo[i].dwPing);
+			Log("(ID: %d) %s - score: %d, ping: %d, streamed %s", i, playerInfo[i].szPlayerName, playerInfo[i].iScore, playerInfo[i].dwPing, (playerInfo[i].iIsStreamedIn ? "in" : "out"));
+
 			iPlayerCount++;
 		}
 		Log(" ");
 		Log("Count: %d.", iPlayerCount);
 		Log("=================================");
 		Log(" ");
-
 		return 1;
 	}
 
@@ -125,20 +128,22 @@ int RunCommand(char *szCMD, int iFromAutorun)
 		Log("============ NPC LIST ============");
 		for(int i = 0; i < MAX_PLAYERS; i++)
 		{
+			if(g_myPlayerID == i)
+				continue;
+
 			if(!playerInfo[i].iIsConnected)
 				continue;
 
 			if(!playerInfo[i].byteIsNPC)
 				continue;
 
-			Log("(ID: %d) %s - score: %d, ping: %d", i, playerInfo[i].szPlayerName, playerInfo[i].iScore, playerInfo[i].dwPing);
+			Log("(ID: %d) %s - score: %d, ping: %d, streamed %s", i, playerInfo[i].szPlayerName, playerInfo[i].iScore, playerInfo[i].dwPing, (playerInfo[i].iIsStreamedIn ? "in" : "out"));
 			iPlayerCount++;
 		}
 		Log(" ");
 		Log("Count: %d.", iPlayerCount);
 		Log("===============================");
 		Log(" ");
-
 		return 1;
 	}
 

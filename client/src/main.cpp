@@ -1,5 +1,5 @@
 /*
-	Updated to 0.3z by P3ti
+	Updated to 0.3.7 by P3ti
 */
 
 #include "main.h"
@@ -279,46 +279,56 @@ bare:;
 	return 0;
 }
 
-void Log ( char *fmt, ... )
+void Log(char *fmt, ...)
 {
-	SYSTEMTIME	time;
-	va_list		ap;
-
-	if ( flLog == NULL )
+	if(flLog == NULL)
 	{
-		flLog = fopen( "RakSAMPClient.log", "a" );
-		if ( flLog == NULL )
+		flLog = fopen("RakSAMPClient.log", "a");
+
+		if(flLog == NULL)
 			return;
 	}
 
-	GetLocalTime( &time );
-	fprintf( flLog, "[%02d:%02d:%02d.%03d] ", time.wHour, time.wMinute, time.wSecond, time.wMilliseconds );
-	if(settings.iPrintTimestamps)
-	{
-		if(settings.iConsole)
-			printf("[%02d:%02d:%02d.%03d] ", time.wHour, time.wMinute, time.wSecond, time.wMilliseconds );
-	}
+	SYSTEMTIME time;
+	GetLocalTime(&time);
 
-	va_start( ap, fmt );
-	vfprintf( flLog, fmt, ap );
+	fprintf(flLog, "[%02d:%02d:%02d.%03d] ", time.wHour, time.wMinute, time.wSecond, time.wMilliseconds);
+
+	if(settings.iPrintTimestamps && settings.iConsole)
+		printf("[%02d:%02d:%02d.%03d] ", time.wHour, time.wMinute, time.wSecond, time.wMilliseconds);
+
+	char buffer[512];
+	memset(buffer, 0, 512);
+
+	va_list args;
+	va_start(args, fmt);
+	vsprintf_s(buffer, 512, fmt, args);
+	va_end(args);
+
+	fprintf(flLog, buffer);
+
 	if(settings.iConsole)
-		vprintf(fmt, ap);
+	{
+		printf(buffer);
+	}
 	else
 	{
-		int lbCount = SendMessage(loghwnd, LB_GETCOUNT, 0, 0);
-		LPTSTR buf = new TCHAR[512];
-		wvsprintf(buf, fmt, ap);
+		LPTSTR tbuf = new TCHAR[512];
+		wsprintf(tbuf, buffer);
 
-		WPARAM idx = SendMessage(loghwnd, LB_ADDSTRING, 0, (LPARAM)buf);
+		int lbCount = SendMessage(loghwnd, LB_GETCOUNT, 0, 0);
+		WPARAM idx = SendMessage(loghwnd, LB_ADDSTRING, 0, (LPARAM)tbuf);
+
 		SendMessage(loghwnd, LB_SETCURSEL, lbCount - 1, 0);
 		SendMessage(loghwnd, LB_SETTOPINDEX, idx, 0);
 	}
-	va_end( ap );
 
-	fprintf( flLog, "\n" );
+	fprintf(flLog, "\n");
+
 	if(settings.iConsole)
 		printf("\n");
-	fflush( flLog );
+
+	fflush(flLog);
 }
 
 void SaveTextDrawData ( WORD wTextID, TEXT_DRAW_TRANSMIT *pData, CHAR* cText )

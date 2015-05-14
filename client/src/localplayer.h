@@ -1,5 +1,5 @@
 /*
-	Updated to 0.3z by P3ti
+	Updated to 0.3.7 by P3ti
 */
 
 void SendOnFootFullSyncData(ONFOOT_SYNC_DATA *pofSync, int sendDeathNoti, PLAYERID followPlayerID);

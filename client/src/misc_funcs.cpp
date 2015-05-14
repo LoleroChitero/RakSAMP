@@ -1,5 +1,5 @@
 /*
-	Updated to 0.3z by P3ti
+	Updated to 0.3.7 by P3ti
 */
 
 #include "main.h"
@@ -200,7 +200,7 @@ void sampFakeKill()
 		int randkillerid = 0xFFFF + 1;
 		int randreason = rand() % 46;
 
-		while(!(randkillerid >= 0 && randkillerid < MAX_PLAYERS && randkillerid != g_myPlayerID && playerInfo[randkillerid].iIsConnected))
+		while(!(randkillerid >= 0 && randkillerid < MAX_PLAYERS && randkillerid != g_myPlayerID && playerInfo[randkillerid].iIsConnected && !playerInfo[randkillerid].byteIsNPC))
 		{
 			if(getPlayerCount() < 2)
 			{
@@ -579,6 +579,17 @@ void processBulletFlood()
 			BulletSyncData.fCenterOfHit[0] = (rand() % 10) / 20.0f;
 			BulletSyncData.fCenterOfHit[1] = (rand() % 10) / 20.0f;
 			BulletSyncData.fCenterOfHit[2] = (rand() % 10) / 20.0f;
+
+			if(settings.bCurrentWeapon != 0)
+				BulletSyncData.bWeaponID = settings.bCurrentWeapon;
+
+			else if(settings.runMode == RUNMODE_FOLLOWPLAYER || settings.runMode == RUNMODE_FOLLOWPLAYERSVEHICLE)
+			{
+				PLAYERID copyingID = getPlayerIDFromPlayerName(settings.szFollowingPlayerName);
+				
+				if(copyingID != (PLAYERID)-1)
+					BulletSyncData.bWeaponID = playerInfo[copyingID].onfootData.byteCurrentWeapon;
+			}
 
 			SendBulletData(&BulletSyncData);
 

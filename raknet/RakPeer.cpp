@@ -2862,7 +2862,7 @@ bool RakPeer::HandleRPCPacket( const char *data, int length, PlayerID playerId )
 		bs.ReadCompressed(numdatbits);
 		unsigned char *dtt = new unsigned char[BITS_TO_BYTES(bs.GetNumberOfUnreadBits())];
 		bs.ReadBits(dtt, numdatbits, false);
-		Log("uniqueIdentifier: %d", uniqueIdentifier);
+		Log("[RPC] uniqueIdentifier: %d", uniqueIdentifier);
 		
 		char mess[1024] = {0};
 		for (unsigned int i = 0; i < BITS_TO_BYTES(numdatbits); i++)
@@ -3691,6 +3691,7 @@ void ProcessNetworkPacket( const unsigned int binaryAddress, const unsigned shor
 		unsigned i;
 		for (i=0; i < rakPeer->messageHandlerList.Size(); i++)
 			rakPeer->messageHandlerList[i]->OnDirectSocketSend((char*)&c, 16, playerId);
+
 		SocketLayer::Instance()->SendTo( rakPeer->connectionSocket, (char*)&c, 2, playerId.binaryAddress, playerId.port );
 
 		return;
@@ -3958,8 +3959,8 @@ void ProcessNetworkPacket( const unsigned int binaryAddress, const unsigned shor
 			unsigned i;
 			for (i=0; i < rakPeer->messageHandlerList.Size(); i++)
 				rakPeer->messageHandlerList[i]->OnDirectSocketSend((char*)&c, 16, playerId);
-			SocketLayer::Instance()->SendTo( rakPeer->connectionSocket, (char*)&c, 2, playerId.binaryAddress, playerId.port );
 
+			SocketLayer::Instance()->SendTo( rakPeer->connectionSocket, (char*)&c, 2, playerId.binaryAddress, playerId.port );
 			return;
 		}
 		else if (rss!=0)
@@ -3982,6 +3983,24 @@ void ProcessNetworkPacket( const unsigned int binaryAddress, const unsigned shor
 
 	}
 
+	else if ((unsigned char)(data)[0] == ID_OPEN_CONNECTION_COOKIE && length == sizeof(unsigned char)*2+1) // 0.3.7 RAKSAMP HACK PONPON
+	{
+		for (i=0; i < rakPeer->messageHandlerList.Size(); i++)
+			rakPeer->messageHandlerList[i]->OnDirectSocketReceive(data, length*8, playerId);
+
+		unsigned char c[3];
+
+		c[0] = ID_OPEN_CONNECTION_REQUEST;
+		*(WORD*)&c[1] = (*(WORD*)&data[1] ^ NETCODE_CONNCOOKIELULZ);
+
+		unsigned i;
+		for (i=0; i < rakPeer->messageHandlerList.Size(); i++)
+			rakPeer->messageHandlerList[i]->OnDirectSocketSend((char*)&c, 24, playerId);
+
+		SocketLayer::Instance()->SendTo( rakPeer->connectionSocket, (char*)&c, 3, playerId.binaryAddress, playerId.port );
+		return;
+	}
+
 	// See if this datagram came from a connected system
 	remoteSystem = rakPeer->GetRemoteSystemFromPlayerID( playerId, true, true );
 	if ( remoteSystem )
@@ -3993,10 +4012,10 @@ void ProcessNetworkPacket( const unsigned int binaryAddress, const unsigned shor
 		{
 		   //if ((length % 16) == 0)
    
-			bool v44 = (length & 0x8000000F) == 0;
+			bool v44 = (length & 0x80000007) == 0;
 
-			if ((length & 0x8000000F) < 0)
-				v44 = (((length & 0x8000000F) - 1) | 0xFFFFFFF0) == -1;
+			if ((length & 0x80000007) < 0)
+				v44 = (((length & 0x80000007) - 1) | 0xFFFFFFF8) == -1;
 
 			if (v44)
 				remoteSystem->reliabilityLayer.SetEncryptionKey(remoteSystem->AESKey);
@@ -4018,7 +4037,8 @@ void ProcessNetworkPacket( const unsigned int binaryAddress, const unsigned shor
 			) )
 #else
 			if ( !(
-			( (unsigned char)data[0] == ID_OPEN_CONNECTION_REQUEST && length <= 3 ) || // 0.3d RAKSAMP HACK PONPON
+			( (unsigned char)data[0] == ID_OPEN_CONNECTION_REQUEST && length <= 3 ) ||
+			( (unsigned char)data[0] == ID_OPEN_CONNECTION_COOKIE && length <= 3) ||
 			( (unsigned char)data[0] == ID_OPEN_CONNECTION_REPLY && length <= 2 ) ||
 			( (unsigned char)data[0] == ID_CONNECTION_ATTEMPT_FAILED && length <= 2 ) ||
 			( ((unsigned char)data[0] == ID_PING_OPEN_CONNECTIONS || (unsigned char)data[0] == ID_PING || (unsigned char)data[0] == ID_PONG) && length >= sizeof(unsigned char)+sizeof(RakNetTime) ) ||
@@ -4271,11 +4291,12 @@ bool RakPeer::RunUpdateCycle( void )
 
 			char c[3]; // 0.3d RAKSAMP HACK PONPON
 			c[0] = ID_OPEN_CONNECTION_REQUEST;
-			*(WORD*)&c[1] = (WORD)rcs->playerId.port ^ NETCODE_OPENCONNLULZ;
+			//*(WORD*)&c[1] = (WORD)rcs->playerId.port ^ NETCODE_OPENCONNLULZ; // dropped in 0.3.7-RC5-1
 			
 			unsigned i;
 			for (i=0; i < messageHandlerList.Size(); i++)
-				messageHandlerList[i]->OnDirectSocketSend((char*)&c, 16, rcs->playerId);
+				messageHandlerList[i]->OnDirectSocketSend((char*)&c, 24, rcs->playerId);
+
 			SocketLayer::Instance()->SendTo( connectionSocket, (char*)&c, 3, rcs->playerId.binaryAddress, rcs->playerId.port );
 		}
 

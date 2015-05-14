@@ -1,5 +1,5 @@
 /*
-	Updated to 0.3z by P3ti
+	Updated to 0.3.7 by P3ti
 */
 
 #define REJECT_REASON_BAD_VERSION 1
@@ -9,26 +9,6 @@
 
 extern int iNetModeNormalOnfootSendRate, iNetModeNormalIncarSendRate, iNetModeFiringSendRate, iNetModeSendMultiplier;
 extern char g_szHostName[256];
-
-#pragma pack(1)
-typedef struct _NEW_VEHICLE {
-    VEHICLEID VehicleId;
-	int		  iVehicleType;
-	float	  vecPos[3];
-	float	  fRotation;
-	BYTE	  aColor1;
-	BYTE	  aColor2;
-	float	  fHealth;
-	BYTE	  byteInterior;
-	DWORD	  dwDoorDamageStatus;
-	DWORD	  dwPanelDamageStatus;
-	BYTE	  byteLightDamageStatus;
-	BYTE	  byteTireDamageStatus;
-	BYTE      byteModSlots[14];
-	BYTE	  bytePaintjob;
-	DWORD	  cColor1;
-	DWORD	  cColor2;
-} NEW_VEHICLE;
 
 #define MAX_MENU_ITEMS 12
 #define MAX_MENU_LINE 32

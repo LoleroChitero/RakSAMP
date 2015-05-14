@@ -1,5 +1,5 @@
 /*
-	Updated to 0.3z by P3ti
+	Updated to 0.3.7 by P3ti
 */
 
 extern int iVehicleCount;
@@ -20,26 +20,6 @@ struct stVehiclePool
 	int iTimeUntilRespawn;
 };
 extern struct stVehiclePool vehiclePool[MAX_VEHICLES];
-
-#pragma pack(1)
-typedef struct _NEW_VEHICLE {
-    VEHICLEID VehicleId;
-	int		  iVehicleType;
-	float	  vecPos[3];
-	float	  fRotation;
-	BYTE	  aColor1;
-	BYTE	  aColor2;
-	float	  fHealth;
-	BYTE	  byteInterior;
-	DWORD	  dwDoorDamageStatus;
-	DWORD	  dwPanelDamageStatus;
-	BYTE	  byteLightDamageStatus;
-	BYTE	  byteTireDamageStatus;
-	BYTE      byteModSlots[14];
-	BYTE	  bytePaintjob;
-	DWORD	  cColor1;
-	DWORD	  cColor2;
-} NEW_VEHICLE;
 
 VEHICLEID addStaticVehicle(int iVehModelID, float fPosX, float fPosY, float fPosZ, float fRot,
 					  BYTE bColor1, BYTE bColor2, int iRespawnsIfDead, int iTimeUntilRespawn);

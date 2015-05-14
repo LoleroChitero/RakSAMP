@@ -2,14 +2,12 @@ RakSAMP
 =======
 RakSAMP is a fake client and server for SA-MP.  
   
-Current version: v0.8.6-0.3z.  
+Current version: v0.8.6-0.3.7.  
 Authors: jlfm, bartekdvd, P3ti.  
 Special thanks to balika011, .silent, n3ptun0.  
 
 --
 ### Client
-The client supports 0.3z-R3 servers too.  
-  
 **Available runmodes in the client:**
 * 0 = RCON mode,
 * 1 = Bare mode (doesn't spawn),

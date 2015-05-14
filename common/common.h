@@ -1,5 +1,5 @@
 /*
-	Updated to 0.3z by P3ti
+	Updated to 0.3.7 by P3ti
 */
 
 // MAIN STUFF /////////////////////////////
@@ -8,9 +8,10 @@
 
 #include "SAMP_VER.h"
 
-#define RAKSAMP_VERSION "v0.8.6-0.3z"
-#define NETCODE_OPENCONNLULZ 6969
-#define NETGAME_VERSION 4047
+#define RAKSAMP_VERSION "v0.8.6-0.3.7"
+
+#define NETCODE_CONNCOOKIELULZ 0x6969
+#define NETGAME_VERSION 4057
 
 #define AUTHOR "jlfm, bartekdvd, P3ti"
 
@@ -173,6 +174,7 @@ typedef struct _BULLET_SYNC_DATA {
 	float fHitOrigin[3];
 	float fHitTarget[3];
 	float fCenterOfHit[3];
+	BYTE bWeaponID;
 } BULLET_SYNC_DATA;
 
 #pragma pack(1)
@@ -234,6 +236,28 @@ typedef struct _TEXT_DRAW_TRANSMIT
 	WORD wColor1;
 	WORD wColor2;
 } TEXT_DRAW_TRANSMIT;
+
+#pragma pack(1)
+typedef struct _NEW_VEHICLE {
+    VEHICLEID VehicleId;
+	int		  iVehicleType;
+	float	  vecPos[3];
+	float	  fRotation;
+	BYTE	  aColor1;
+	BYTE	  aColor2;
+	float	  fHealth;
+	BYTE	  byteInterior;
+	DWORD	  dwDoorDamageStatus;
+	DWORD	  dwPanelDamageStatus;
+	BYTE	  byteLightDamageStatus;
+	BYTE	  byteTireDamageStatus;
+	BYTE	  byteAddSiren;
+	BYTE      byteModSlots[14];
+	BYTE	  bytePaintjob;
+	DWORD	  cColor1;
+	DWORD	  cColor2;
+	BYTE	  byteUnk;
+} NEW_VEHICLE;
 
 struct stPlayerInfo
 {

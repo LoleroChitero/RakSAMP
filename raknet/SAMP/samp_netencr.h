@@ -1,6 +1,8 @@
 /*
-	Updated to 0.3z by P3ti
+	Updated to 0.3.7 by P3ti
 */
+
+char *DumpMem(unsigned char *pAddr, int len);
 
 #ifdef RAKSAMP_CLIENT
 extern unsigned char encrBuffer[4092];

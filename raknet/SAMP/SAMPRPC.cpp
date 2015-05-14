@@ -1,5 +1,5 @@
 /*
-	Updated to 0.3z by P3ti
+	Updated to 0.3.7 by P3ti
 */
 
 #include "main.h"
@@ -54,7 +54,7 @@ int RPC_ClickPlayer = 23;
 int RPC_PlayerUpdate = 60;
 int RPC_ClickTextDraw = 83;
 int RPC_MapMarker = 119;
-int RPC_PlayerGiveTakeDamage = 115; // bool Give/Take, playerid, amount, weaponid
+int RPC_PlayerGiveTakeDamage = 115;
 int RPC_EnterEditObject = 27;
 int RPC_EditObject = 117;
 

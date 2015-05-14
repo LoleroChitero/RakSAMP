@@ -24,11 +24,13 @@ function onScriptExit()
 end
 
 function onNewQuery(ip, srcport, isbanned)
+--[[
 	if isbanned then
 		outputConsole("[QUERY:BANNED] " .. ip .. ":" .. srcport .. "")
 	else
 		outputConsole("[QUERY] " .. ip .. ":" .. srcport .. "")
 	end
+--]]
 end
 
 function onNewConnection(playerID, ip, srcport)

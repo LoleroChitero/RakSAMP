@@ -1,5 +1,5 @@
 /*
-	Updated to 0.3z by P3ti
+	Updated to 0.3.7 by P3ti
 */
 
 #include "main.h"
@@ -274,7 +274,7 @@ void Packet_BulletSync(Packet *p)
 		for(int i = 0; i < iScriptsRunning; i++)
 		{
 			if(script.scriptVM[i] != NULL && script.szScriptName[i][0] != 0x00)
-				ScriptEvent_OnPlayerWeaponShot(script.scriptVM[i], playerId, playerInfo[playerId].onfootData.byteCurrentWeapon, playerInfo[playerId].bulletData.bHitType, playerInfo[playerId].bulletData.iHitID, playerInfo[playerId].bulletData.fCenterOfHit[0], playerInfo[playerId].bulletData.fCenterOfHit[1], playerInfo[playerId].bulletData.fCenterOfHit[2]);
+				ScriptEvent_OnPlayerWeaponShot(script.scriptVM[i], playerId, playerInfo[playerId].bulletData.bWeaponID, playerInfo[playerId].bulletData.bHitType, playerInfo[playerId].bulletData.iHitID, playerInfo[playerId].bulletData.fCenterOfHit[0], playerInfo[playerId].bulletData.fCenterOfHit[1], playerInfo[playerId].bulletData.fCenterOfHit[2]);
 		}
 
 		bsBulletSync.Reset();
