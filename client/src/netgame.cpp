@@ -17,7 +17,7 @@ void Packet_AUTH_KEY(Packet *p, RakClientInterface *pRakClient)
 	char* auth_key;
 	bool found_key = false;
 
-	for(int x = 0; x < 1535; x++)
+	for(int x = 0; x < 512; x++)
 	{
 		if(!strcmp(((char*)p->data + 2), AuthKeyTable[x][0]))
 		{
