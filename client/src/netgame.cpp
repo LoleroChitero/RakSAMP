@@ -14,12 +14,23 @@ int iPassengerNotificationSent = 0, iDriverNotificationSent = 0;
 
 void Packet_AUTH_KEY(Packet *p, RakClientInterface *pRakClient)
 {
+	RakNet::BitStream bsAuth((unsigned char *)p->data, p->length, false);
+
+	BYTE byteAuthLen;
+	char szAuth[260];
+
+	bsAuth.IgnoreBits(8); // ID_AUTH_KEY
+	bsAuth.Read(byteAuthLen);
+	bsAuth.Read(szAuth, byteAuthLen);
+	szAuth[byteAuthLen] = '\0';
+
+/*
 	char* auth_key;
 	bool found_key = false;
 
 	for(int x = 0; x < 512; x++)
 	{
-		if(!strcmp(((char*)p->data + 2), AuthKeyTable[x][0]))
+		if(!strcmp(szAuth, AuthKeyTable[x][0]))
 		{
 			auth_key = AuthKeyTable[x][1];
 			found_key = true;
@@ -39,12 +50,27 @@ void Packet_AUTH_KEY(Packet *p, RakClientInterface *pRakClient)
 
 		pRakClient->Send(&bsKey, SYSTEM_PRIORITY, RELIABLE, NULL);
 
-		//Log("[AUTH] %s -> %s", ((char*)p->data + 2), auth_key);
+		Log("[AUTH] %s -> %s", szAuth, auth_key);
 	}
 	else
 	{
 		Log("Unknown AUTH_IN! (%s)", ((char*)p->data + 2));
 	}
+*/
+
+	char szAuthKey[260];
+	gen_auth_key(szAuthKey, szAuth);
+
+	RakNet::BitStream bsKey;
+	BYTE byteAuthKeyLen = (BYTE)strlen(szAuthKey);
+
+	bsKey.Write((BYTE)ID_AUTH_KEY);
+	bsKey.Write((BYTE)byteAuthKeyLen);
+	bsKey.Write(szAuthKey, byteAuthKeyLen);
+
+	pRakClient->Send(&bsKey, SYSTEM_PRIORITY, RELIABLE, NULL);
+
+	Log("[AUTH] %s -> %s", szAuth, szAuthKey);
 }
 
 void Packet_ConnectionSucceeded(Packet *p, RakClientInterface *pRakClient)
