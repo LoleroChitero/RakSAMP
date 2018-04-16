@@ -69,6 +69,8 @@ struct stSettings
 
 	char szClientVersion[20];
 
+	int iNPC;
+
 	bool bSpam;
 	bool bFakeKill;
 	bool bLag;

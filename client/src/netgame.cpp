@@ -59,7 +59,11 @@ void Packet_AUTH_KEY(Packet *p, RakClientInterface *pRakClient)
 */
 
 	char szAuthKey[260];
-	gen_auth_key(szAuthKey, szAuth);
+
+	if (settings.iNPC)
+		strcpy(szAuthKey, "NPC");	
+	else
+		gen_auth_key(szAuthKey, szAuth);
 
 	RakNet::BitStream bsKey;
 	BYTE byteAuthKeyLen = (BYTE)strlen(szAuthKey);
@@ -87,6 +91,10 @@ void Packet_ConnectionSucceeded(Packet *p, RakClientInterface *pRakClient)
 
 	g_myPlayerID = myPlayerID;
 	playerInfo[myPlayerID].iIsConnected = 1;
+
+	if (settings.iNPC)
+		playerInfo[myPlayerID].byteIsNPC = 1;
+
 	strcpy(playerInfo[myPlayerID].szPlayerName, g_szNickName);
 
 	bsSuccAuth.Read(uiChallenge);
@@ -114,12 +122,16 @@ void Packet_ConnectionSucceeded(Packet *p, RakClientInterface *pRakClient)
 	bsSend.Write(byteNameLen);
 	bsSend.Write(g_szNickName, byteNameLen);
 	bsSend.Write(uiClientChallengeResponse);
-	bsSend.Write(byteAuthBSLen);
-	bsSend.Write(auth_bs, byteAuthBSLen);
-	bsSend.Write(iClientVerLen);
-	bsSend.Write(settings.szClientVersion, iClientVerLen);
 
-	pRakClient->RPC(&RPC_ClientJoin, &bsSend, HIGH_PRIORITY, RELIABLE, 0, FALSE, UNASSIGNED_NETWORK_ID, NULL);
+	if (!settings.iNPC)
+	{
+		bsSend.Write(byteAuthBSLen);
+		bsSend.Write(auth_bs, byteAuthBSLen);
+		bsSend.Write(iClientVerLen);
+		bsSend.Write(settings.szClientVersion, iClientVerLen);
+	}
+
+	pRakClient->RPC(settings.iNPC ? &RPC_NPCJoin : &RPC_ClientJoin, &bsSend, HIGH_PRIORITY, RELIABLE, 0, FALSE, UNASSIGNED_NETWORK_ID, NULL);
 
 	iAreWeConnected = 1;
 }

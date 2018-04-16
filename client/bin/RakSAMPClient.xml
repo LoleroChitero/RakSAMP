@@ -11,7 +11,7 @@ Avalable runmodes:
 <RakSAMPClient console="0" runmode="3" autorun="0" find="1" select_classid="0" manual_spawn="1"
 			   print_timestamps="0" chatcolor_rgb="0 0 130" clientmsg_rgb="0 130 0" cpalert_rgb="170 0 0"
 			   followplayer="P3ti" followplayerwithvehicleid="295" followXOffset="3.0" followYOffset="0.0" followZOffset="0.0"
-			   updatestats="1" minfps="20" maxfps="90" clientversion="0.3.7">
+			   updatestats="1" minfps="20" maxfps="90" clientversion="0.3.7" npc="0">
 
 	<server nickname="root" password="">127.0.0.1:7777</server>
 

@@ -52,6 +52,9 @@ int LoadSettings()
 		// get client version
 		strcpy(settings.szClientVersion, (char *)rakSAMPElement->Attribute("clientversion"));
 
+		// npc mode
+		rakSAMPElement->QueryIntAttribute("npc", (int *)&settings.iNPC);
+
 		// get chat color
 		rakSAMPElement->QueryColorAttribute("chatcolor_rgb",
 			(unsigned char *)&settings.bChatColorRed, (unsigned char *)&settings.bChatColorGreen, (unsigned char *)&settings.bChatColorBlue);
